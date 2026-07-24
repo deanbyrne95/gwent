@@ -168,24 +168,16 @@ function openMenu() {
 function backAction() { return document.body.classList.contains("pre-game") ? "open-mainmenu" : "open-menu"; }
 
 function openSettings() {
-  const light = SETTINGS.theme === "light";
   openModal(`
     <div class="page-body">
       <h2>Settings</h2>
-      <div class="field">
-        <label>Theme</label>
-        <div class="chips">
-          <button class="chip ${!light ? "on" : ""}" data-action="set-theme" data-v="dark">Dark</button>
-          <button class="chip ${light ? "on" : ""}" data-action="set-theme" data-v="light">Light</button>
-        </div>
-      </div>
       <div class="field">
         <label>Default difficulty</label>
         <div class="chips">
           ${["easy", "normal", "hard"].map(l => `<button class="chip ${(SETTINGS.aiLevel || "normal") === l ? "on" : ""}" data-action="ng-level" data-v="${l}">${LEVEL_LABEL[l]}</button>`).join("")}
         </div>
       </div>
-      <p class="field-note">Motion respects your system's reduce-motion setting. Preferences are saved on this device.</p>
+      <p class="field-note">Use the theme button to switch light/dark. Motion respects your system's reduce-motion setting. Preferences are saved on this device.</p>
       <div class="foot">
         <button class="gbtn primary" data-action="${backAction()}">Done</button>
       </div>

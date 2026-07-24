@@ -29,7 +29,6 @@ document.addEventListener("click", (e) => {
     case "start-game": startFromMenu(); break;
 
     // settings
-    case "set-theme": SETTINGS.theme = t.dataset.v; saveSettings(); applySettings(); openSettings(); break;
     case "toggle-theme": toggleTheme(); break;
 
     // save / load
@@ -53,7 +52,7 @@ document.addEventListener("click", (e) => {
 // (difficulty) changes value.
 function rerenderOpenPage() {
   if (document.querySelector('[data-action="ng-faction"]')) openNewGame();
-  else if (document.querySelector('[data-action="set-theme"]')) openSettings();
+  else if (document.querySelector('[data-action="ng-level"]')) openSettings();
 }
 
 /* ---------- keyboard ---------- */
