@@ -38,8 +38,9 @@ button{font-family:"Jost",sans-serif; cursor:pointer}
   background:linear-gradient(180deg,var(--panel-2),var(--panel)); color:var(--gilt-soft);
   font-size:18px; box-shadow:var(--shadow)}
 .theme-btn:hover{color:#fff; border-color:var(--gilt-soft)}
+body.light .theme-btn:hover{color:var(--gilt-soft)}
 .menu-btn[hidden]{display:none}
-.theme-float{position:fixed; left:16px; bottom:calc(16px + env(safe-area-inset-bottom,0px)); z-index:55; display:none; width:44px; height:44px}
+.theme-float{position:fixed; left:16px; bottom:calc(16px + env(safe-area-inset-bottom,0px)); z-index:90; display:none; width:44px; height:44px}
 body.pre-game .theme-float{display:inline-flex}
 
 /* Banner */
