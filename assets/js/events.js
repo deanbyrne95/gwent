@@ -158,6 +158,7 @@ window.addEventListener("resize", () => { if (G) render(); });
 /* ---------- boot ---------- */
 
 applySettings();
+CardTip.init();
 // Prime a silent game so the board sits behind the opening menu.
 startGame({ mode: "ai", faction: SETTINGS.faction || "nr", foeFaction: SETTINGS.foeFaction || "monsters", level: SETTINGS.aiLevel || "normal" }, true);
 syncHeaderActions();

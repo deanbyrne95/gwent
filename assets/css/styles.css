@@ -115,6 +115,16 @@ body.pre-game .theme-float{display:inline-flex}
 .card.ab-weather .c-kind,.card.ab-clear .c-kind{color:var(--weather)}
 .card.ab-horn .c-kind{color:var(--horn)}
 
+/* Card tooltip — floating detail panel shown on hover/focus, carrying the full
+   name and rules text the truncated card face can't. Parented to <body>. */
+.card-tip{position:fixed; z-index:80; max-width:200px; pointer-events:none;
+  display:flex; flex-direction:column; gap:3px; padding:8px 10px;
+  background:var(--panel-2); border:1px solid var(--gilt); border-radius:9px; box-shadow:var(--shadow)}
+.card-tip[hidden]{display:none}
+.card-tip .ct-name{font-family:"Cormorant Garamond",serif; font-weight:600; font-size:16px; line-height:1.1; color:var(--gilt-soft)}
+.card-tip .ct-meta{font-size:10px; letter-spacing:.7px; text-transform:uppercase; color:var(--ink-dim)}
+.card-tip .ct-desc{font-size:11.5px; line-height:1.3; color:var(--ink)}
+
 /* Hand cards */
 .hand .card{width:58px; height:80px; cursor:pointer}
 .hand .card .c-name{font-size:8.5px}
