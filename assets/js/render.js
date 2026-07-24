@@ -19,7 +19,9 @@ function crownsHTML(p) {
 }
 
 // One card tile. `opts.hand` makes it a selectable hand card; `opts.selected`
-// draws the selection ring.
+// draws the selection ring. Every tile carries two type cues: a corner label
+// naming what the card is, and a central glyph showing its combat row (or its
+// special nature) — both legible even in hand, where cards aren't row-grouped.
 function cardHTML(card, opts) {
   opts = opts || {};
   const cls = ["card", "c-" + (card.type)];
@@ -27,16 +29,44 @@ function cardHTML(card, opts) {
   if (card.ability) cls.push("ab-" + card.ability);
   if (opts.selected) cls.push("sel");
   const badge = (card.type === "weather" || card.type === "horn") ? "" : `<span class="c-str">${card.str}</span>`;
-  const tag = card.ability ? `<span class="c-tag">${abilityLabel(card.ability)}</span>`
-            : card.hero ? `<span class="c-tag">Hero</span>` : "";
+  const tag = `<span class="c-tag">${cardTypeLabel(card)}</span>`;
+  const glyph = cardKindGlyph(card);
+  const kind = glyph ? `<span class="c-kind" aria-hidden="true">${glyph}</span>` : "";
   const attrs = opts.hand ? ` data-action="hand-card" data-id="${card.id}" tabindex="0" role="button"` : "";
-  return `<div class="${cls.join(" ")}"${attrs} title="${esc(card.name)}">
-    ${badge}${tag}<span class="c-name">${esc(card.name)}</span>
+  return `<div class="${cls.join(" ")}"${attrs} title="${esc(cardTitle(card))}">
+    ${badge}${tag}${kind}<span class="c-name">${esc(card.name)}</span>
   </div>`;
 }
 
 function abilityLabel(a) {
   return { spy: "Spy", medic: "Medic", horn: "Horn", weather: "Weather", clear: "Clear" }[a] || a;
+}
+
+// Short word for the corner tag naming the card's type. Heroes and specials
+// take precedence over their row; an ability (spy/medic) names a unit's role;
+// everything else is a plain "Unit".
+function cardTypeLabel(card) {
+  if (card.hero) return "Hero";
+  if (card.type === "weather") return card.ability === "clear" ? "Clear" : "Weather";
+  if (card.type === "horn") return "Horn";
+  if (card.ability) return abilityLabel(card.ability);
+  return "Unit";
+}
+
+// Central glyph identifying the card's combat row (melee/ranged/siege) or, for
+// row-less specials, their nature — so a card's type reads at a glance.
+function cardKindGlyph(card) {
+  if (card.row) return ROW_GLYPH[card.row];
+  if (card.type === "weather") return card.ability === "clear" ? "☀" : "❄";
+  if (card.type === "horn") return "♪";
+  return "";
+}
+
+// Rich hover tooltip: the card's name plus a type · row summary.
+function cardTitle(card) {
+  const bits = [cardTypeLabel(card)];
+  if (card.row) bits.push(ROW_NAME[card.row]);
+  return `${card.name} — ${bits.join(" · ")}`;
 }
 
 // One combat row for a given player, including weather/horn state and score.
