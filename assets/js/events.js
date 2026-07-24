@@ -25,11 +25,16 @@ document.addEventListener("click", (e) => {
     case "open-settings": openSettings(); break;
     case "how-to": howTo(); break;
 
-    // new-game selections
-    case "ng-faction": SETTINGS.faction = t.dataset.v; saveSettings(); openNewGame(); break;
-    case "ng-foe": SETTINGS.foeFaction = t.dataset.v; saveSettings(); openNewGame(); break;
-    case "ng-level": SETTINGS.aiLevel = t.dataset.v; saveSettings(); rerenderOpenPage(); break;
-    case "start-game": startFromMenu(); break;
+    // new-game wizard (Mode → Factions → Deck → Play)
+    case "ng-mode": if (NG) { NG.mode = t.dataset.v; ngNext(); } break;
+    case "ng-goto": ngGoto(t.dataset.step); break;
+    case "ng-faction": if (NG) { NG.you = t.dataset.v; delete NG.decks[0]; } ngRender(); break;
+    case "ng-foe": if (NG) { NG.foe = t.dataset.v; delete NG.decks[1]; } ngRender(); break;
+    case "ng-level": if (NG) { NG.level = t.dataset.v; } ngRender(); break;
+    case "ng-next": ngNext(); break;
+    case "ng-back": ngBack(); break;
+    case "ng-deck-inc": ngDeckAdjust(t.dataset.key, +1); break;
+    case "ng-deck-dec": ngDeckAdjust(t.dataset.key, -1); break;
 
     // settings
     case "toggle-theme": toggleTheme(); break;
@@ -59,7 +64,7 @@ document.addEventListener("click", (e) => {
 // Re-render whichever selection page is currently open after a shared control
 // (difficulty) changes value.
 function rerenderOpenPage() {
-  if (document.querySelector('[data-action="ng-faction"]')) openNewGame();
+  if (typeof NG !== "undefined" && NG) ngRender();
 }
 
 /* ---------- volume sliders & audio arming ---------- */
@@ -102,7 +107,14 @@ document.addEventListener("keydown", (e) => {
       if (modal.classList.contains("mainmenu")) { e.preventDefault(); return; }
       // Pre-game sub-pages (New game / Settings / How to Play / Load) sit over a
       // hidden board, so Esc must go BACK to the menu, never close to a blank screen.
-      if (document.body.classList.contains("pre-game")) { e.preventDefault(); openMainMenu(); return; }
+      if (document.body.classList.contains("pre-game")) {
+        e.preventDefault();
+        // Inside the New Game wizard, step backwards; from its first step (or any
+        // other sub-page) return to the main menu.
+        if (typeof NG !== "undefined" && NG && NG.step !== "mode") ngBack();
+        else openMainMenu();
+        return;
+      }
       // In-game pause menu → resume the game.
       if (modal.classList.contains("menu-page")) { e.preventDefault(); closeModal(); return; }
       // In-game dismissible dialog (Settings / How to Play / Load from the pause

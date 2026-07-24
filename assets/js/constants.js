@@ -27,12 +27,19 @@ const WEATHER = {
   rain:  { row: "siege",  name: "Torrential Rain" },
 };
 
-// Faction display metadata.
+// Faction display metadata. `icon` keys into UI.factionIcon() for the menu art.
 const FACTIONS = {
-  nr:       { name: "Northern Realms", blurb: "Discipline and siege engines." },
-  monsters: { name: "Monsters",        blurb: "Relentless beat-down and muster." },
+  nr:        { name: "Northern Realms", icon: "nr",        blurb: "Discipline and siege engines." },
+  nilfgaard: { name: "Nilfgaardian Empire", icon: "nilfgaard", blurb: "Spies, medics and ruthless efficiency." },
+  monsters:  { name: "Monsters",        icon: "monsters",  blurb: "Relentless beat-down and monstrous heroes." },
+  scoiatael: { name: "Scoia'tael",      icon: "scoiatael", blurb: "Agile elven and dwarven guerrillas." },
+  skellige:  { name: "Skellige",        icon: "skellige",  blurb: "Seafaring raiders who revive their fallen." },
 };
 const FACTION_KEYS = Object.keys(FACTIONS);
+
+// Neutral cards aren't a faction of their own — they supplement every deck.
+// Kept here for menu copy so the New Game screen can describe them.
+const NEUTRAL_INFO = { name: "Neutral cards", icon: "neutral", blurb: "Heroes, weather and horns that reinforce any deck." };
 
 /* ---------- card database ----------
  * Every card is a template keyed by `key`. Fields:
@@ -57,6 +64,11 @@ const CARDS = {
   // --- neutral heroes ---
   geralt: { name: "Geralt of Rivia",     str: 7, row: "melee",  type: "hero", ability: null, faction: "neutral" },
   ciri:   { name: "Cirilla Fiona",       str: 6, row: "melee",  type: "hero", ability: null, faction: "neutral" },
+  vesemir:{ name: "Vesemir",             str: 6, row: "melee",  type: "hero", ability: null, faction: "neutral" },
+  // --- neutral units (supplement any deck) ---
+  zoltan: { name: "Zoltan Chivay",       str: 5, row: "melee",  type: "unit", ability: null,    faction: "neutral" },
+  yennefer:{name: "Yennefer of Vengerberg",str: 0,row: "ranged", type: "unit", ability: "medic", faction: "neutral" },
+  avallach:{name: "Avallac'h",           str: 0, row: "ranged", type: "unit", ability: "spy",   faction: "neutral" },
 
   // --- Northern Realms ---
   blue:    { name: "Blue Stripes Commando", str: 4, row: "melee",  type: "unit", ability: null,    faction: "nr" },
@@ -83,13 +95,51 @@ const CARDS = {
   fiend:   { name: "Fiend",             str: 6, row: "melee",  type: "unit", ability: null, faction: "monsters" },
   draug:   { name: "Draug",             str: 7, row: "siege",  type: "hero", ability: null, faction: "monsters" },
   imlerith:{ name: "Nithral",           str: 10,row: "melee",  type: "hero", ability: null, faction: "monsters" },
+
+  // --- Nilfgaardian Empire ---
+  nauzicaa: { name: "Nauzicaa Brigade",     str: 4, row: "melee",  type: "unit", ability: null,    faction: "nilfgaard" },
+  impera:   { name: "Impera Brigade Guard",  str: 3, row: "ranged", type: "unit", ability: null,    faction: "nilfgaard" },
+  blackarch:{ name: "Black Infantry Archer",str: 6, row: "ranged", type: "unit", ability: null,    faction: "nilfgaard" },
+  siegesup: { name: "Siege Engineer",        str: 6, row: "siege",  type: "unit", ability: null,    faction: "nilfgaard" },
+  arbalest: { name: "Arbalest",              str: 4, row: "siege",  type: "unit", ability: null,    faction: "nilfgaard" },
+  menno:    { name: "Menno Coehoorn",        str: 0, row: "ranged", type: "unit", ability: "medic", faction: "nilfgaard" },
+  vattier:  { name: "Vattier de Rideaux",    str: 0, row: "melee",  type: "unit", ability: "spy",   faction: "nilfgaard" },
+  stefan:   { name: "Stefan Skellen",        str: 0, row: "siege",  type: "unit", ability: "spy",   faction: "nilfgaard" },
+  cahir:    { name: "Cahir Mawr Dyffryn",    str: 6, row: "melee",  type: "hero", ability: null,    faction: "nilfgaard" },
+  morvran:  { name: "Morvran Voorhis",       str: 10,row: "siege",  type: "hero", ability: null,    faction: "nilfgaard" },
+
+  // --- Scoia'tael ---
+  dwarf:    { name: "Dwarven Skirmisher",    str: 3, row: "melee",  type: "unit", ability: null,    faction: "scoiatael" },
+  mahakam:  { name: "Mahakam Defender",      str: 5, row: "melee",  type: "unit", ability: null,    faction: "scoiatael" },
+  dolarcher:{ name: "Dol Blathanna Archer",  str: 4, row: "ranged", type: "unit", ability: null,    faction: "scoiatael" },
+  vrihedd:  { name: "Vrihedd Brigade Officer",str: 6,row: "ranged", type: "unit", ability: null,    faction: "scoiatael" },
+  havekar:  { name: "Havekar Smuggler",      str: 5, row: "siege",  type: "unit", ability: null,    faction: "scoiatael" },
+  ithlinne: { name: "Ithlinne",              str: 0, row: "ranged", type: "unit", ability: "medic", faction: "scoiatael" },
+  yaevinn:  { name: "Yaevinn",               str: 0, row: "ranged", type: "unit", ability: "spy",   faction: "scoiatael" },
+  ciaran:   { name: "Ciaran aep Easnillen",  str: 4, row: "melee",  type: "unit", ability: null,    faction: "scoiatael" },
+  filavandrel:{name: "Filavandrel aén Fidháil",str:6,row: "ranged", type: "hero", ability: null,    faction: "scoiatael" },
+  isengrim: { name: "Isengrim Faoiltiarna",  str: 10,row: "melee",  type: "hero", ability: null,    faction: "scoiatael" },
+
+  // --- Skellige ---
+  tordarroch:{name: "Clan Tordarroch Armorsmith",str:3,row:"melee", type: "unit", ability: null,    faction: "skellige" },
+  berserker:{ name: "Young Berserker",       str: 4, row: "melee",  type: "unit", ability: null,    faction: "skellige" },
+  shieldmaid:{name: "Shieldmaiden",          str: 5, row: "melee",  type: "unit", ability: null,    faction: "skellige" },
+  donar:    { name: "Donar an Hindar",       str: 5, row: "ranged", type: "unit", ability: null,    faction: "skellige" },
+  dimun:    { name: "Clan Dimun Pirate",     str: 4, row: "siege",  type: "unit", ability: null,    faction: "skellige" },
+  longship: { name: "War Longship",          str: 6, row: "siege",  type: "unit", ability: null,    faction: "skellige" },
+  birna:    { name: "Birna Bran",            str: 0, row: "ranged", type: "unit", ability: "medic", faction: "skellige" },
+  holger:   { name: "Holger Blackhand",      str: 0, row: "melee",  type: "unit", ability: "spy",   faction: "skellige" },
+  madman:   { name: "Madman Lugos",          str: 6, row: "siege",  type: "hero", ability: null,    faction: "skellige" },
+  hjalmar:  { name: "Hjalmar an Craite",     str: 10,row: "melee",  type: "hero", ability: null,    faction: "skellige" },
 };
 
 // Deck recipes: which templates make up each faction deck, and how many copies.
-// Every deck folds in a shared band of neutral weather + a Commander's Horn so
-// the ability system is exercised from the first game.
+// Every deck folds in a shared band of neutral cards — weather, a Commander's
+// Horn, a hero, plus a couple of neutral supports — so the ability system is
+// exercised from the first game and every faction shares the same neutral pool.
 const NEUTRAL_KIT = [
-  ["frost", 1], ["fog", 1], ["rain", 1], ["clear", 1], ["horn", 1], ["geralt", 1],
+  ["frost", 1], ["fog", 1], ["rain", 1], ["clear", 1], ["horn", 1],
+  ["geralt", 1], ["zoltan", 1], ["yennefer", 1],
 ];
 const DECKS = {
   nr: [
@@ -97,11 +147,26 @@ const DECKS = {
     ["catapult", 1], ["siegfried", 1], ["medic_nr", 1], ["dijkstra", 1], ["stennis", 1],
     ...NEUTRAL_KIT, ["ciri", 1],
   ],
+  nilfgaard: [
+    ["nauzicaa", 3], ["impera", 3], ["blackarch", 2], ["siegesup", 2], ["arbalest", 2],
+    ["menno", 1], ["vattier", 1], ["stefan", 1], ["cahir", 1], ["morvran", 1],
+    ...NEUTRAL_KIT, ["avallach", 1],
+  ],
   monsters: [
     ["ghoul", 3], ["nekker", 3], ["foglet", 2], ["harpy", 2], ["griffin", 1],
     ["katakan", 1], ["werewolf", 1], ["forktail", 1], ["arachas", 2], ["fiend", 1],
     ["draug", 1], ["imlerith", 1],
     ...NEUTRAL_KIT,
+  ],
+  scoiatael: [
+    ["dwarf", 3], ["mahakam", 2], ["dolarcher", 3], ["vrihedd", 2], ["havekar", 2],
+    ["ciaran", 2], ["ithlinne", 1], ["yaevinn", 1], ["filavandrel", 1], ["isengrim", 1],
+    ...NEUTRAL_KIT,
+  ],
+  skellige: [
+    ["tordarroch", 2], ["berserker", 3], ["shieldmaid", 3], ["donar", 2], ["dimun", 2],
+    ["longship", 2], ["birna", 1], ["holger", 1], ["madman", 1], ["hjalmar", 1],
+    ...NEUTRAL_KIT, ["vesemir", 1],
   ],
 };
 
@@ -126,10 +191,12 @@ function makeCard(key) {
 }
 
 // Build and shuffle a faction deck from its recipe.
-function buildDeck(faction) {
-  const recipe = DECKS[faction] || DECKS.nr;
+// Build and shuffle a faction deck. An explicit `recipe` (from the deck-builder)
+// overrides the faction default; unknown factions fall back to Northern Realms.
+function buildDeck(faction, recipe) {
+  const list = (recipe && recipe.length) ? recipe : (DECKS[faction] || DECKS.nr);
   const out = [];
-  recipe.forEach(([key, n]) => { for (let i = 0; i < n; i++) out.push(makeCard(key)); });
+  list.forEach(([key, n]) => { for (let i = 0; i < n; i++) out.push(makeCard(key)); });
   return shuffle(out);
 }
 
@@ -181,12 +248,27 @@ function startGame(opts, silent) {
   SETTINGS.faction = youFaction; SETTINGS.foeFaction = foeFaction;
   saveSettings();
 
-  const you = newPlayer("You", false, youFaction);
-  const foe = newPlayer(AI_NAMES[0], true, foeFaction);
-  foe.level = level;
+  // Seat both sides according to the chosen mode:
+  //   ai      — a human "You" against the computer.
+  //   hotseat — two humans sharing the screen (pass-and-play).
+  //   watch   — two AIs the human spectates.
+  let you, foe;
+  if (mode === "hotseat") {
+    you = newPlayer("Player 1", false, youFaction);
+    foe = newPlayer("Player 2", false, foeFaction);
+  } else if (mode === "watch") {
+    you = newPlayer(AI_NAMES[0], true, youFaction); you.level = level;
+    foe = newPlayer(AI_NAMES[1], true, foeFaction); foe.level = level;
+  } else {
+    you = newPlayer("You", false, youFaction);
+    foe = newPlayer(AI_NAMES[0], true, foeFaction); foe.level = level;
+  }
 
-  [you, foe].forEach(p => {
-    p.deck = buildDeck(p.faction);
+  // Per-seat custom recipes from the deck-builder (opts.decks[0] = you,
+  // opts.decks[1] = foe); absent seats fall back to the faction default.
+  const decks = opts.decks || {};
+  [you, foe].forEach((p, i) => {
+    p.deck = buildDeck(p.faction, decks[i]);
     p.hand = p.deck.splice(0, HAND_SIZE);
   });
 
@@ -208,8 +290,10 @@ function startGame(opts, silent) {
   currentSessionId = null;
 
   if (!silent) {
-    log(`<b>A new game begins.</b> ${FACTIONS[youFaction].name} vs ${FACTIONS[foeFaction].name} · ${LEVEL_LABEL[level]}.`);
-    log(`<b>${G.players[starter].name}</b> ${starter === 0 ? "lead" : "leads"} the first round.`);
+    const modeTail = mode === "hotseat" ? "hot seat" : mode === "watch" ? `spectating · ${LEVEL_LABEL[level]}` : LEVEL_LABEL[level];
+    log(`<b>A new game begins.</b> ${FACTIONS[youFaction].name} vs ${FACTIONS[foeFaction].name} · ${modeTail}.`);
+    const leadVerb = G.players[starter].name === "You" ? "lead" : "leads";
+    log(`<b>${G.players[starter].name}</b> ${leadVerb} the first round.`);
   }
   render();
   if (!silent && !G.over && me().isAI) scheduleAI();

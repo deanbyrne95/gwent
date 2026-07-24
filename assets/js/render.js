@@ -69,10 +69,18 @@ function plateHTML(player, isCurrent) {
   </div>`;
 }
 
+// Which player sits at the bottom of the board (the viewer). In hot-seat we
+// swap to the player whose turn it is, so the active human always sees their
+// own hand; every other mode keeps player 0 anchored below.
+function viewIndex() {
+  return (G && G.mode === "hotseat" && !G.over) ? G.current : 0;
+}
+
 // Build the whole view from state.
 function render() {
   if (!G) return;
-  const you = G.players[0], foe = G.players[1];
+  const bottomIdx = viewIndex();
+  const you = G.players[bottomIdx], foe = G.players[bottomIdx ^ 1];
 
   // Banner: round + last-round recap.
   const last = G.lastRound ? `<span class="bn-last">Last round ${G.lastRound.a}\u2013${G.lastRound.b}</span>` : "";
@@ -83,8 +91,8 @@ function render() {
     <span class="bn-turn">${turnText()}</span>`;
 
   // Opponent half (siege at the top, melee nearest the centre) then your half.
-  $("oppPlate").innerHTML = plateHTML(foe, G.current === 1);
-  $("youPlate").innerHTML = plateHTML(you, G.current === 0);
+  $("oppPlate").innerHTML = plateHTML(foe, G.current === (bottomIdx ^ 1));
+  $("youPlate").innerHTML = plateHTML(you, G.current === bottomIdx);
   $("oppRows").innerHTML = ["siege", "ranged", "melee"].map(r => rowHTML(foe, r)).join("");
   $("youRows").innerHTML = ["melee", "ranged", "siege"].map(r => rowHTML(you, r)).join("");
 
@@ -108,13 +116,17 @@ function turnText() {
   if (G.over) return G.winner == null ? "Match drawn" : `${esc(G.players[G.winner].name)} wins`;
   const p = me();
   if (p.isAI) return `${esc(p.name)} is thinking\u2026`;
+  if (G.mode === "hotseat") return `${esc(p.name)} to move`;
   return "Your move";
 }
 
 // Hint under the controls.
 function controlHint() {
   if (G.over) return "Open the menu for a new game.";
-  if (me().isAI) return "";
+  if (me().isAI) return G.mode === "watch" ? "Watching the rivals play out the round\u2026" : "";
+  if (G.mode === "hotseat") return UI.selectedCard != null
+    ? "Click the card again to play it, or pick another."
+    : `${esc(me().name)}: select a card to play, or pass.`;
   if (UI.selectedCard != null) return "Click the card again to play it, or pick another.";
   return "Select a card to play, or pass to end the round.";
 }

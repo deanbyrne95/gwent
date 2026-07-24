@@ -17,8 +17,21 @@ light/dark theming, and reduced-motion support.
 
 ## Play
 
-Open the game and choose **New game** from the menu. Pick your faction, your
-opponent, and a difficulty, then **Start**.
+Open the game and choose **New game** from the menu. First pick a **mode**:
+
+- **vs AI** — play a faction against the computer at Easy / Normal / Hard.
+- **vs Player** — two players share one screen (pass-and-play); the board
+  turns to face whoever is to move, so hands stay secret.
+- **Watch** — sit back and spectate two AIs duelling.
+- **Online** — _coming soon_ (this build is fully static, with no server).
+
+Then pick factions for each side from **Northern Realms, Nilfgaardian Empire,
+Monsters, Scoia'tael** or **Skellige** and set the difficulty (for AI-driven
+modes). Finally, **build your deck** — trim copies of any card down toward the
+minimum (22) to tune your list, or just leave the ready-made deck as-is. In
+**vs Player** each player builds their own deck in turn; **Watch** runs both
+default decks. Every deck is reinforced with shared **neutral cards** — heroes,
+weather and a Commander's Horn that supplement any faction.
 
 ### Running locally
 
@@ -115,11 +128,12 @@ This is a **playable foundation**, not the full card catalogue. The ability
 system is a single dispatch point (`applyPlay` in `game.js` and `evalCard` in
 `ai.js`) designed to grow. Natural next additions:
 
-- More factions and a real deck-builder screen.
 - Additional abilities: **muster**, **tight bond**, **scorch**, **decoy**,
   **leader cards**, and an opening **mulligan/redraw**.
 - Faction passives (e.g. Nilfgaard wins ties; Monsters keep a random unit).
 - Animations for plays, weather, and round transitions.
+- **Online play** — the New Game lobby already offers the mode; it needs a
+  backend (matchmaking + a networked turn relay) to go live.
 
 ---
 

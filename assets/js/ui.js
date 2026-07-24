@@ -83,11 +83,39 @@ function iconSvg(name) {
     load:     '<path d="M3 7.5A1.5 1.5 0 0 1 4.5 6h4l2 2.2H19.5A1.5 1.5 0 0 1 21 9.7V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
     settings: '<circle cx="12" cy="12" r="3.2"/><path d="M12 2.6l1.5 2.7 3-.6.6 3 2.7 1.5-1.5 2.6 1.5 2.6-2.7 1.5-.6 3-3-.6L12 21.4l-1.5-2.7-3 .6-.6-3L4.2 14.8l1.5-2.6-1.5-2.6 2.7-1.5.6-3 3 .6z"/>',
     help:     '<circle cx="12" cy="12" r="9"/><path d="M9.4 9.2a2.6 2.6 0 0 1 5 .9c0 1.7-2.4 2.2-2.4 3.9"/><circle cx="12" cy="17" r="1" fill="currentColor" stroke="none"/>',
+    // Mode glyphs for the New Game screen (shared with Gilded for consistency).
+    ai:      '<rect x="6" y="6" width="12" height="12" rx="2"/><circle cx="9.5" cy="10.5" r="1"/><circle cx="14.5" cy="10.5" r="1"/><path d="M9 14.5h6M9 2.5v3M15 2.5v3M9 18.5v3M15 18.5v3M2.5 9h3M2.5 15h3M18.5 9h3M18.5 15h3"/>',
+    players: '<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6"/><path d="M17 20a6 6 0 0 0-2.8-5.1"/>',
+    watch:   '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
+    online:  '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9s1.3-6.4 3.8-9z"/>',
   };
   const p = paths[name];
   return p ? `<svg class="mi-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>` : "";
 }
 function mmIcon(name) { return `<span class="mm-ic">${iconSvg(name)}</span>`; }
+
+// Heraldic faction crests for the New Game screen: a Witcher-style heater
+// shield framing each faction's charge (and a star for the neutral pool).
+// Original artwork keyed by FACTIONS[k].icon / NEUTRAL_INFO.icon.
+function factionSvg(name) {
+  const shield = '<path d="M12 2.6 19.5 5.4 19.5 11.4 C19.5 16.2 16.1 19.5 12 21.4 C7.9 19.5 4.5 16.2 4.5 11.4 L4.5 5.4 Z"/>';
+  const emblems = {
+    // Northern Realms — the Temerian fleur-de-lis at the heart of their arms.
+    nr: '<path fill="currentColor" stroke="none" d="M9.2 12.2 H14.8 V13 H9.2 Z"/><path fill="currentColor" stroke="none" d="M12 5.7 C10.7 7.8 10.8 10.3 12 12.2 C13.2 10.3 13.3 7.8 12 5.7 Z"/><path fill="currentColor" stroke="none" d="M12 9.2 C10.8 9 8.6 9.6 8.6 11.4 C8.6 12.6 9.6 13 10.5 12.6 C9.8 12.4 9.3 11.8 9.5 11 C10 10.2 11.2 10.2 12 11.4 Z"/><path fill="currentColor" stroke="none" d="M12 9.2 C13.2 9 15.4 9.6 15.4 11.4 C15.4 12.6 14.4 13 13.5 12.6 C14.2 12.4 14.7 11.8 14.5 11 C14 10.2 12.8 10.2 12 11.4 Z"/><path fill="currentColor" stroke="none" d="M11.3 13 C11.1 14 11.6 14.9 12 15.4 C12.4 14.9 12.9 14 12.7 13 Z"/>',
+    // Nilfgaard — the Great Sun.
+    nilfgaard: '<circle cx="12" cy="11" r="2.1"/><path d="M12 6.3V7.9M12 14.1V15.7M7.3 11H8.9M15.1 11H16.7M8.7 7.7 9.8 8.8M15.3 7.7 14.2 8.8M8.7 14.3 9.8 13.2M15.3 14.3 14.2 13.2"/>',
+    // Monsters — three claw slashes rending the shield.
+    monsters: '<path fill="currentColor" stroke="none" d="M9.7 7.5 C10.6 9.9 10.5 12.5 9.5 15 C8.8 12.5 8.8 9.9 9.7 7.5 Z"/><path fill="currentColor" stroke="none" d="M12.1 7.1 C13.0 9.7 12.9 12.5 11.9 15.2 C11.2 12.5 11.2 9.7 12.1 7.1 Z"/><path fill="currentColor" stroke="none" d="M14.5 7.5 C15.4 9.9 15.3 12.5 14.3 15 C13.6 12.5 13.6 9.9 14.5 7.5 Z"/>',
+    // Scoia'tael — three fanned arrows of the guerrilla archers.
+    scoiatael: '<path d="M9.2 15 8.2 7.3M12 15.3 12 6.9M15.8 7.3 14.8 15"/><path d="M8.2 7.3 7.5 8.1M8.2 7.3 9 7.9M12 6.9 11.2 7.7M12 6.9 12.8 7.7M15.8 7.3 15 7.9M15.8 7.3 16.5 8.1"/><path d="M9.2 15 8.5 14.2M9.2 15 9.9 14.4M12 15.3 11.3 14.5M12 15.3 12.7 14.5M14.8 15 14.1 14.4M14.8 15 15.5 14.2"/>',
+    // Skellige — a raider longship, sail full of wind.
+    skellige: '<path fill="currentColor" stroke="none" d="M6 12.6 18 12.6 C16.4 15.3 7.6 15.3 6 12.6 Z"/><path d="M10 12.5V6.3"/><path fill="currentColor" stroke="none" d="M10 6.7 C13.2 7 14.8 8.6 15.2 10.6 L10 10.6 Z"/><path fill="currentColor" stroke="none" d="M10 6.3 11.5 6.6 10 6.9 Z"/><path d="M6 12.6 C5.1 11.2 5.5 9.7 6.9 9.6 C6.1 10.1 6 11 6.6 11.6M18 12.6 C18.9 11.4 18.5 10.3 17.5 10.2"/>',
+    // Neutral — reinforcements for any deck.
+    neutral: '<path fill="currentColor" stroke="none" d="M12 6.7 13.1 9.85 16.45 9.95 13.8 12 14.7 15.25 12 13.3 9.3 15.25 10.2 12 7.55 9.95 10.9 9.85 Z"/>',
+  };
+  const e = emblems[name];
+  return e ? `<svg class="fac-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${shield}${e}</svg>` : "";
+}
 function mmItem(action, icon, title, sub, disabled, dataAttr) {
   return `<button class="mm-item" data-action="${action}"${dataAttr || ""}${disabled ? " disabled" : ""}>
     ${mmIcon(icon)}<span class="mm-tx"><span class="mm-i-t">${title}</span><span class="mm-i-s">${sub}</span></span></button>`;
@@ -95,6 +123,7 @@ function mmItem(action, icon, title, sub, disabled, dataAttr) {
 
 function openMainMenu() {
   document.body.classList.add("pre-game");
+  NG = null;                     // abandon any in-progress New Game wizard
   if (typeof Music !== "undefined") Music.setMode("menu");
   const canLoad = loadSessions().length > 0;
   openModal(`
@@ -114,47 +143,284 @@ function openMainMenu() {
 }
 
 function factionButtons(selected, action) {
-  return FACTION_KEYS.map(k =>
-    `<button class="chip ${selected === k ? "on" : ""}" data-action="${action}" data-v="${k}">${esc(FACTIONS[k].name)}</button>`
-  ).join("");
+  return FACTION_KEYS.map(k => {
+    const f = FACTIONS[k];
+    return `<button class="fac-opt ${selected === k ? "on" : ""}" data-action="${action}" data-v="${k}" aria-pressed="${selected === k}">
+      <span class="fac-ic">${factionSvg(f.icon)}</span>
+      <span class="fac-tx"><span class="fac-name">${esc(f.name)}</span><span class="fac-blurb">${esc(f.blurb)}</span></span>
+    </button>`;
+  }).join("");
 }
 
-function openNewGame() {
-  const you = SETTINGS.faction || "nr";
-  const foe = SETTINGS.foeFaction || "monsters";
-  const lvl = SETTINGS.aiLevel || "normal";
+// The four match modes, mirroring Gilded's lobby. `online` is stubbed until a
+// backend exists (this is a static, server-less app), so it renders disabled.
+const GAME_MODES = [
+  { v: "ai",      name: "vs AI",     blurb: "Battle the computer",   icon: "ai" },
+  { v: "hotseat", name: "vs Player", blurb: "Local pass-and-play",   icon: "players" },
+  { v: "watch",   name: "Watch",     blurb: "Spectate two AIs",      icon: "watch" },
+  { v: "online",  name: "Online",    blurb: "Coming soon",           icon: "online", disabled: true },
+];
+
+// Wording for the two side pickers (and whether a difficulty control shows).
+const MODE_SIDES = {
+  ai:      { a: "Your faction",     b: "Opponent",         hasDiff: true,  diff: "Difficulty" },
+  hotseat: { a: "Player 1 faction", b: "Player 2 faction", hasDiff: false, diff: "" },
+  watch:   { a: "Side A faction",   b: "Side B faction",   hasDiff: true,  diff: "AI difficulty" },
+};
+
+// Minimum cards a custom deck must hold before a match can begin.
+const MIN_DECK = 22;
+
+// Gilded-style mode cards (icon over title over subtitle); picking one commits
+// and advances, so the only footer control on this step is Back.
+function modeCards(selected) {
+  return GAME_MODES.map(m => {
+    const on = selected === m.v;
+    const attrs = m.disabled ? 'disabled aria-disabled="true"' : `data-action="ng-mode" data-v="${m.v}"`;
+    return `<button class="mode-card ${on ? "sel" : ""} ${m.disabled ? "disabled" : ""}" ${attrs}>
+      <span class="mc-ic">${iconSvg(m.icon)}</span>
+      <span class="mc-t">${esc(m.name)}</span><span class="mc-s">${esc(m.blurb)}</span>
+    </button>`;
+  }).join("");
+}
+
+/* ---------- New Game wizard: Mode → Factions → Deck → Play ----------
+ * Transient wizard state lives in `NG`, kept apart from SETTINGS so an abandoned
+ * wizard never disturbs saved preferences (those are committed only as each step
+ * is confirmed / the match launches). Mirrors Gilded's staged lobby. */
+let NG = null;
+
+function ngInit() {
+  let mode = SETTINGS.mode || "ai";
+  if (mode === "online" || !MODE_SIDES[mode]) mode = "ai";
+  NG = {
+    step: "mode",
+    mode,
+    you: SETTINGS.faction || "nr",
+    foe: SETTINGS.foeFaction || "monsters",
+    level: SETTINGS.aiLevel || "normal",
+    buildList: [],   // seat indices that build a custom deck this match
+    buildPos: 0,     // which of buildList is currently on screen
+    decks: {},       // seat index -> { cardKey: count }
+  };
+}
+
+// Menu entry point — always opens a fresh wizard at the first step.
+function openNewGame() { ngInit(); ngRender(); }
+
+// Seats that hand-build a deck: the human in vs AI, both in hot-seat, none in
+// Watch (two AIs run default decks).
+function ngBuilders(mode) { return mode === "hotseat" ? [0, 1] : mode === "watch" ? [] : [0]; }
+function ngSeatFaction(idx) { return idx === 0 ? NG.you : NG.foe; }
+
+// Per-faction recipe folded into { cardKey: maxCopies }; the default deck starts
+// every card at its max, so building is a matter of trimming toward the minimum.
+function ngRecipeMax(faction) {
+  const max = {};
+  (DECKS[faction] || DECKS.nr).forEach(([key, n]) => { max[key] = (max[key] || 0) + n; });
+  return max;
+}
+function ngDefaultCounts(faction) { return ngRecipeMax(faction); }
+function ngDeckSize(counts) { return Object.keys(counts).reduce((t, k) => t + counts[k], 0); }
+function ngCountsToRecipe(counts) { return Object.keys(counts).filter(k => counts[k] > 0).map(k => [k, counts[k]]); }
+
+function ngSeatName(idx) {
+  if (NG.mode === "hotseat") return idx === 0 ? "Player 1" : "Player 2";
+  return idx === 0 ? "You" : esc(FACTIONS[NG.foe].name);
+}
+function ngDeckTitle(idx) { return NG.mode === "hotseat" ? `${ngSeatName(idx)}\u2019s deck` : "Your deck"; }
+
+// A compact tag for a card in the builder (ability / hero / row).
+function ngCardTag(c) {
+  if (c.ability) return abilityLabel(c.ability);
+  if (c.type === "hero") return "Hero";
+  return ROW_NAME[c.row] || "";
+}
+
+// The step breadcrumb, rendered as the page eyebrow. Already-visited ("done")
+// steps are clickable buttons for quick back-navigation; the current step and
+// not-yet-reached steps are inert.
+function ngCrumb() {
+  const steps = NG.mode === "watch"
+    ? [["mode", "Mode"], ["faction", "Sides"]]
+    : [["mode", "Mode"], ["faction", "Factions"], ["deck", "Deck"]];
+  const active = steps.findIndex(s => s[0] === NG.step);
+  return `<div class="ng-steps eyebrow">${steps.map((s, i) => {
+    const cls = `ng-step ${i === active ? "on" : ""} ${i < active ? "done" : ""}`;
+    return i < active
+      ? `<button class="${cls}" data-action="ng-goto" data-step="${s[0]}">${esc(s[1])}</button>`
+      : `<span class="${cls}">${esc(s[1])}</span>`;
+  }).join('<span class="ng-arrow">\u203A</span>')}</div>`;
+}
+
+// Jump straight to an earlier, already-visited step from the breadcrumb.
+function ngGoto(step) {
+  if (!NG) return;
+  if (step === "deck" && !NG.buildList.length) step = "faction";
+  NG.step = step;
+  ngRender();
+}
+
+function ngRender() {
+  if (!NG) ngInit();
+  if (NG.step === "faction") return ngFactionStep();
+  if (NG.step === "deck") return ngDeckStep();
+  return ngModeStep();
+}
+
+function ngModeStep() {
   openModal(`
-    <div class="page-body">
-      <h2>New game</h2>
-      <div class="field">
-        <label>Your faction</label>
-        <div class="chips">${factionButtons(you, "ng-faction")}</div>
-        <p class="field-note">${esc(FACTIONS[you].blurb)}</p>
-      </div>
-      <div class="field">
-        <label>Opponent</label>
-        <div class="chips">${factionButtons(foe, "ng-foe")}</div>
-      </div>
-      <div class="field">
-        <label>Difficulty</label>
-        <div class="chips">
-          ${["easy", "normal", "hard"].map(l => `<button class="chip ${lvl === l ? "on" : ""}" data-action="ng-level" data-v="${l}">${LEVEL_LABEL[l]}</button>`).join("")}
-        </div>
-      </div>
+    <div class="page-body newgame ng-narrow">
+      ${ngCrumb()}
+      <h2>Choose a mode</h2>
+      <div class="mode-cards">${modeCards(NG.mode)}</div>
       <div class="foot">
         <button class="gbtn ghost" data-action="open-mainmenu">Back</button>
-        <button class="gbtn primary" data-action="start-game">Start</button>
       </div>
     </div>`, false, "page");
 }
 
-// Start the match described by the current selections.
-function startFromMenu() {
+function ngFactionStep() {
+  const sides = MODE_SIDES[NG.mode] || MODE_SIDES.ai;
+  const diffRow = sides.hasDiff ? `
+      <div class="set-row">
+        <div class="set-label">${esc(sides.diff)}<span class="set-hint">how sharply the AI plays</span></div>
+        <div class="seg-group">
+          ${["easy", "normal", "hard"].map(l => `<button class="seg ${NG.level === l ? "on" : ""}" data-action="ng-level" data-v="${l}">${LEVEL_LABEL[l]}</button>`).join("")}
+        </div>
+      </div>` : "";
+  const nextLabel = ngBuilders(NG.mode).length ? "Continue" : "Start";
+  openModal(`
+    <div class="page-body newgame">
+      ${ngCrumb()}
+      <h2>Choose factions</h2>
+      <div class="field">
+        <label>${esc(sides.a)}</label>
+        <div class="fac-grid">${factionButtons(NG.you, "ng-faction")}</div>
+      </div>
+      <div class="field">
+        <label>${esc(sides.b)}</label>
+        <div class="fac-grid">${factionButtons(NG.foe, "ng-foe")}</div>
+      </div>
+      <div class="neutral-note">
+        <span class="fac-ic sm">${factionSvg(NEUTRAL_INFO.icon)}</span>
+        <span><b>${esc(NEUTRAL_INFO.name)}</b> — ${esc(NEUTRAL_INFO.blurb)} Every deck already includes them.</span>
+      </div>
+      ${diffRow}
+      <div class="foot">
+        <button class="gbtn ghost" data-action="ng-back">Back</button>
+        <button class="gbtn primary" data-action="ng-next">${nextLabel}</button>
+      </div>
+    </div>`, false, "page");
+}
+
+function ngDeckStep() {
+  const seat = NG.buildList[NG.buildPos];
+  const faction = ngSeatFaction(seat);
+  const counts = NG.decks[seat];
+  const max = ngRecipeMax(faction);
+  const size = ngDeckSize(counts);
+  const ok = size >= MIN_DECK;
+  const last = NG.buildPos === NG.buildList.length - 1;
+
+  // Unique card keys in recipe order, split into faction and neutral pools.
+  const seen = {}, order = [];
+  (DECKS[faction] || DECKS.nr).forEach(([key]) => { if (!seen[key]) { seen[key] = 1; order.push(key); } });
+  const facCards = order.filter(k => CARDS[k].faction !== "neutral");
+  const neuCards = order.filter(k => CARDS[k].faction === "neutral");
+
+  const rowFor = key => {
+    const c = CARDS[key], n = counts[key] || 0, mx = max[key] || 0;
+    const str = (c.type === "weather" || c.type === "horn") ? "\u2726" : c.str;
+    return `<div class="deck-row ${n === 0 ? "off" : ""}">
+      <span class="deck-info">
+        <span class="deck-str">${str}</span>
+        <span class="deck-nm">${esc(c.name)}</span>
+        <span class="deck-tag">${esc(ngCardTag(c))}</span>
+      </span>
+      <span class="deck-stepper">
+        <button class="stp" data-action="ng-deck-dec" data-key="${key}" ${n <= 0 ? "disabled" : ""} aria-label="Remove one">\u2212</button>
+        <span class="deck-ct">${n}<span class="deck-mx">/${mx}</span></span>
+        <button class="stp" data-action="ng-deck-inc" data-key="${key}" ${n >= mx ? "disabled" : ""} aria-label="Add one">+</button>
+      </span>
+    </div>`;
+  };
+
+  openModal(`
+    <div class="page-body newgame deckbuild">
+      ${ngCrumb()}
+      <h2>${esc(ngDeckTitle(seat))}</h2>
+      <div class="deck-summary">
+        <span class="deck-fac"><span class="fac-ic sm">${factionSvg(FACTIONS[faction].icon)}</span> ${esc(FACTIONS[faction].name)}</span>
+        <span class="deck-count ${ok ? "ok" : "warn"}">${size} cards${ok ? "" : ` · add ${MIN_DECK - size} more (min ${MIN_DECK})`}</span>
+      </div>
+      <div class="deck-cols">
+        <div class="deck-col"><h3>Faction cards</h3>${facCards.map(rowFor).join("")}</div>
+        <div class="deck-col"><h3>Neutral cards</h3>${neuCards.map(rowFor).join("")}</div>
+      </div>
+      <div class="foot">
+        <button class="gbtn ghost" data-action="ng-back">Back</button>
+        <button class="gbtn primary" data-action="ng-next" ${ok ? "" : "disabled"}>${last ? "Start" : "Next player"}</button>
+      </div>
+    </div>`, false, "page");
+}
+
+/* ---------- wizard navigation ---------- */
+
+function ngNext() {
+  if (!NG) return;
+  if (NG.step === "mode") {
+    SETTINGS.mode = NG.mode; saveSettings();
+    NG.step = "faction"; return ngRender();
+  }
+  if (NG.step === "faction") {
+    SETTINGS.faction = NG.you; SETTINGS.foeFaction = NG.foe; SETTINGS.aiLevel = NG.level; saveSettings();
+    NG.buildList = ngBuilders(NG.mode);
+    NG.buildPos = 0;
+    NG.buildList.forEach(i => { NG.decks[i] = NG.decks[i] || ngDefaultCounts(ngSeatFaction(i)); });
+    if (!NG.buildList.length) return ngStart();       // Watch → straight to play
+    NG.step = "deck"; return ngRender();
+  }
+  if (NG.step === "deck") {
+    const seat = NG.buildList[NG.buildPos];
+    if (ngDeckSize(NG.decks[seat]) < MIN_DECK) return;  // guard (button also disabled)
+    if (NG.buildPos < NG.buildList.length - 1) { NG.buildPos++; return ngRender(); }
+    return ngStart();
+  }
+}
+
+function ngBack() {
+  if (!NG) return;
+  if (NG.step === "faction") { NG.step = "mode"; return ngRender(); }
+  if (NG.step === "deck") {
+    if (NG.buildPos > 0) { NG.buildPos--; return ngRender(); }
+    NG.step = "faction"; return ngRender();
+  }
+}
+
+// Adjust a card's copy count within [0, max] for the seat being built.
+function ngDeckAdjust(key, delta) {
+  if (!NG || NG.step !== "deck") return;
+  const seat = NG.buildList[NG.buildPos];
+  const counts = NG.decks[seat];
+  const mx = (ngRecipeMax(ngSeatFaction(seat))[key]) || 0;
+  const next = Math.max(0, Math.min(mx, (counts[key] || 0) + delta));
+  counts[key] = next;
+  ngRender();
+}
+
+// Launch the configured match, handing custom recipes to startGame per seat.
+function ngStart() {
+  SETTINGS.mode = NG.mode; SETTINGS.faction = NG.you; SETTINGS.foeFaction = NG.foe; SETTINGS.aiLevel = NG.level;
+  saveSettings();
+  const decks = {};
+  NG.buildList.forEach(i => { decks[i] = ngCountsToRecipe(NG.decks[i]); });
   document.body.classList.remove("pre-game");
   if (typeof Music !== "undefined") Music.setMode("game");
   closeModal();
   clearLog();
-  startGame({ mode: "ai", faction: SETTINGS.faction || "nr", foeFaction: SETTINGS.foeFaction || "monsters", level: SETTINGS.aiLevel || "normal" });
+  startGame({ mode: NG.mode, faction: NG.you, foeFaction: NG.foe, level: NG.level, decks });
+  NG = null;
 }
 
 /* ---------- in-game menu / settings ---------- */
