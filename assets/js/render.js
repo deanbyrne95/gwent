@@ -19,7 +19,9 @@ function crownsHTML(p) {
 }
 
 // One card tile. `opts.hand` makes it a selectable hand card; `opts.selected`
-// draws the selection ring.
+// draws the selection ring. Every tile carries two type cues: a corner label
+// naming what the card is, and a central glyph showing its combat row (or its
+// special nature) — both legible even in hand, where cards aren't row-grouped.
 function cardHTML(card, opts) {
   opts = opts || {};
   const cls = ["card", "c-" + (card.type)];
@@ -27,17 +29,138 @@ function cardHTML(card, opts) {
   if (card.ability) cls.push("ab-" + card.ability);
   if (opts.selected) cls.push("sel");
   const badge = (card.type === "weather" || card.type === "horn") ? "" : `<span class="c-str">${card.str}</span>`;
-  const tag = card.ability ? `<span class="c-tag">${abilityLabel(card.ability)}</span>`
-            : card.hero ? `<span class="c-tag">Hero</span>` : "";
-  const attrs = opts.hand ? ` data-action="hand-card" data-id="${card.id}" tabindex="0" role="button"` : "";
-  return `<div class="${cls.join(" ")}"${attrs} title="${esc(card.name)}">
-    ${badge}${tag}<span class="c-name">${esc(card.name)}</span>
+  const glyph = cardKindGlyph(card);
+  const kind = `<span class="c-kind" aria-hidden="true">${glyph ? `<span class="c-kind-ic">${glyph}</span>` : ""}<span class="c-kind-lb">${cardTypeLabel(card)}</span></span>`;
+  // Full details for the floating tooltip (shown on hover/focus) — the card face
+  // truncates its name, so the tip is where the complete text lives.
+  const meta = cardKindMeta(card), desc = cardDesc(card);
+  const tip = ` data-tip-name="${esc(card.name)}" data-tip-meta="${esc(meta)}"${desc ? ` data-tip-desc="${esc(desc)}"` : ""}`;
+  // Hand cards are interactive: give them an accessible label carrying the full
+  // text so keyboard and screen-reader users get what the truncation hides.
+  const label = [card.name, meta, desc].filter(Boolean).join(". ");
+  const attrs = opts.hand
+    ? ` data-action="hand-card" data-id="${card.id}" tabindex="0" role="button" aria-label="${esc(label)}"`
+    : "";
+  return `<div class="${cls.join(" ")}"${attrs}${tip}>
+    ${badge}${kind}<span class="c-name">${esc(card.name)}</span>
   </div>`;
 }
 
 function abilityLabel(a) {
   return { spy: "Spy", medic: "Medic", horn: "Horn", weather: "Weather", clear: "Clear" }[a] || a;
 }
+
+// Short word for the corner tag naming the card's type. Heroes and specials
+// take precedence over their row; an ability (spy/medic) names a unit's role;
+// everything else is a plain "Unit".
+function cardTypeLabel(card) {
+  if (card.hero) return "Hero";
+  if (card.type === "weather") return card.ability === "clear" ? "Clear" : "Weather";
+  if (card.type === "horn") return "Horn";
+  if (card.ability) return abilityLabel(card.ability);
+  return "Unit";
+}
+
+// Central glyph identifying the card's combat row (melee/ranged/siege) or, for
+// row-less specials, their nature — so a card's type reads at a glance.
+function cardKindGlyph(card) {
+  if (card.row) return ROW_GLYPH[card.row];
+  if (card.type === "weather") return card.ability === "clear" ? "☀" : "❄";
+  if (card.type === "horn") return "♪";
+  return "";
+}
+
+// The "type · row" line shown under a card's name in its tooltip.
+function cardKindMeta(card) {
+  const bits = [cardTypeLabel(card)];
+  if (card.row) bits.push(ROW_NAME[card.row]);
+  return bits.join(" · ");
+}
+
+// One-line description of what a card does, for its tooltip. Plain units carry
+// no special rule, so their kind/row line (above) already says everything.
+function cardDesc(card) {
+  switch (card.ability) {
+    case "spy":     return "Deploys to the enemy's row, but you draw two cards.";
+    case "medic":   return "Revives your strongest fallen unit.";
+    case "horn":    return "Doubles the strength of a chosen row.";
+    case "clear":   return "Removes all weather effects.";
+    case "weather": return `Drops every non-hero unit in the ${ROW_NAME[WEATHER[card.weather].row]} row to 1 until Clear Weather.`;
+  }
+  if (card.hero) return "A hero — immune to weather effects.";
+  return "";
+}
+
+/* ---------- card tooltip ----------
+ * A single floating panel, parented to <body> so it escapes the board and hand
+ * scroll containers' clipping. It reads the hovered/focused card's data-tip-*
+ * attributes and anchors itself above (or below, near the top edge) the card.
+ */
+const CardTip = {
+  el: null,
+  ensure() {
+    if (this.el) return this.el;
+    const el = document.createElement("div");
+    el.className = "card-tip"; el.id = "cardTip";
+    el.setAttribute("role", "tooltip"); el.hidden = true;
+    document.body.appendChild(el);
+    return (this.el = el);
+  },
+  forEl: null,   // the card the panel is currently anchored to
+  pinned: false, // true when opened by a tap, so hover-out doesn't dismiss it
+  show(cardEl, pinned) {
+    const name = cardEl.dataset.tipName;
+    if (!name) return;
+    const el = this.ensure();
+    const meta = cardEl.dataset.tipMeta || "", desc = cardEl.dataset.tipDesc || "";
+    el.innerHTML = `<span class="ct-name">${esc(name)}</span>`
+      + (meta ? `<span class="ct-meta">${esc(meta)}</span>` : "")
+      + (desc ? `<span class="ct-desc">${esc(desc)}</span>` : "");
+    el.hidden = false;
+    this.forEl = cardEl;
+    this.pinned = !!pinned;
+    this.place(cardEl);
+  },
+  // Tap handling: a tap on the already-open card closes it, otherwise (re)opens
+  // pinned on the tapped card.
+  toggle(cardEl) {
+    if (this.el && !this.el.hidden && this.forEl === cardEl) this.hide();
+    else this.show(cardEl, true);
+  },
+  place(cardEl) {
+    const el = this.el, r = cardEl.getBoundingClientRect();
+    const tw = el.offsetWidth, th = el.offsetHeight, pad = 6;
+    let left = r.left + r.width / 2 - tw / 2;
+    left = Math.max(pad, Math.min(left, window.innerWidth - tw - pad));
+    let top = r.top - th - 8, below = false;
+    if (top < pad) { top = r.bottom + 8; below = true; }
+    el.classList.toggle("below", below);
+    el.style.left = Math.round(left) + "px";
+    el.style.top = Math.round(top) + "px";
+  },
+  hide() { if (this.el) this.el.hidden = true; this.forEl = null; this.pinned = false; },
+  init() {
+    // Mouse hover (touch is handled by tap-to-inspect in events.js instead).
+    document.addEventListener("pointerover", e => {
+      if (e.pointerType === "touch") return;
+      const c = e.target.closest && e.target.closest(".card");
+      if (c) this.show(c);
+    });
+    document.addEventListener("pointerout", e => {
+      if (e.pointerType === "touch" || this.pinned) return;
+      const c = e.target.closest && e.target.closest(".card");
+      if (c && !c.contains(e.relatedTarget)) this.hide();
+    });
+    // Keyboard focus.
+    document.addEventListener("focusin", e => {
+      const c = e.target.closest && e.target.closest(".card");
+      if (c) this.show(c); else if (!this.pinned) this.hide();
+    });
+    document.addEventListener("focusout", () => { if (!this.pinned) this.hide(); });
+    window.addEventListener("scroll", () => this.hide(), true);
+    window.addEventListener("resize", () => this.hide());
+  },
+};
 
 // One combat row for a given player, including weather/horn state and score.
 function rowHTML(player, row) {
@@ -79,6 +202,7 @@ function viewIndex() {
 // Build the whole view from state.
 function render() {
   if (!G) return;
+  CardTip.hide();  // stale once the cards it anchored to are rebuilt
   const bottomIdx = viewIndex();
   const you = G.players[bottomIdx], foe = G.players[bottomIdx ^ 1];
 

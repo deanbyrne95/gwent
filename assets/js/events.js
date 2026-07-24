@@ -8,9 +8,22 @@
 
 /* ---------- click delegation ---------- */
 
+// Remember how the last click was produced so tap-to-inspect (touch) can be
+// told apart from a mouse click, which already reveals the tooltip on hover.
+let lastPointerType = "mouse";
+document.addEventListener("pointerdown", (e) => { lastPointerType = e.pointerType || "mouse"; }, true);
+
 document.addEventListener("click", (e) => {
   const t = e.target.closest("[data-action]");
-  if (!t) { clearSelection(); return; }
+  if (!t) {
+    // Touch has no hover: a tap on a board card inspects it; a tap on empty
+    // space dismisses the panel and clears any hand selection.
+    const card = e.target.closest(".card");
+    if (lastPointerType === "touch" && card) { CardTip.toggle(card); return; }
+    CardTip.hide();
+    clearSelection();
+    return;
+  }
   // Soft UI tick for menu/header/theme buttons (not board plays, which have
   // their own cues from the rules engine).
   if (e.target.closest("#modal") || e.target.closest(".topbar") || e.target.closest(".theme-float")) sfx("click");
@@ -58,6 +71,15 @@ document.addEventListener("click", (e) => {
     // ledger
     case "toggle-ledger": toggleLedger(); break;
     case "close-ledger": closeLedger(); break;
+  }
+
+  // On touch, selecting a hand card also inspects it: mirror the current
+  // selection into the pinned panel (render() has already rebuilt the tiles).
+  if (a === "hand-card" && lastPointerType === "touch") {
+    if (UI.selectedCard != null) {
+      const el = document.querySelector('#hand .card[data-id="' + UI.selectedCard + '"]');
+      if (el) CardTip.show(el, true);
+    } else CardTip.hide();
   }
 });
 
@@ -158,6 +180,7 @@ window.addEventListener("resize", () => { if (G) render(); });
 /* ---------- boot ---------- */
 
 applySettings();
+CardTip.init();
 // Prime a silent game so the board sits behind the opening menu.
 startGame({ mode: "ai", faction: SETTINGS.faction || "nr", foeFaction: SETTINGS.foeFaction || "monsters", level: SETTINGS.aiLevel || "normal" }, true);
 syncHeaderActions();
