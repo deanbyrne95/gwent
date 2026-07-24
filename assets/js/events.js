@@ -66,7 +66,9 @@ document.addEventListener("click", (e) => {
     // gameplay
     case "hand-card": onHandCard(+t.dataset.id); break;
     case "pass": onPass(); break;
+    case "use-leader": onUseLeader(); break;
     case "pick-row": pickRow(t.dataset.row); break;
+    case "pick-decoy": pickDecoy(t.dataset.id); break;
 
     // ledger
     case "toggle-ledger": toggleLedger(); break;

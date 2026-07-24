@@ -26,6 +26,9 @@ function aiTakeTurn() {
   const p = me(), o = opp();
   const myTotal = playerTotal(p), oppTotal = playerTotal(o);
 
+  // Consider the once-per-game leader ability before playing a card.
+  if (aiMaybeLeader(p, o)) return;
+
   // Rank each hand card by its effect on (my strength − their strength).
   const ranked = p.hand
     .map(c => ({ c, d: evalCard(p, o, c) }))
@@ -56,6 +59,12 @@ function aiTakeTurn() {
 
   const card = best.c;
   if (card.ability === "horn") playCard(card.id, { row: strongestRow(p) });
+  else if (card.ability === "decoy") {
+    const t = decoyTargets(p);
+    if (!t.length) { pass(); return; }
+    playCard(card.id, { target: t.reduce((a, b) => (a.str <= b.str ? a : b)).id });   // recall the weakest
+  }
+  else if (card.agile) playCard(card.id, { row: aiAgileRow(p, card) });
   else playCard(card.id);
 }
 
@@ -87,12 +96,68 @@ function evalCard(p, o, card) {
       const w = Object.assign({}, G.weather, { [WEATHER[card.weather].row]: true });
       return weatherDelta(p, o, w);
     }
+    case "muster": {
+      // Playing it rallies every copy from hand and deck onto the board at once.
+      const kin = p.hand.concat(p.deck).filter(c => c.muster === card.muster);
+      let add = 0;
+      kin.forEach(c => { const r = c.row; const b = c.hero ? c.str : (G.weather[r] ? 1 : c.str); add += p.horns[r] ? b * 2 : b; });
+      return add;
+    }
+    case "scorch": {
+      // Weigh what burns on each side; worth it only when it hurts them more.
+      const entries = [];
+      [p, o].forEach(pl => ROWS.forEach(r => effectiveRow(pl, r).cards.forEach(x => { if (!x.card.hero) entries.push({ own: pl === p, value: x.value }); })));
+      let max = -1; entries.forEach(e => { if (e.value > max) max = e.value; });
+      if (max < 0) return -1;
+      let oppLoss = 0, selfLoss = 0;
+      entries.filter(e => e.value === max).forEach(e => { if (e.own) selfLoss += e.value; else oppLoss += e.value; });
+      return oppLoss - selfLoss;
+    }
+    case "decoy": return -5;   // the rival keeps it simple and doesn't juggle decoys
     default: {
-      const r = card.row;
+      const r = card.agile ? aiAgileRow(p, card) : card.row;
       const add = card.hero ? card.str : (G.weather[r] ? 1 : card.str);
       return p.horns[r] ? add * 2 : add;
     }
   }
+}
+
+// Decide whether the rival should spend its leader ability this turn. Returns
+// true (and uses it) when the moment is clearly worthwhile.
+function aiMaybeLeader(p, o) {
+  if (!p.leader || p.leaderUsed) return false;
+  switch (p.leader.act) {
+    case "clearweather": {
+      const anyWeather = G.weather.melee || G.weather.ranged || G.weather.siege;
+      if (anyWeather && weatherDelta(p, o, { melee: false, ranged: false, siege: false }) > 2) { useLeader(); return true; }
+      return false;
+    }
+    case "horn": {
+      const row = strongestRow(p);
+      if (!p.horns[row] && rowStrengthNoHorn(p, row) >= 8) { useLeader({ row }); return true; }
+      return false;
+    }
+    case "summon": {
+      const c = strongestRevivable(p);
+      if (c && c.str >= 5) { useLeader(); return true; }
+      return false;
+    }
+    case "recall": {
+      const c = strongestRevivable(p);
+      if (c && c.str >= 6) { useLeader(); return true; }
+      return false;
+    }
+    case "draw":
+      if (p.hand.length <= 6) { useLeader(); return true; }
+      return false;
+  }
+  return false;
+}
+
+// The stronger of Close Combat / Ranged for an agile card right now.
+function aiAgileRow(p, card) {
+  const val = r => { const b = card.hero ? card.str : (G.weather[r] ? 1 : card.str); return p.horns[r] ? b * 2 : b; };
+  return val("ranged") > val("melee") ? "ranged" : "melee";
 }
 
 // Row strength assuming no Commander's Horn (for horn value estimates).

@@ -24,10 +24,16 @@ function onHandCard(cardId) {
   }
 }
 
-// Commit the selected card. Commander's Horn asks which row to buff first.
+// Commit the selected card. Some cards ask a follow-up question first:
+// Commander's Horn and agile units pick a row; Decoy picks a unit to recall.
 function commitCard(card) {
   if (card.ability === "horn") {
     chooseRow(me(), row => playCard(card.id, { row }));
+  } else if (card.ability === "decoy") {
+    if (!decoyTargets(me()).length) { flash("No unit on the board to recall."); return; }
+    chooseDecoyTarget(me(), id => playCard(card.id, { target: id }));
+  } else if (card.agile) {
+    chooseRow(me(), row => playCard(card.id, { row }), ["melee", "ranged"], "Deploy", "Close Combat or Ranged?");
   } else {
     playCard(card.id);
   }
@@ -42,4 +48,17 @@ function clearSelection() {
 function onPass() {
   if (!humanControls()) return;
   pass();
+}
+
+// The human activates their leader's once-per-game ability. Horn-type leaders
+// ask which row to buff first.
+function onUseLeader() {
+  if (!humanControls()) return;
+  const p = me();
+  if (!p.leader || p.leaderUsed) return;
+  if (p.leader.act === "horn") {
+    chooseRow(p, row => useLeader({ row }), ROWS, p.leader.name, "Sound the horn on which row?");
+  } else {
+    useLeader();
+  }
 }

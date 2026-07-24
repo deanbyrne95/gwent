@@ -28,7 +28,12 @@ function cardHTML(card, opts) {
   if (card.hero) cls.push("hero");
   if (card.ability) cls.push("ab-" + card.ability);
   if (opts.selected) cls.push("sel");
-  const badge = (card.type === "weather" || card.type === "horn") ? "" : `<span class="c-str">${card.str}</span>`;
+  if (opts.state) cls.push("v-" + opts.state);   // gem tint when boosted/reduced
+  // Special (Scorch/Decoy), weather and horn carry no strength number. On the
+  // board a unit shows its *effective* strength (opts.value); in hand, its base.
+  const hideStr = card.type === "weather" || card.type === "horn" || card.type === "special";
+  const shown = opts.value != null ? opts.value : card.str;
+  const badge = hideStr ? "" : `<span class="c-str">${shown}</span>`;
   const glyph = cardKindGlyph(card);
   const kind = `<span class="c-kind" aria-hidden="true">${glyph ? `<span class="c-kind-ic">${glyph}</span>` : ""}<span class="c-kind-lb">${cardTypeLabel(card)}</span></span>`;
   // Full details for the floating tooltip (shown on hover/focus) — the card face
@@ -47,23 +52,29 @@ function cardHTML(card, opts) {
 }
 
 function abilityLabel(a) {
-  return { spy: "Spy", medic: "Medic", horn: "Horn", weather: "Weather", clear: "Clear" }[a] || a;
+  return { spy: "Spy", medic: "Medic", horn: "Horn", weather: "Weather", clear: "Clear",
+           muster: "Muster", scorch: "Scorch", decoy: "Decoy" }[a] || a;
 }
 
 // Short word for the corner tag naming the card's type. Heroes and specials
-// take precedence over their row; an ability (spy/medic) names a unit's role;
-// everything else is a plain "Unit".
+// take precedence; an ability (spy/medic/muster) names a unit's role; a unit's
+// passive flag (bond/morale/agile) names it; everything else is a plain "Unit".
 function cardTypeLabel(card) {
   if (card.hero) return "Hero";
   if (card.type === "weather") return card.ability === "clear" ? "Clear" : "Weather";
   if (card.type === "horn") return "Horn";
   if (card.ability) return abilityLabel(card.ability);
+  if (card.bond) return "Bond";
+  if (card.morale) return "Morale";
+  if (card.agile) return "Agile";
   return "Unit";
 }
 
 // Central glyph identifying the card's combat row (melee/ranged/siege) or, for
 // row-less specials, their nature — so a card's type reads at a glance.
 function cardKindGlyph(card) {
+  if (card.ability === "scorch") return "✹";
+  if (card.ability === "decoy") return "⇆";
   if (card.row) return ROW_GLYPH[card.row];
   if (card.type === "weather") return card.ability === "clear" ? "☀" : "❄";
   if (card.type === "horn") return "♪";
@@ -86,8 +97,14 @@ function cardDesc(card) {
     case "horn":    return "Doubles the strength of a chosen row.";
     case "clear":   return "Removes all weather effects.";
     case "weather": return `Drops every non-hero unit in the ${ROW_NAME[WEATHER[card.weather].row]} row to 1 until Clear Weather.`;
+    case "muster":  return "Muster — when played, summons all its copies from your deck and hand.";
+    case "scorch":  return "Destroys the highest-strength unit(s) on the board.";
+    case "decoy":   return "Swap for one of your units, returning it to your hand.";
   }
-  if (card.hero) return "A hero — immune to weather effects.";
+  if (card.hero) return "A hero — immune to weather and special effects.";
+  if (card.bond) return "Tight Bond — copies in the same row multiply each other.";
+  if (card.morale) return "Morale Boost — +1 to every other unit in its row.";
+  if (card.agile) return "Agile — deploy to Close Combat or Ranged.";
   return "";
 }
 
@@ -163,15 +180,20 @@ const CardTip = {
 };
 
 // One combat row for a given player, including weather/horn state and score.
+// Each unit shows its *effective* strength, tinted when boosted or reduced.
 function rowHTML(player, row) {
   const weatherOn = !!G.weather[row];
   const hornOn = !!player.horns[row];
-  const cards = player.rows[row].map(c => cardHTML(c)).join("");
+  const eff = effectiveRow(player, row);
+  const cards = eff.cards.map(o => {
+    const st = o.card.hero ? "" : (o.value > o.card.str ? "up" : o.value < o.card.str ? "down" : "");
+    return cardHTML(o.card, { value: o.value, state: st });
+  }).join("");
   const marks = `${hornOn ? '<span class="row-mark horn" title="Commander\'s Horn">\u266A</span>' : ""}${weatherOn ? '<span class="row-mark weather" title="Weather">\u2744</span>' : ""}`;
   return `<div class="row ${weatherOn ? "weathered" : ""}" data-row="${row}">
     <div class="row-label"><span class="row-glyph">${ROW_GLYPH[row]}</span>${ROW_NAME[row]}${marks}</div>
     <div class="row-field">${cards}</div>
-    <div class="row-score">${rowStrength(player, row)}</div>
+    <div class="row-score"><span>${eff.total}</span></div>
   </div>`;
 }
 
@@ -182,7 +204,10 @@ function plateHTML(player, isCurrent) {
   const turn = isCurrent && !G.over && !G.roundOver && !player.passed ? '<span class="acting">to move</span>' : "";
   const total = playerTotal(player), foeTotal = playerTotal(G.players[G.players.indexOf(player) ^ 1]);
   const lead = total > foeTotal ? "lead" : "";
-  return `<div class="plate ${player.isAI ? "ai" : "you"} ${isCurrent ? "active" : ""} ${lead}">
+  const leader = player.leader
+    ? `<div class="pl-leader ${player.leaderUsed ? "used" : ""}" title="${esc(player.leader.name + " — " + player.leader.desc)}">⚑ ${esc(player.leader.name)}${player.leaderUsed ? " · spent" : ""}</div>`
+    : "";
+  return `<div class="plate ${player.isAI ? "ai" : "you"} fac-${player.faction} ${isCurrent ? "active" : ""} ${lead}">
     <div class="pl-main">
       <div class="pl-top">
         <span class="pl-name">${esc(player.name)}</span>
@@ -190,6 +215,7 @@ function plateHTML(player, isCurrent) {
       </div>
       <div class="pl-sub">${esc(FACTIONS[player.faction].name)} ${passed} ${turn}</div>
       <div class="pl-counts">Hand ${player.hand.length} · Deck ${player.deck.length} · Grave ${player.graveyard.length}</div>
+      ${leader}
     </div>
     <div class="pl-gem"><span class="pl-total">${total}</span></div>
   </div>`;
@@ -240,10 +266,16 @@ function render() {
     .map(c => cardHTML(c, { hand: humanControls(), selected: UI.selectedCard === c.id }))
     .join("") || '<div class="hand-empty">No cards in hand</div>';
 
-  // Controls.
+  // Controls — Pass, the once-per-game leader ability, and a hint.
   const canAct = humanControls();
+  const leaderBtn = you.leader
+    ? (you.leaderUsed
+        ? `<span class="leader-spent" title="${esc(you.leader.name)} — spent">⚑ Leader spent</span>`
+        : `<button class="gbtn leader-btn" data-action="use-leader" ${canAct ? "" : "disabled"} title="${esc(you.leader.name + " — " + you.leader.desc)}">⚑ ${esc(you.leader.name)}</button>`)
+    : "";
   $("controls").innerHTML = `
     <button class="gbtn pass-btn" data-action="pass" ${canAct ? "" : "disabled"}>Pass</button>
+    ${leaderBtn}
     <span class="ctrl-hint">${controlHint()}</span>`;
 
   document.body.classList.toggle("your-turn", canAct);

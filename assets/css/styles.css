@@ -100,6 +100,14 @@ body.pre-game .theme-float{display:inline-flex}
 .plate.lead .pl-gem{background:radial-gradient(circle at 38% 32%, #6e5320, #362611 80%);
   border-color:var(--gilt); box-shadow:inset 0 0 8px rgba(0,0,0,.6), 0 0 16px rgba(241,203,91,.45)}
 .plate.lead .pl-total{color:var(--gilt-soft)}
+.pl-leader{font-size:11.5px; color:var(--gilt-soft); letter-spacing:.2px}
+.pl-leader.used{color:var(--ink-dim); text-decoration:line-through}
+/* Faction accent on the score-gem ring (leading player still glows gold). */
+.plate.fac-nr .pl-gem{border-color:#4f7fb5}
+.plate.fac-nilfgaard .pl-gem{border-color:#d0a03a}
+.plate.fac-monsters .pl-gem{border-color:#b5432f}
+.plate.fac-scoiatael .pl-gem{border-color:#5c9e4f}
+.plate.fac-skellige .pl-gem{border-color:#8a5bb0}
 
 .side{display:flex; flex-direction:column; gap:6px}
 
@@ -153,6 +161,9 @@ body.pre-game .theme-float{display:inline-flex}
 /* Hero: ornate gilt frame with a warm glow. */
 .card.hero{border-color:var(--hero); box-shadow:0 0 0 1px var(--hero) inset, 0 2px 9px rgba(241,203,91,.35)}
 .card.hero .c-str{background:radial-gradient(circle at 38% 30%, #ffe79a, #e0a93f 78%); border-color:#8a6a24}
+/* Strength gem tints green when a unit is boosted, red when weakened. */
+.card.v-up .c-str{background:radial-gradient(circle at 38% 30%, #b6e592, #5c9e3f 78%); border-color:#3d7327; color:#12240a}
+.card.v-down .c-str{background:radial-gradient(circle at 38% 30%, #ee9d86, #b23f2c 78%); border-color:#742619; color:#2a0d07}
 /* Ability accent runs along the foot banner. */
 .card.ab-spy{border-color:var(--spy)}
 .card.ab-weather,.card.ab-clear{border-color:var(--weather)}
@@ -208,6 +219,8 @@ body.pre-game .hud{display:none}
 body.pre-game .wrap{display:none}
 .controls{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
 .pass-btn{min-width:96px}
+.leader-btn{border-color:var(--gilt); color:var(--gilt-soft)}
+.leader-spent{font-size:12px; color:var(--ink-dim); letter-spacing:.3px}
 .ctrl-hint{font-size:12px; color:var(--ink-dim)}
 .hand{display:flex; align-items:flex-end; gap:7px; overflow-x:auto; padding:6px 2px 2px; min-height:90px;
   scrollbar-width:thin; scrollbar-color:var(--line) transparent}
