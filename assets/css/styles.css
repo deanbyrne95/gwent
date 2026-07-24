@@ -181,17 +181,32 @@ body.pre-game .ledger-drawer{display:none}
 .menu-actions{display:flex; flex-direction:column; gap:10px; width:100%; max-width:260px}
 .menu-actions .gbtn{width:100%}
 
-/* Full-screen main menu (parity with Gilded): the modal fills the viewport. */
+/* Full-screen main menu (Gilded-style hero + list rows). */
 .scrim:has(.mainmenu){padding:0}
 .modal.mainmenu{max-width:none; width:100%; height:100%; max-height:100%; border:none; border-radius:0;
-  background:radial-gradient(ellipse at 50% 26%, var(--panel) 0%, var(--felt) 72%);
-  display:flex; align-items:center; justify-content:center; padding:24px}
-.mainmenu .mm{display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px; width:100%; max-width:340px}
-.mainmenu .mm-hero{margin-bottom:22px}
-.mainmenu .eyebrow{font-size:12px; letter-spacing:4px; text-transform:uppercase; color:var(--ink-dim)}
-.mainmenu .menu-title{font-size:clamp(52px,12vw,84px); line-height:1; margin:6px 0}
-.mainmenu .menu-sub{max-width:340px; margin:0}
-.mainmenu .menu-actions{max-width:300px}
+  background:radial-gradient(ellipse at 50% 28%, var(--panel) 0%, var(--felt) 72%);
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+  padding:clamp(28px,7vh,90px) 24px 6vh; overflow:auto}
+.mm{width:100%; max-width:520px; display:flex; flex-direction:column; align-items:center; text-align:center}
+.mm-hero{margin-bottom:clamp(24px,5vh,44px)}
+.mm-hero .eyebrow{font-size:12px; letter-spacing:4px; text-transform:uppercase; color:var(--ink-dim)}
+.mm-title{font-family:"Cormorant Garamond",serif; font-weight:700; line-height:.95;
+  font-size:clamp(64px,15vw,120px); color:var(--gilt-soft); letter-spacing:2px; margin:8px 0 6px;
+  text-shadow:0 2px 30px rgba(95,191,143,.25)}
+.mm-tag{font-size:15px; color:var(--ink-dim); max-width:420px; margin:6px auto 0}
+.mm-tag b{color:var(--gilt-soft)}
+.mm-menu{display:flex; flex-direction:column; gap:12px; width:100%}
+.mm-item{display:flex; flex-direction:row; align-items:center; gap:14px; text-align:left; cursor:pointer;
+  background:var(--felt-2); border:1px solid var(--line); border-radius:14px; padding:15px 20px;
+  font-family:"Jost"; transition:border-color .15s ease, transform .12s ease}
+.mm-item:hover:not(:disabled){border-color:var(--gilt); transform:translateY(-1px)}
+.mm-item:disabled{opacity:.45; cursor:not-allowed}
+.mm-ic{flex:0 0 auto; width:26px; height:26px; display:flex; align-items:center; justify-content:center; color:var(--gilt-soft)}
+.mm-ic .mi-svg{width:24px; height:24px}
+.mm-tx{display:flex; flex-direction:column; gap:2px; min-width:0}
+.mm-i-t{font-family:"Cormorant Garamond",serif; font-size:24px; color:var(--gilt-soft)}
+.mm-i-s{font-size:12.5px; letter-spacing:.3px; color:var(--ink-dim)}
+body.light .modal.mainmenu{background:radial-gradient(ellipse at 50% 28%, var(--panel), var(--felt) 72%)}
 
 /* Pre-game sub-pages (New game / Settings / Load) also fill the screen, so the
    flow from the full-screen menu stays consistent (as in Gilded's landing). */

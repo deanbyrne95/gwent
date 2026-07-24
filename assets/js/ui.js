@@ -66,6 +66,23 @@ function closeModal() {
 
 /* ---------- start menu & new game ---------- */
 
+// Dependency-free line icons (inherit colour via currentColor), Gilded-style.
+function iconSvg(name) {
+  const paths = {
+    new:      '<path d="M12 5v14M5 12h14"/>',
+    load:     '<path d="M3 7.5A1.5 1.5 0 0 1 4.5 6h4l2 2.2H19.5A1.5 1.5 0 0 1 21 9.7V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+    settings: '<circle cx="12" cy="12" r="3.2"/><path d="M12 2.6l1.5 2.7 3-.6.6 3 2.7 1.5-1.5 2.6 1.5 2.6-2.7 1.5-.6 3-3-.6L12 21.4l-1.5-2.7-3 .6-.6-3L4.2 14.8l1.5-2.6-1.5-2.6 2.7-1.5.6-3 3 .6z"/>',
+    help:     '<circle cx="12" cy="12" r="9"/><path d="M9.4 9.2a2.6 2.6 0 0 1 5 .9c0 1.7-2.4 2.2-2.4 3.9"/><circle cx="12" cy="17" r="1" fill="currentColor" stroke="none"/>',
+  };
+  const p = paths[name];
+  return p ? `<svg class="mi-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>` : "";
+}
+function mmIcon(name) { return `<span class="mm-ic">${iconSvg(name)}</span>`; }
+function mmItem(action, icon, title, sub, disabled, dataAttr) {
+  return `<button class="mm-item" data-action="${action}"${dataAttr || ""}${disabled ? " disabled" : ""}>
+    ${mmIcon(icon)}<span class="mm-tx"><span class="mm-i-t">${title}</span><span class="mm-i-s">${sub}</span></span></button>`;
+}
+
 function openMainMenu() {
   document.body.classList.add("pre-game");
   const canLoad = loadSessions().length > 0;
@@ -73,14 +90,14 @@ function openMainMenu() {
     <div class="mm">
       <div class="mm-hero">
         <div class="eyebrow">Two Rounds to Victory</div>
-        <h1 class="menu-title">Gwent</h1>
-        <p class="menu-sub">Marshal your rows and win two rounds to take the match.</p>
+        <h1 class="mm-title">Gwent</h1>
+        <p class="mm-tag">Marshal your rows and win two rounds to take the match.</p>
       </div>
-      <div class="menu-actions">
-        <button class="gbtn primary" data-action="open-newgame">New game</button>
-        <button class="gbtn ${canLoad ? "" : "ghost"}" data-action="load-game" ${canLoad ? "" : "disabled"}>Load game</button>
-        <button class="gbtn" data-action="open-settings">Settings</button>
-        <button class="gbtn ghost" data-action="how-to">How to play</button>
+      <div class="mm-menu">
+        ${mmItem("open-newgame", "new", "New Game", "Choose your factions and difficulty")}
+        ${mmItem("load-game", "load", "Load Game", canLoad ? "Continue a saved game" : "No saved games yet", !canLoad)}
+        ${mmItem("open-settings", "settings", "Settings", "Theme and default difficulty")}
+        ${mmItem("how-to", "help", "How to Play", "Rows, weather, crowns &amp; winning")}
       </div>
     </div>`, false, "mainmenu");
 }
