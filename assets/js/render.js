@@ -1,0 +1,120 @@
+"use strict";
+
+/* ============================================================================
+ * render.js — the view layer. It rebuilds the board, hand, and HUD from `G`
+ * every time state changes. Rendering is a pure function of state: it reads
+ * `G`/`UI` and writes DOM, but never mutates game state.
+ * ==========================================================================*/
+
+const $ = id => document.getElementById(id);
+
+// Escape user-facing text before injecting into innerHTML.
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+// Crown pips: filled for crowns held, hollow for crowns lost.
+function crownsHTML(p) {
+  let out = "";
+  for (let i = 0; i < START_CROWNS; i++) out += `<span class="crown ${i < p.crowns ? "on" : "off"}">\u265B</span>`;
+  return out;
+}
+
+// One card tile. `opts.hand` makes it a selectable hand card; `opts.selected`
+// draws the selection ring.
+function cardHTML(card, opts) {
+  opts = opts || {};
+  const cls = ["card", "c-" + (card.type)];
+  if (card.hero) cls.push("hero");
+  if (card.ability) cls.push("ab-" + card.ability);
+  if (opts.selected) cls.push("sel");
+  const badge = (card.type === "weather" || card.type === "horn") ? "" : `<span class="c-str">${card.str}</span>`;
+  const tag = card.ability ? `<span class="c-tag">${abilityLabel(card.ability)}</span>`
+            : card.hero ? `<span class="c-tag">Hero</span>` : "";
+  const attrs = opts.hand ? ` data-action="hand-card" data-id="${card.id}" tabindex="0" role="button"` : "";
+  return `<div class="${cls.join(" ")}"${attrs} title="${esc(card.name)}">
+    ${badge}${tag}<span class="c-name">${esc(card.name)}</span>
+  </div>`;
+}
+
+function abilityLabel(a) {
+  return { spy: "Spy", medic: "Medic", horn: "Horn", weather: "Weather", clear: "Clear" }[a] || a;
+}
+
+// One combat row for a given player, including weather/horn state and score.
+function rowHTML(player, row) {
+  const weatherOn = !!G.weather[row];
+  const hornOn = !!player.horns[row];
+  const cards = player.rows[row].map(c => cardHTML(c)).join("");
+  const marks = `${hornOn ? '<span class="row-mark horn" title="Commander\'s Horn">\u266A</span>' : ""}${weatherOn ? '<span class="row-mark weather" title="Weather">\u2744</span>' : ""}`;
+  return `<div class="row ${weatherOn ? "weathered" : ""}" data-row="${row}">
+    <div class="row-label"><span class="row-glyph">${ROW_GLYPH[row]}</span>${ROW_NAME[row]}${marks}</div>
+    <div class="row-field">${cards}</div>
+    <div class="row-score">${rowStrength(player, row)}</div>
+  </div>`;
+}
+
+// A player's nameplate: name, faction, total strength, crowns, deck/hand/grave.
+function plateHTML(player, isCurrent) {
+  const passed = player.passed ? '<span class="passed">passed</span>' : "";
+  const turn = isCurrent && !G.over && !G.roundOver && !player.passed ? '<span class="acting">to move</span>' : "";
+  return `<div class="plate ${player.isAI ? "ai" : "you"} ${isCurrent ? "active" : ""}">
+    <div class="pl-top">
+      <span class="pl-name">${esc(player.name)}</span>
+      <span class="pl-crowns">${crownsHTML(player)}</span>
+    </div>
+    <div class="pl-sub">${esc(FACTIONS[player.faction].name)} ${passed} ${turn}</div>
+    <div class="pl-stats">
+      <span class="pl-total">${playerTotal(player)}</span>
+      <span class="pl-counts">Hand ${player.hand.length} · Deck ${player.deck.length} · Grave ${player.graveyard.length}</span>
+    </div>
+  </div>`;
+}
+
+// Build the whole view from state.
+function render() {
+  if (!G) return;
+  const you = G.players[0], foe = G.players[1];
+
+  // Banner: round + last-round recap.
+  const last = G.lastRound ? `<span class="bn-last">Last round ${G.lastRound.a}\u2013${G.lastRound.b}</span>` : "";
+  $("banner").innerHTML = `
+    <span class="bn-main">Round ${G.round}</span>
+    <span class="bn-sep"></span>
+    ${last}
+    <span class="bn-turn">${turnText()}</span>`;
+
+  // Opponent half (siege at the top, melee nearest the centre) then your half.
+  $("oppPlate").innerHTML = plateHTML(foe, G.current === 1);
+  $("youPlate").innerHTML = plateHTML(you, G.current === 0);
+  $("oppRows").innerHTML = ["siege", "ranged", "melee"].map(r => rowHTML(foe, r)).join("");
+  $("youRows").innerHTML = ["melee", "ranged", "siege"].map(r => rowHTML(you, r)).join("");
+
+  // Your hand.
+  $("hand").innerHTML = you.hand
+    .map(c => cardHTML(c, { hand: humanControls(), selected: UI.selectedCard === c.id }))
+    .join("") || '<div class="hand-empty">No cards in hand</div>';
+
+  // Controls.
+  const canAct = humanControls();
+  $("controls").innerHTML = `
+    <button class="gbtn pass-btn" data-action="pass" ${canAct ? "" : "disabled"}>Pass</button>
+    <span class="ctrl-hint">${controlHint()}</span>`;
+
+  document.body.classList.toggle("your-turn", canAct);
+  if (typeof syncHeaderActions === "function") syncHeaderActions();
+}
+
+// Headline describing whose move it is.
+function turnText() {
+  if (G.over) return G.winner == null ? "Match drawn" : `${esc(G.players[G.winner].name)} wins`;
+  const p = me();
+  if (p.isAI) return `${esc(p.name)} is thinking\u2026`;
+  return "Your move";
+}
+
+// Hint under the controls.
+function controlHint() {
+  if (G.over) return "Open the menu for a new game.";
+  if (me().isAI) return "";
+  if (UI.selectedCard != null) return "Click the card again to play it, or pick another.";
+  return "Select a card to play, or pass to end the round.";
+}

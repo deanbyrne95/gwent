@@ -1,0 +1,12 @@
+{
+  "name": "Gwent",
+  "short_name": "Gwent",
+  "description": "A two-round card game for the browser.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0e1512",
+  "theme_color": "#0e1512",
+  "icons": [
+    { "src": "assets/images/card.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

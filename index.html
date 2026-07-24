@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gwent — a two-round card game</title>
+<link rel="icon" type="image/svg+xml" href="assets/images/card.svg">
+<link rel="manifest" href="assets/site.webmanifest">
+<meta name="theme-color" content="#0e1512">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body class="pre-game">
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <h1>Gwent</h1>
+      <span class="sub">Two Rounds to Victory</span>
+    </div>
+    <div class="spacer"></div>
+    <button class="theme-btn theme-toggle" id="themeToggle" data-action="toggle-theme" aria-label="Toggle light or dark theme" aria-pressed="false" title="Toggle light / dark theme"></button>
+    <button class="theme-btn menu-btn" id="menuBtn" data-action="open-menu" aria-haspopup="dialog" aria-label="Menu" title="Menu" hidden>&#9776;</button>
+  </div>
+
+  <div class="banner" id="banner"></div>
+
+  <div class="board">
+    <div class="plate-slot" id="oppPlate"></div>
+    <div class="side opp" id="oppRows"></div>
+    <div class="divider"><span>The board</span></div>
+    <div class="side you" id="youRows"></div>
+    <div class="plate-slot" id="youPlate"></div>
+  </div>
+</div>
+
+<!-- Your hand + controls: fixed HUD along the bottom -->
+<div class="hud" id="hudBar">
+  <div class="controls" id="controls"></div>
+  <div class="hand" id="hand"></div>
+</div>
+
+<!-- Ledger: floating drawer, slides in from the right -->
+<aside class="ledger-drawer" id="ledgerDrawer">
+  <button class="ledger-tab" data-action="toggle-ledger" aria-expanded="false" aria-label="Open or close ledger"><span class="lbl">Ledger</span><span class="chev" aria-hidden="true">&#9662;</span></button>
+  <div class="ledger-head">
+    <h3>Ledger</h3>
+    <button class="ledger-close" data-action="close-ledger" aria-label="Close ledger">&times;</button>
+  </div>
+  <div class="log" id="log"></div>
+</aside>
+
+<div id="toasts" class="toasts" aria-live="polite"></div>
+
+<!-- Quick theme toggle on the main menu -->
+<button class="theme-btn theme-float" id="themeFloat" data-action="toggle-theme" aria-label="Toggle light or dark theme" aria-pressed="false" title="Toggle light / dark theme"></button>
+
+<!-- Modals -->
+<div class="scrim" id="scrim">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script src="assets/js/constants.js"></script>
+<script src="assets/js/game.js"></script>
+<script src="assets/js/interactions.js"></script>
+<script src="assets/js/ai.js"></script>
+<script src="assets/js/render.js"></script>
+<script src="assets/js/ui.js"></script>
+<script src="assets/js/events.js"></script>
+</body>
+</html>
