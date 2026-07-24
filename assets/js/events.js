@@ -19,8 +19,7 @@ document.addEventListener("click", (e) => {
     case "open-newgame": closeModal(); openNewGame(); break;
     case "open-mainmenu": openMainMenu(); break;
     case "return-mainmenu": returnToMainMenu(); break;
-    case "open-settings": openSettings(!document.body.classList.contains("pre-game") && !!G && !document.querySelector(".menu-page") ? false : true); break;
-    case "open-menu-back": openMenu(); break;
+    case "open-settings": openSettings(); break;
     case "how-to": howTo(); break;
 
     // new-game selections

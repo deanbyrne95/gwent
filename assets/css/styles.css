@@ -120,6 +120,7 @@ body.pre-game .theme-float{display:inline-flex}
   border-top:1px solid var(--gilt); backdrop-filter:blur(6px)}
 body.light .hud{background:linear-gradient(0deg, rgba(230,240,234,.98), rgba(238,243,239,.92))}
 body.pre-game .hud{display:none}
+body.pre-game .wrap{display:none}
 .controls{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
 .pass-btn{min-width:96px}
 .ctrl-hint{font-size:12px; color:var(--ink-dim)}

@@ -146,9 +146,11 @@ function openMenu() {
     </div>`, true, "menu-page");
 }
 
-let settingsFromMenu = false;
-function openSettings(fromMenu) {
-  if (fromMenu !== undefined) settingsFromMenu = fromMenu;
+// Where a sub-page's Done/Back should return to: the full-screen main menu
+// while pre-game, otherwise the in-game pause menu it was opened from.
+function backAction() { return document.body.classList.contains("pre-game") ? "open-mainmenu" : "open-menu"; }
+
+function openSettings() {
   const light = SETTINGS.theme === "light";
   openModal(`
     <div class="page-body">
@@ -168,7 +170,7 @@ function openSettings(fromMenu) {
       </div>
       <p class="field-note">Motion respects your system's reduce-motion setting. Preferences are saved on this device.</p>
       <div class="foot">
-        <button class="gbtn primary" data-action="${settingsFromMenu ? "open-menu-back" : "close-modal"}">Done</button>
+        <button class="gbtn primary" data-action="${backAction()}">Done</button>
       </div>
     </div>`, true, "page");
 }
@@ -190,7 +192,7 @@ function howTo() {
         <li><b>Spy</b> — goes to the enemy's row but lets you draw 2 cards.</li>
         <li><b>Medic</b> — revives your strongest fallen unit.</li>
       </ul>
-      <div class="foot"><button class="gbtn primary" data-action="close-modal">Got it</button></div>
+      <div class="foot"><button class="gbtn primary" data-action="${backAction()}">Got it</button></div>
     </div>`, true, "page");
 }
 
@@ -304,7 +306,7 @@ function openSessions() {
     <div class="page-body">
       <h2>Load game</h2>
       <div class="sessions">${rows}</div>
-      <div class="foot"><button class="gbtn ghost" data-action="${document.body.classList.contains("pre-game") ? "open-mainmenu" : "close-modal"}">Back</button></div>
+      <div class="foot"><button class="gbtn ghost" data-action="${backAction()}">Back</button></div>
     </div>`, true, "page");
 }
 
