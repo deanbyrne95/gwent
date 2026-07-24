@@ -175,21 +175,35 @@ function rowHTML(player, row) {
   </div>`;
 }
 
-// A player's nameplate: name, faction, total strength, crowns, deck/hand/grave.
+// A player's nameplate: a leather bar with name, faction, round crowns, hand/
+// deck/grave counts, and a gilt score gem that lights when this player leads.
 function plateHTML(player, isCurrent) {
   const passed = player.passed ? '<span class="passed">passed</span>' : "";
   const turn = isCurrent && !G.over && !G.roundOver && !player.passed ? '<span class="acting">to move</span>' : "";
-  return `<div class="plate ${player.isAI ? "ai" : "you"} ${isCurrent ? "active" : ""}">
-    <div class="pl-top">
-      <span class="pl-name">${esc(player.name)}</span>
-      <span class="pl-crowns">${crownsHTML(player)}</span>
+  const total = playerTotal(player), foeTotal = playerTotal(G.players[G.players.indexOf(player) ^ 1]);
+  const lead = total > foeTotal ? "lead" : "";
+  return `<div class="plate ${player.isAI ? "ai" : "you"} ${isCurrent ? "active" : ""} ${lead}">
+    <div class="pl-main">
+      <div class="pl-top">
+        <span class="pl-name">${esc(player.name)}</span>
+        <span class="pl-crowns">${crownsHTML(player)}</span>
+      </div>
+      <div class="pl-sub">${esc(FACTIONS[player.faction].name)} ${passed} ${turn}</div>
+      <div class="pl-counts">Hand ${player.hand.length} · Deck ${player.deck.length} · Grave ${player.graveyard.length}</div>
     </div>
-    <div class="pl-sub">${esc(FACTIONS[player.faction].name)} ${passed} ${turn}</div>
-    <div class="pl-stats">
-      <span class="pl-total">${playerTotal(player)}</span>
-      <span class="pl-counts">Hand ${player.hand.length} · Deck ${player.deck.length} · Grave ${player.graveyard.length}</span>
-    </div>
+    <div class="pl-gem"><span class="pl-total">${total}</span></div>
   </div>`;
+}
+
+// The central weather zone: shows any active weather, or clear skies.
+function weatherZoneHTML() {
+  const active = ROWS.filter(r => G.weather[r]);
+  if (!active.length) return `<span class="weather-zone clear">Clear skies</span>`;
+  const glyph = { melee: "❄", ranged: "☁", siege: "☂" };
+  const key = { melee: "frost", ranged: "fog", siege: "rain" };
+  const label = { melee: "Frost", ranged: "Fog", siege: "Rain" };
+  const marks = active.map(r => `<span class="wz-ic ${key[r]}">${glyph[r]}</span><span class="wz-lb">${label[r]}</span>`).join("");
+  return `<span class="weather-zone">${marks}</span>`;
 }
 
 // Which player sits at the bottom of the board (the viewer). In hot-seat we
@@ -219,6 +233,7 @@ function render() {
   $("youPlate").innerHTML = plateHTML(you, G.current === bottomIdx);
   $("oppRows").innerHTML = ["siege", "ranged", "melee"].map(r => rowHTML(foe, r)).join("");
   $("youRows").innerHTML = ["melee", "ranged", "siege"].map(r => rowHTML(you, r)).join("");
+  const wz = $("weatherZone"); if (wz) wz.innerHTML = weatherZoneHTML();
 
   // Your hand.
   $("hand").innerHTML = you.hand
