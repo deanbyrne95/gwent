@@ -106,7 +106,9 @@ const CardTip = {
     document.body.appendChild(el);
     return (this.el = el);
   },
-  show(cardEl) {
+  forEl: null,   // the card the panel is currently anchored to
+  pinned: false, // true when opened by a tap, so hover-out doesn't dismiss it
+  show(cardEl, pinned) {
     const name = cardEl.dataset.tipName;
     if (!name) return;
     const el = this.ensure();
@@ -115,7 +117,15 @@ const CardTip = {
       + (meta ? `<span class="ct-meta">${esc(meta)}</span>` : "")
       + (desc ? `<span class="ct-desc">${esc(desc)}</span>` : "");
     el.hidden = false;
+    this.forEl = cardEl;
+    this.pinned = !!pinned;
     this.place(cardEl);
+  },
+  // Tap handling: a tap on the already-open card closes it, otherwise (re)opens
+  // pinned on the tapped card.
+  toggle(cardEl) {
+    if (this.el && !this.el.hidden && this.forEl === cardEl) this.hide();
+    else this.show(cardEl, true);
   },
   place(cardEl) {
     const el = this.el, r = cardEl.getBoundingClientRect();
@@ -128,21 +138,25 @@ const CardTip = {
     el.style.left = Math.round(left) + "px";
     el.style.top = Math.round(top) + "px";
   },
-  hide() { if (this.el) this.el.hidden = true; },
+  hide() { if (this.el) this.el.hidden = true; this.forEl = null; this.pinned = false; },
   init() {
+    // Mouse hover (touch is handled by tap-to-inspect in events.js instead).
     document.addEventListener("pointerover", e => {
+      if (e.pointerType === "touch") return;
       const c = e.target.closest && e.target.closest(".card");
       if (c) this.show(c);
     });
     document.addEventListener("pointerout", e => {
+      if (e.pointerType === "touch" || this.pinned) return;
       const c = e.target.closest && e.target.closest(".card");
       if (c && !c.contains(e.relatedTarget)) this.hide();
     });
+    // Keyboard focus.
     document.addEventListener("focusin", e => {
       const c = e.target.closest && e.target.closest(".card");
-      if (c) this.show(c); else this.hide();
+      if (c) this.show(c); else if (!this.pinned) this.hide();
     });
-    document.addEventListener("focusout", () => this.hide());
+    document.addEventListener("focusout", () => { if (!this.pinned) this.hide(); });
     window.addEventListener("scroll", () => this.hide(), true);
     window.addEventListener("resize", () => this.hide());
   },
