@@ -325,5 +325,7 @@ function startGame(opts, silent) {
     log(`<b>${G.players[starter].name}</b> ${leadVerb} the first round.`);
   }
   render();
-  if (!silent && !G.over && me().isAI) scheduleAI();
+  if (silent) return;   // a game primed behind the menu — no redraw, no AI yet
+  // Opening redraw, then the first turn begins (see beginPlay in ui.js).
+  runMulliganPhase();
 }

@@ -221,6 +221,14 @@ body.pre-game .wrap{display:none}
 .pass-btn{min-width:96px}
 .leader-btn{border-color:var(--gilt); color:var(--gilt-soft)}
 .leader-spent{font-size:12px; color:var(--ink-dim); letter-spacing:.3px}
+/* Opening-redraw hand: a wrapping row of pickable cards inside the modal. */
+.mull-hand{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:10px 0 4px}
+.mull-hand .card{width:58px; height:80px; cursor:pointer}
+.mull-hand .card .c-name{height:24px; font-size:8.5px}
+.mull-hand .card .c-kind{bottom:25px}
+.mull-hand .card .c-str{width:22px; height:22px; font-size:14px; top:-4px; left:-4px}
+.mull-hand .card .c-kind-ic{font-size:27px}
+.mull-hand .card:hover{transform:translateY(-5px); border-color:var(--gilt)}
 .ctrl-hint{font-size:12px; color:var(--ink-dim)}
 .hand{display:flex; align-items:flex-end; gap:7px; overflow-x:auto; padding:6px 2px 2px; min-height:90px;
   scrollbar-width:thin; scrollbar-color:var(--line) transparent}

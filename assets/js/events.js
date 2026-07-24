@@ -69,6 +69,8 @@ document.addEventListener("click", (e) => {
     case "use-leader": onUseLeader(); break;
     case "pick-row": pickRow(t.dataset.row); break;
     case "pick-decoy": pickDecoy(t.dataset.id); break;
+    case "mull-card": onMulliganCard(t.dataset.id); break;
+    case "mull-done": onMulliganDone(); break;
 
     // ledger
     case "toggle-ledger": toggleLedger(); break;

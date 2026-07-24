@@ -547,6 +547,54 @@ function howTo() {
     </div>`, true, "page");
 }
 
+/* ---------- opening redraw (mulligan) ---------- */
+
+// After deal: AI seats redraw silently; human seats get a prompt in turn, then
+// play begins. Called by startGame (non-silent starts only).
+function runMulliganPhase() {
+  const humans = [];
+  G.players.forEach((p, i) => { if (p.isAI) aiMulligan(p); else humans.push(i); });
+  UI._mullQueue = humans;
+  nextMulligan();
+}
+function nextMulligan() {
+  const q = UI._mullQueue || [];
+  if (!q.length) { beginPlay(); return; }
+  UI.mulligan = { idx: q[0], left: 2 };
+  openMulliganModal();
+}
+function openMulliganModal() {
+  const idx = UI.mulligan.idx, left = UI.mulligan.left, p = G.players[idx];
+  const who = G.mode === "hotseat" ? `${esc(p.name)} — opening hand` : "Your opening hand";
+  openModal(`
+    <div class="page-body mulligan">
+      <h2>${who}</h2>
+      <p>Tap up to two cards to redraw them, or keep your hand as dealt.
+      Redraws left: <b>${left}</b>.</p>
+      <div class="mull-hand">${p.hand.map(c => cardHTML(c, { mulligan: left > 0 })).join("")}</div>
+      <div class="foot"><button class="gbtn primary" data-action="mull-done">${left < 2 ? "Done" : "Keep hand"}</button></div>
+    </div>`, false, "page");
+}
+function onMulliganCard(id) {
+  if (!UI.mulligan || UI.mulligan.left <= 0) return;
+  mulliganCard(G.players[UI.mulligan.idx], +id);
+  UI.mulligan.left--;
+  sfx("select");
+  openMulliganModal();
+}
+function onMulliganDone() {
+  UI.mulligan = null;
+  (UI._mullQueue || []).shift();
+  closeModal();
+  nextMulligan();
+}
+// The first turn begins once every seat has finished its redraw.
+function beginPlay() {
+  render();
+  autoSave();
+  if (!G.over && me().isAI) scheduleAI();
+}
+
 /* ---------- horn row picker ---------- */
 
 // Ask which row to target, then invoke `cb(row)`. Defaults to all three rows

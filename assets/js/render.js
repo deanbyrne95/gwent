@@ -45,6 +45,8 @@ function cardHTML(card, opts) {
   const label = [card.name, meta, desc].filter(Boolean).join(". ");
   const attrs = opts.hand
     ? ` data-action="hand-card" data-id="${card.id}" tabindex="0" role="button" aria-label="${esc(label)}"`
+    : opts.mulligan
+    ? ` data-action="mull-card" data-id="${card.id}" tabindex="0" role="button" aria-label="Redraw ${esc(label)}"`
     : "";
   return `<div class="${cls.join(" ")}"${attrs}${tip}>
     ${badge}${kind}<span class="c-name">${esc(card.name)}</span>

@@ -73,6 +73,32 @@ function draw(player, n) {
   return got;
 }
 
+// Opening redraw (mulligan): swap one hand card for a fresh draw, then shuffle
+// the discarded card back into the deck — so the replacement is a new card, per
+// the rulebook. Returns the drawn replacement (or null if the deck was empty).
+function mulliganCard(player, cardId) {
+  const i = player.hand.findIndex(c => c.id === cardId);
+  if (i < 0) return null;
+  const discarded = player.hand.splice(i, 1)[0];
+  const drew = player.deck.length ? player.deck.pop() : null;
+  if (drew) player.hand.push(drew);
+  player.deck.push(discarded);
+  player.deck = shuffle(player.deck);
+  return drew;
+}
+
+// The rival's opening redraw: swap up to two of its weakest ordinary units.
+function aiMulligan(player) {
+  for (let done = 0; done < 2; done++) {
+    let worst = null;
+    player.hand.forEach(c => {
+      if (c.type === "unit" && !c.ability && !c.bond && !c.morale && c.str <= 2 && (!worst || c.str < worst.str)) worst = c;
+    });
+    if (!worst) break;
+    mulliganCard(player, worst.id);
+  }
+}
+
 /* ---------- playing a card ---------- */
 
 // Play the hand card with id `cardId` for the current player. `opts.row` lets a
