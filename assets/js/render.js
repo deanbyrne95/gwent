@@ -29,12 +29,11 @@ function cardHTML(card, opts) {
   if (card.ability) cls.push("ab-" + card.ability);
   if (opts.selected) cls.push("sel");
   const badge = (card.type === "weather" || card.type === "horn") ? "" : `<span class="c-str">${card.str}</span>`;
-  const tag = `<span class="c-tag">${cardTypeLabel(card)}</span>`;
   const glyph = cardKindGlyph(card);
-  const kind = glyph ? `<span class="c-kind" aria-hidden="true">${glyph}</span>` : "";
+  const kind = `<span class="c-kind" aria-hidden="true">${glyph ? `<span class="c-kind-ic">${glyph}</span>` : ""}<span class="c-kind-lb">${cardTypeLabel(card)}</span></span>`;
   const attrs = opts.hand ? ` data-action="hand-card" data-id="${card.id}" tabindex="0" role="button"` : "";
   return `<div class="${cls.join(" ")}"${attrs} title="${esc(cardTitle(card))}">
-    ${badge}${tag}${kind}<span class="c-name">${esc(card.name)}</span>
+    ${badge}${kind}<span class="c-name">${esc(card.name)}</span>
   </div>`;
 }
 
