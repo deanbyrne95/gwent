@@ -70,16 +70,19 @@ function openMainMenu() {
   document.body.classList.add("pre-game");
   const canLoad = loadSessions().length > 0;
   openModal(`
-    <div class="menu">
-      <h2 class="menu-title">Gwent</h2>
-      <p class="menu-sub">A card game of two rounds won.</p>
+    <div class="mm">
+      <div class="mm-hero">
+        <div class="eyebrow">Two Rounds to Victory</div>
+        <h1 class="menu-title">Gwent</h1>
+        <p class="menu-sub">Marshal your rows and win two rounds to take the match.</p>
+      </div>
       <div class="menu-actions">
         <button class="gbtn primary" data-action="open-newgame">New game</button>
         <button class="gbtn ${canLoad ? "" : "ghost"}" data-action="load-game" ${canLoad ? "" : "disabled"}>Load game</button>
         <button class="gbtn" data-action="open-settings">Settings</button>
         <button class="gbtn ghost" data-action="how-to">How to play</button>
       </div>
-    </div>`, false, "page menu-page");
+    </div>`, false, "mainmenu");
 }
 
 function factionButtons(selected, action) {
