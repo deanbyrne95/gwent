@@ -19,6 +19,7 @@ function onHandCard(cardId) {
     commitCard(card);
   } else {
     UI.selectedCard = cardId;
+    sfx("select");
     render();
   }
 }

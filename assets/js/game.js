@@ -91,12 +91,14 @@ function applyPlay(p, card, opts) {
     case "weather": {
       G.weather[WEATHER[card.weather].row] = true;
       p.graveyard.push(card);
+      sfx("weather");
       log(`<b>${p.name}</b> summons <b>${card.name}</b>.`);
       break;
     }
     case "clear": {
       G.weather.melee = G.weather.ranged = G.weather.siege = false;
       p.graveyard.push(card);
+      sfx("clear");
       log(`<b>${p.name}</b> plays <b>${card.name}</b> — the skies clear.`);
       break;
     }
@@ -104,24 +106,28 @@ function applyPlay(p, card, opts) {
       const row = opts.row || strongestRow(p);
       p.horns[row] = true;
       p.graveyard.push(card);
+      sfx("horn");
       log(`<b>${p.name}</b> sounds the <b>${card.name}</b> on ${ROW_NAME[row]}.`);
       break;
     }
     case "spy": {
       o.rows[card.row].push(card);
       const drew = draw(p, 2);
+      sfx("spy");
       log(`<b>${p.name}</b> plants <b>${card.name}</b> (spy) and draws ${drew}.`);
       break;
     }
     case "medic": {
       p.rows[card.row].push(card);
       const revived = reviveStrongest(p);
+      sfx("medic");
       if (revived) log(`<b>${p.name}</b> plays <b>${card.name}</b> and revives <b>${revived.name}</b>.`);
       else log(`<b>${p.name}</b> plays <b>${card.name}</b>.`);
       break;
     }
     default: {
       p.rows[card.row].push(card);
+      sfx("play");
       log(`<b>${p.name}</b> plays <b>${card.name}</b> (${card.str}).`);
     }
   }
@@ -155,6 +161,7 @@ function pass() {
   const p = me();
   if (p.passed) return;
   p.passed = true;
+  sfx("pass");
   log(`<b>${p.name}</b> passes.`);
   UI.selectedCard = null; UI.phase = "play";
   render();
@@ -193,6 +200,13 @@ function resolveRound() {
   });
   G.weather.melee = G.weather.ranged = G.weather.siege = false;
 
+  // Round-result cue from the human's perspective — but stay silent when this
+  // round ends the match, so the match fanfare (endMatch) isn't stepped on.
+  if (!(a.crowns <= 0 || b.crowns <= 0)) {
+    const humanIdx = G.players.findIndex(pl => !pl.isAI);
+    if (humanIdx >= 0) sfx(loserIdx === humanIdx ? "roundLose" : "roundWin");
+  }
+
   if (a.crowns <= 0 || b.crowns <= 0) { endMatch(); return; }
 
   // Next round: the loser leads.
@@ -217,6 +231,8 @@ function endMatch() {
   if (a.crowns !== b.crowns) winner = a.crowns > b.crowns ? a : b;
   else if (a.roundsWon !== b.roundsWon) winner = a.roundsWon > b.roundsWon ? a : b;
   G.winner = winner ? G.players.indexOf(winner) : null;
+  const humanIdx = G.players.findIndex(pl => !pl.isAI);
+  if (winner && humanIdx >= 0) sfx(G.winner === humanIdx ? "win" : "lose");
   if (winner) log(`<b>${winner.name}</b> wins the match!`);
   else log(`<b>The match ends in a draw.</b>`);
   render();

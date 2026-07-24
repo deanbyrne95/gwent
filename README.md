@@ -9,7 +9,8 @@ card-battle classic — no accounts, no installs, no build step.
 This project reuses the architecture and several features of its sibling
 [**Gilded**](../gilded): the zero-build single-page structure, the `G`/`UI`
 state model with one-way data flow, a single delegated event handler,
-`localStorage` settings and saved sessions, a sliding ledger, corner toasts,
+`localStorage` settings and saved sessions, a tabbed settings panel, a bundled
+Web Audio soundtrack and sound effects, a sliding ledger, corner toasts,
 light/dark theming, and reduced-motion support.
 
 ---
@@ -68,6 +69,9 @@ gwent/
         ├── ai.js           # Computer-rival heuristic
         ├── render.js       # View layer — rebuilds the board/HUD from state
         ├── ui.js           # Menus, settings, save/load, modals, ledger, toasts
+        ├── music.js        # Menu pair + in-game loop as base64 data URIs (play from file://)
+        ├── sfx.js          # Recorded foley/UI/brass samples as base64 data URIs
+        ├── audio.js        # Web Audio SFX cues + looping music player (see Credits)
         └── events.js       # Delegated [data-action] handling + boot
 ```
 
@@ -89,6 +93,22 @@ gwent/
 
 ---
 
+## Settings
+
+Open **Settings** from the menu for a tabbed panel (carried over from Gilded):
+
+- **Visual** — colour-vision mode (Off / Protanopia / Deuteranopia / Tritanopia)
+  recolours the card status accents to colourblind-safe hues. (Light/dark is the
+  round theme button — bottom-left on the menu, in the header in-game.)
+- **Audio** — independent **Master**, **Sound effects**, and **Music** volume
+  sliders, driven by a Web Audio engine (`audio.js`).
+- **Alerts** — corner position and on-screen lifetime for toast messages.
+- **Controls** — toggle keyboard shortcuts, with an on-screen key reference.
+
+Preferences are saved to `localStorage` on the device.
+
+---
+
 ## Foundation scope & next steps
 
 This is a **playable foundation**, not the full card catalogue. The ability
@@ -99,12 +119,25 @@ system is a single dispatch point (`applyPlay` in `game.js` and `evalCard` in
 - Additional abilities: **muster**, **tight bond**, **scorch**, **decoy**,
   **leader cards**, and an opening **mulligan/redraw**.
 - Faction passives (e.g. Nilfgaard wins ties; Monsters keep a random unit).
-- Audio (music + SFX) following Gilded's Web Audio approach.
 - Animations for plays, weather, and round transitions.
 
 ---
 
 ## Credits & license
 
-Card names reference *The Witcher* card game for flavour only. No license has
+**Audio** (bundled as base64 data URIs and played via the Web Audio API, carried
+over from Gilded):
+
+- **Music** by Kevin MacLeod ([incompetech.com](https://incompetech.com/)),
+  licensed [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/):
+  *"Lord of the Land"* and *"Village Consort"* (menu themes) and *"Folk Round"*
+  (in-game loop). This attribution must be preserved regardless of the project's
+  own license.
+- **Sound effects** — foley & UI cues from [Kenney](https://kenney.nl/)'s
+  *Casino Audio*, *Interface Sounds*, *RPG Audio* and *Impact Sounds* packs, plus
+  brass fanfares from [Freesound](https://freesound.org/), all released under
+  [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) (public domain;
+  credited here with thanks).
+
+Card names reference *The Witcher* card game for flavour only. No code license has
 been chosen yet; until one is added, all rights are reserved by the author.

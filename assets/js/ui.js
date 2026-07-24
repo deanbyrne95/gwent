@@ -28,7 +28,8 @@ function flash(msg, ms) {
   t.innerHTML = msg;
   host.appendChild(t);
   requestAnimationFrame(() => t.classList.add("show"));
-  setTimeout(() => { t.classList.remove("show"); setTimeout(() => t.remove(), 300); }, ms || 2600);
+  const life = ms || (typeof SETTINGS !== "undefined" && SETTINGS.toastMs) || 2600;
+  setTimeout(() => { t.classList.remove("show"); setTimeout(() => t.remove(), 300); }, life);
 }
 
 /* ---------- settings ---------- */
@@ -37,15 +38,24 @@ function flash(msg, ms) {
 const SETTINGS = (function () { try { return JSON.parse(localStorage.getItem("gwent_settings")) || {}; } catch (e) { return {}; } })();
 function saveSettings() { try { localStorage.setItem("gwent_settings", JSON.stringify(SETTINGS)); } catch (e) {} }
 
-// Apply settings to the DOM (theme class + theme-button glyphs).
+// Apply settings to the DOM: theme class + glyphs, colour-vision palette, toast
+// position, and audio volumes.
 function applySettings() {
   const light = SETTINGS.theme === "light";
   document.body.classList.toggle("light", light);
+  const cvd = SETTINGS.cvd || "off";
+  document.body.classList.toggle("cvd-prot", cvd === "prot");
+  document.body.classList.toggle("cvd-deut", cvd === "deut");
+  document.body.classList.toggle("cvd-trit", cvd === "trit");
+  const toasts = document.getElementById("toasts");
+  if (toasts) toasts.className = "toasts pos-" + (SETTINGS.toastPos || "br");
   const glyph = light ? "\u2600" : "\u263E";
   ["themeToggle", "themeFloat"].forEach(id => {
     const b = document.getElementById(id);
     if (b) { b.innerHTML = `<span aria-hidden="true">${glyph}</span>`; b.setAttribute("aria-pressed", light ? "true" : "false"); }
   });
+  if (typeof Sfx !== "undefined") Sfx.setVolume();
+  if (typeof Music !== "undefined") Music.setVolume();
 }
 function toggleTheme() { SETTINGS.theme = SETTINGS.theme === "light" ? "dark" : "light"; saveSettings(); applySettings(); }
 
@@ -85,6 +95,7 @@ function mmItem(action, icon, title, sub, disabled, dataAttr) {
 
 function openMainMenu() {
   document.body.classList.add("pre-game");
+  if (typeof Music !== "undefined") Music.setMode("menu");
   const canLoad = loadSessions().length > 0;
   openModal(`
     <div class="mm">
@@ -96,7 +107,7 @@ function openMainMenu() {
       <div class="mm-menu">
         ${mmItem("open-newgame", "new", "New Game", "Choose your factions and difficulty")}
         ${mmItem("load-game", "load", "Load Game", canLoad ? "Continue a saved game" : "No saved games yet", !canLoad)}
-        ${mmItem("open-settings", "settings", "Settings", "Theme and default difficulty")}
+        ${mmItem("open-settings", "settings", "Settings", "Audio, visual, alerts &amp; controls")}
         ${mmItem("how-to", "help", "How to Play", "Rows, weather, crowns &amp; winning")}
       </div>
     </div>`, false, "mainmenu");
@@ -140,6 +151,7 @@ function openNewGame() {
 // Start the match described by the current selections.
 function startFromMenu() {
   document.body.classList.remove("pre-game");
+  if (typeof Music !== "undefined") Music.setMode("game");
   closeModal();
   clearLog();
   startGame({ mode: "ai", faction: SETTINGS.faction || "nr", foeFaction: SETTINGS.foeFaction || "monsters", level: SETTINGS.aiLevel || "normal" });
@@ -167,22 +179,71 @@ function openMenu() {
 // while pre-game, otherwise the in-game pause menu it was opened from.
 function backAction() { return document.body.classList.contains("pre-game") ? "open-mainmenu" : "open-menu"; }
 
+// Settings — organised into tabs (Visual / Audio / Alerts / Controls), mirroring
+// Gilded. `settingsTab` is preserved across re-renders so changing a control
+// keeps you on the same tab. How to Play is its own menu entry, not a tab.
+let settingsTab = "visual";
+const SET_TABS = [["visual", "Visual"], ["audio", "Audio"], ["alerts", "Alerts"], ["controls", "Controls"]];
+
 function openSettings() {
+  const cvd = SETTINGS.cvd || "off";
+  const tpos = SETTINGS.toastPos || "br", tms = SETTINGS.toastMs || 3000;
+  const svol = SETTINGS.volume != null ? +SETTINGS.volume : 0.6;
+  const mvol = SETTINGS.musicVol != null ? +SETTINGS.musicVol : 0.5;
+  const mastvol = SETTINGS.masterVol != null ? +SETTINGS.masterVol : 1;
+  const keysOn = SETTINGS.keys !== false;
+  const seg = (name, val, cur, label) => `<button class="seg ${String(val) === String(cur) ? "on" : ""}" data-action="set-${name}" data-v="${val}">${label}</button>`;
+  const row = (label, hint, segs) => `<div class="set-row"><div class="set-label">${label}${hint ? `<span class="set-hint">${hint}</span>` : ""}</div><div class="seg-group">${segs}</div></div>`;
+  const volRow = (label, hint, action, frac) => {
+    const pct = Math.round(Math.max(0, Math.min(1, frac)) * 100);
+    return `<div class="set-row"><div class="set-label">${label}${hint ? `<span class="set-hint">${hint}</span>` : ""}</div>`
+      + `<div class="slider-group"><input type="range" class="vol-slider" min="0" max="100" step="5" value="${pct}" data-action="set-${action}" aria-label="${label}" aria-valuetext="${pct}%"><output class="vol-val">${pct}%</output></div></div>`;
+  };
+  const panels = {
+    visual: `${row("Colour-vision mode", "recolours card accents for clarity",
+        seg("cvd", "off", cvd, "Off") + seg("cvd", "prot", cvd, "Protanopia") + seg("cvd", "deut", cvd, "Deuteranopia") + seg("cvd", "trit", cvd, "Tritanopia"))}
+      <p class="set-note">Use the theme button (bottom-left on the menu, in the header in-game) to switch light &amp; dark.</p>`,
+    audio: `${volRow("Master volume", "overall loudness for the whole game", "master", mastvol)}
+      ${volRow("Sound effects", "cues for plays, weather &amp; wins", "vol", svol)}
+      ${volRow("Music", "background soundtrack (menu &amp; in-game)", "musicvol", mvol)}`,
+    alerts: `${row("Alert position", "where messages pop up",
+        seg("toastpos", "tl", tpos, "Top left") + seg("toastpos", "tr", tpos, "Top right") + seg("toastpos", "bl", tpos, "Bottom left") + seg("toastpos", "br", tpos, "Bottom right"))}
+      ${row("Alert timeout", "how long alerts stay",
+        seg("toastms", "2000", tms, "2s") + seg("toastms", "3000", tms, "3s") + seg("toastms", "5000", tms, "5s"))}`,
+    controls: `${row("Keyboard shortcuts", "navigate menus and pause from the keyboard",
+        seg("keys", "on", keysOn ? "on" : "off", "On") + seg("keys", "off", keysOn ? "on" : "off", "Off"))}
+      <div class="key-list">
+        <div class="key-row"><span class="key-keys"><kbd>Esc</kbd></span><span class="key-desc">In a game: pause and open the menu. In a menu: go back or close it.</span></div>
+        <div class="key-row"><span class="key-keys"><kbd>&uarr;</kbd><kbd>&darr;</kbd><kbd>&larr;</kbd><kbd>&rarr;</kbd></span><span class="key-desc">Move between the options in the open menu.</span></div>
+        <div class="key-row"><span class="key-keys"><kbd>Enter</kbd><kbd>Space</kbd></span><span class="key-desc">Play or select the highlighted card or option.</span></div>
+      </div>`,
+  };
+  const tab = panels[settingsTab] ? settingsTab : "visual";
+  const tabs = SET_TABS.map(([id, label]) => `<button class="set-tab ${id === tab ? "on" : ""}" data-action="set-tab" data-v="${id}" role="tab" aria-selected="${id === tab}">${label}</button>`).join("");
   openModal(`
     <div class="page-body">
       <h2>Settings</h2>
-      <div class="field">
-        <label>Default difficulty</label>
-        <div class="chips">
-          ${["easy", "normal", "hard"].map(l => `<button class="chip ${(SETTINGS.aiLevel || "normal") === l ? "on" : ""}" data-action="ng-level" data-v="${l}">${LEVEL_LABEL[l]}</button>`).join("")}
-        </div>
-      </div>
-      <p class="field-note">Use the theme button to switch light/dark. Motion respects your system's reduce-motion setting. Preferences are saved on this device.</p>
+      <div class="set-tabs" role="tablist">${tabs}</div>
+      <div class="set-panel" role="tabpanel">${panels[tab]}</div>
+      <p class="set-foot-note">Settings are saved on this device.</p>
       <div class="foot">
         <button class="gbtn primary" data-action="${backAction()}">Done</button>
       </div>
-    </div>`, true, "page");
+    </div>`, true, "page settings");
 }
+
+// Settings handlers. Each persists, applies live, and re-opens Settings on the
+// same tab; volume sliders update live (no re-render) so a drag isn't dropped.
+function setTab(v) { settingsTab = v; openSettings(); }
+function setCVD(v) { SETTINGS.cvd = v; saveSettings(); applySettings(); openSettings(); }
+function setKeys(v) { SETTINGS.keys = (v === "on"); saveSettings(); openSettings(); }
+function setToastPos(v) { SETTINGS.toastPos = v; saveSettings(); applySettings(); openSettings(); flash("Alerts will appear here."); }
+function setToastMs(v) { SETTINGS.toastMs = +v; saveSettings(); openSettings(); flash(`Alerts stay for ${(+v) / 1000}s.`); }
+function setMaster(v, el) { SETTINGS.masterVol = Math.max(0, Math.min(1, (+v) / 100)); saveSettings(); if (typeof Sfx !== "undefined") { Sfx.unlock && Sfx.unlock(); Sfx.setVolume(); } if (typeof Music !== "undefined") { Music.start(); Music.setVolume(); } updateVolLabel(el); }
+function setVol(v, el) { SETTINGS.volume = Math.max(0, Math.min(1, (+v) / 100)); saveSettings(); if (typeof Sfx !== "undefined") { Sfx.unlock && Sfx.unlock(); Sfx.setVolume(); } updateVolLabel(el); }
+function setMusicVol(v, el) { SETTINGS.musicVol = Math.max(0, Math.min(1, (+v) / 100)); saveSettings(); if (typeof Music !== "undefined") { Music.start(); Music.setVolume(); } updateVolLabel(el); }
+// Live-update a volume slider's "%" read-out without re-rendering the modal.
+function updateVolLabel(el) { if (!el) return; const pct = Math.round(+el.value); const out = el.parentNode && el.parentNode.querySelector(".vol-val"); if (out) out.textContent = pct + "%"; el.setAttribute("aria-valuetext", pct + "%"); }
 
 function howTo() {
   openModal(`
@@ -327,6 +388,7 @@ function loadSession(id) {
   UI = { selectedCard: null, phase: "play", hornPick: null };
   currentSessionId = id;
   document.body.classList.remove("pre-game");
+  if (typeof Music !== "undefined") Music.setMode("game");
   closeModal(); clearLog(); log("<b>Game resumed.</b>"); render();
   if (!G.over && me().isAI) scheduleAI();
 }

@@ -11,6 +11,9 @@
 document.addEventListener("click", (e) => {
   const t = e.target.closest("[data-action]");
   if (!t) { clearSelection(); return; }
+  // Soft UI tick for menu/header/theme buttons (not board plays, which have
+  // their own cues from the rules engine).
+  if (e.target.closest("#modal") || e.target.closest(".topbar") || e.target.closest(".theme-float")) sfx("click");
   const a = t.dataset.action;
   switch (a) {
     // menus & navigation
@@ -30,6 +33,11 @@ document.addEventListener("click", (e) => {
 
     // settings
     case "toggle-theme": toggleTheme(); break;
+    case "set-tab": setTab(t.dataset.v); break;
+    case "set-cvd": setCVD(t.dataset.v); break;
+    case "set-keys": setKeys(t.dataset.v); break;
+    case "set-toastpos": setToastPos(t.dataset.v); break;
+    case "set-toastms": setToastMs(t.dataset.v); break;
 
     // save / load
     case "save-game": saveGame(); break;
@@ -52,18 +60,59 @@ document.addEventListener("click", (e) => {
 // (difficulty) changes value.
 function rerenderOpenPage() {
   if (document.querySelector('[data-action="ng-faction"]')) openNewGame();
-  else if (document.querySelector('[data-action="ng-level"]')) openSettings();
 }
+
+/* ---------- volume sliders & audio arming ---------- */
+
+// Volume sliders update live while dragging (no modal re-render, so the drag
+// isn't interrupted); a sample cue previews the effects level on release.
+document.addEventListener("input", (e) => {
+  const t = e.target; if (!t || t.tagName !== "INPUT" || t.type !== "range") return;
+  const a = t.dataset.action;
+  if (a === "set-master") setMaster(t.value, t);
+  else if (a === "set-vol") setVol(t.value, t);
+  else if (a === "set-musicvol") setMusicVol(t.value, t);
+});
+document.addEventListener("change", (e) => {
+  const t = e.target; if (!t || t.tagName !== "INPUT" || t.type !== "range") return;
+  const a = t.dataset.action;
+  if (a === "set-vol" || a === "set-master") { if (typeof Sfx !== "undefined" && Sfx.unlock) Sfx.unlock(); sfx("play"); }
+});
+
+// Unlock audio and start music on the first user gesture (browser autoplay
+// policy blocks sound until then). Fires once.
+function armAudio() {
+  try { if (typeof Sfx !== "undefined" && Sfx.unlock) Sfx.unlock(); } catch (e) {}
+  try { if (typeof Music !== "undefined") Music.start(); } catch (e) {}
+}
+["pointerdown", "keydown"].forEach(ev => window.addEventListener(ev, armAudio, { once: true }));
 
 /* ---------- keyboard ---------- */
 
 document.addEventListener("keydown", (e) => {
+  if (typeof SETTINGS !== "undefined" && SETTINGS.keys === false) return;
   const tag = (e.target.tagName || "").toLowerCase();
   if (tag === "input" || tag === "textarea" || tag === "select") return;
-  const open = document.getElementById("scrim").classList.contains("show");
+  const scrim = document.getElementById("scrim");
+  const open = scrim.classList.contains("show");
   if (e.key === "Escape") {
-    if (open) { if (document.getElementById("scrim").dataset.dismiss === "1") closeModal(); }
-    else if (G && !G.over) { e.preventDefault(); openMenu(); }
+    if (open) {
+      const modal = document.getElementById("modal");
+      // The main menu is the root landing page — it can never be dismissed.
+      if (modal.classList.contains("mainmenu")) { e.preventDefault(); return; }
+      // Pre-game sub-pages (New game / Settings / How to Play / Load) sit over a
+      // hidden board, so Esc must go BACK to the menu, never close to a blank screen.
+      if (document.body.classList.contains("pre-game")) { e.preventDefault(); openMainMenu(); return; }
+      // In-game pause menu → resume the game.
+      if (modal.classList.contains("menu-page")) { e.preventDefault(); closeModal(); return; }
+      // In-game dismissible dialog (Settings / How to Play / Load from the pause
+      // menu) → back to the pause menu, matching its foot "Back" button.
+      if (scrim.dataset.dismiss === "1") { e.preventDefault(); openMenu(); return; }
+      // Non-dismissible in-game dialogs (horn row picker, game over) keep focus
+      // on their explicit choices — Esc does nothing.
+      return;
+    }
+    if (G && !G.over) { e.preventDefault(); openMenu(); }
     return;
   }
   // Enter/Space activate a focused hand card.
