@@ -11,6 +11,34 @@ const $ = id => document.getElementById(id);
 // Escape user-facing text before injecting into innerHTML.
 function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 
+// Custom line-art game icons (no emoji — those render inconsistently, especially
+// on iOS). Each is a 24×24 stroke glyph that inherits its container's font-size
+// (via .gic{width:1em}) and colour (currentColor), so one set serves the card
+// faces, row watermarks, weather slot, horn slot and leader crown alike.
+const GICONS = {
+  // Combat rows.
+  melee:  '<path d="M14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><path d="M14.5 6.5 6.5 14.5"/><path d="M4 15l5 5"/><path d="M8.5 17.5 5.5 20.5"/><path d="M3.5 19.5 5.5 21.5"/><path d="M9.5 6.5 6 3 3 3 3 6 6.5 9.5"/><path d="M9.5 6.5 17.5 14.5"/><path d="M20 15l-5 5"/><path d="M15.5 17.5 18.5 20.5"/><path d="M20.5 19.5 18.5 21.5"/>',
+  ranged: '<path d="M5 3.5C11 7 11 17 5 20.5"/><path d="M5 3.5V20.5"/><path d="M3 12H21"/><path d="M17.5 8.5 21 12 17.5 15.5"/>',
+  // Siege — an actual catapult.
+  siege:  '<circle cx="7" cy="18.4" r="1.8"/><circle cx="15" cy="18.4" r="1.8"/><path d="M4.5 16.4H17.5"/><path d="M6 16.4 16 5.4"/><circle cx="16.8" cy="4.7" r="1.9"/><path d="M10 16.4 13.6 11"/>',
+  // Weather.
+  frost:  '<path d="M12 2.6V21.4"/><path d="M3.9 7.3 20.1 16.7"/><path d="M20.1 7.3 3.9 16.7"/><path d="M12 5.6 9.9 3.9M12 5.6 14.1 3.9M12 18.4 9.9 20.1M12 18.4 14.1 20.1"/><path d="M5.4 8.2 5 5.9M5.4 8.2 3.1 8.6M18.6 15.8 19 18.1M18.6 15.8 20.9 15.4"/><path d="M18.6 8.2 19 5.9M18.6 8.2 20.9 8.6M5.4 15.8 5 18.1M5.4 15.8 3.1 15.4"/>',
+  fog:    '<path d="M4 8.5C6 7 8 7 10 8.5S14 10 16 8.5 19 7 20 7.5"/><path d="M4 12.5C6 11 8 11 10 12.5S14 14 16 12.5 19 11 20 11.5"/><path d="M4 16.5C6 15 8 15 10 16.5S14 18 16 16.5 19 15 20 15.5"/>',
+  rain:   '<path d="M7.6 13.4A3.3 3.3 0 0 1 8 6.9 4.6 4.6 0 0 1 16.6 8.1 2.9 2.9 0 0 1 16.2 13.4Z"/><path d="M8 16 7 19M12 16 11 19M16 16 15 19"/>',
+  clear:  '<circle cx="12" cy="12" r="4"/><path d="M12 2.6V5M12 19V21.4M2.6 12H5M19 12H21.4M5.3 5.3 7 7M17 17 18.7 18.7M18.7 5.3 17 7M7 17 5.3 18.7"/>',
+  // Commander's Horn.
+  horn:   '<path d="M18.6 6C10.5 5.6 5 8.4 5 13a3 3 0 0 0 6 .2C11 10.4 14 10 18.6 10.6Z"/><path d="M18.6 6 21 5M18.6 10.6 21 11.6"/>',
+  // Specials.
+  scorch: '<path d="M12 21.5a5.5 5.5 0 0 0 5.5-5.5c0-2-1-3.7-2.4-5.3-.3 1.2-1 1.8-1.8 1.9 1.1-2.7.2-5.4-1.9-7.9-.2 2.3-1.4 3.6-2.7 5S6.5 12.6 6.5 16A5.5 5.5 0 0 0 12 21.5Z"/>',
+  decoy:  '<path d="M4 9H16M13 6 16 9 13 12"/><path d="M20 15H8M11 12 8 15 11 18"/>',
+  // Leader crown.
+  crown:  '<path d="M4 8.5 7 12 12 6 17 12 20 8.5 18.8 18H5.2Z"/>',
+};
+function gicon(name) {
+  const p = GICONS[name];
+  return p ? `<svg class="gic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>` : "";
+}
+
 // Life gems: a pearl and a ruby (Gwent's two round tokens). Lit while the crown
 // is held, darkened once a round \u2014 and the gem \u2014 is lost.
 function crownsHTML(p) {
@@ -77,11 +105,13 @@ function cardTypeLabel(card) {
 // Central glyph identifying the card's combat row (melee/ranged/siege) or, for
 // row-less specials, their nature — so a card's type reads at a glance.
 function cardKindGlyph(card) {
-  if (card.ability === "scorch") return "✹";
-  if (card.ability === "decoy") return "⇆";
-  if (card.row) return ROW_GLYPH[card.row];
-  if (card.type === "weather") return card.ability === "clear" ? "☀" : "❄";
-  if (card.type === "horn") return "♪";
+  if (card.ability === "scorch") return gicon("scorch");
+  if (card.ability === "decoy") return gicon("decoy");
+  if (card.row) return gicon(card.row);   // melee / ranged / siege
+  // Weather shows its own effect's icon (frost/fog/rain) so the hand card matches
+  // what lands in the weather slot; Clear Weather shows the sun.
+  if (card.type === "weather") return gicon(card.ability === "clear" ? "clear" : (card.weather || "frost"));
+  if (card.type === "horn") return gicon("horn");
   return "";
 }
 
@@ -195,27 +225,29 @@ function rowHTML(player, row) {
     return cardHTML(o.card, { value: o.value, state: st });
   }).join("");
   const hornCell = (horn && typeof horn === "object")
-    ? `<div class="horn-slot filled" title="Commander's Horn"><div class="horn-card"><span class="hc-ic">\u266A</span><span class="hc-lb">Horn</span></div></div>`
+    ? `<div class="horn-slot filled" title="Commander's Horn"><div class="horn-card"><span class="hc-ic">${gicon("horn")}</span><span class="hc-lb">Horn</span></div></div>`
     : horn
-    ? `<div class="horn-slot on" title="Commander's Horn (leader)">\u266A</div>`
-    : `<div class="horn-slot" title="Commander's Horn slot \u2014 ${ROW_NAME[row]}"><span class="hs-empty">\u266A</span></div>`;
+    ? `<div class="horn-slot on" title="Commander's Horn (leader)">${gicon("horn")}</div>`
+    : `<div class="horn-slot" title="Commander's Horn slot \u2014 ${ROW_NAME[row]}"><span class="hs-empty">${gicon("horn")}</span></div>`;
   // The score coin floats on the row's inner edge (the divider toward the leader
   // area); the row grid itself is just the horn slot and the unit field.
   return `<div class="row-wrap">
     <div class="row-coin" title="Row strength"><span>${eff.total}</span></div>
     <div class="row ${weatherOn ? "weathered" : ""}" data-row="${row}" title="${ROW_NAME[row]}">
-      <span class="row-emblem" aria-hidden="true">${ROW_GLYPH[row]}</span>
+      <span class="row-emblem" aria-hidden="true">${gicon(row)}</span>
       ${hornCell}
       <div class="row-field">${cards}</div>
     </div>
   </div>`;
 }
 
-// The deck as a card-shaped face-down back with its count.
+// The deck as a card-shaped face-down back: the faction crest sits behind as a
+// watermark and the count reads on top (no "Deck" label).
 function deckCardHTML(player) {
   const n = player.deck.length;
-  return `<div class="stack-card deck-card ${n ? "" : "empty"}" title="Deck: ${n} cards">
-    <span class="stack-lb">Deck</span><span class="stack-n">${n}</span></div>`;
+  const crest = typeof factionSvg === "function" ? factionSvg(FACTIONS[player.faction].icon) : "";
+  return `<div class="stack-card deck-card fac-${player.faction} ${n ? "" : "empty"}" title="Deck: ${n} cards">
+    <span class="deck-crest" aria-hidden="true">${crest}</span><span class="stack-n">${n}</span></div>`;
 }
 
 // The discard pile as a card: the top discarded card shown face-up, with a count.
@@ -277,7 +309,7 @@ function leaderCardHTML(player, isViewer) {
   const desc = L.desc + (player.leaderUsed ? " (spent)" : usable ? " Tap to use." : "");
   const tip = ` data-tip-name="${esc(L.name)}" data-tip-meta="${esc(meta)}" data-tip-desc="${esc(desc)}"`;
   return `<div class="${cls}"${attrs}${tip}>
-    <span class="c-crown" aria-hidden="true">♛</span>
+    <span class="c-crown" aria-hidden="true">${gicon("crown")}</span>
     <span class="c-kind" aria-hidden="true"><span class="c-kind-ic lead-crest">${crest}</span><span class="c-kind-lb">Leader</span></span>
     <span class="c-name">${esc(L.name)}</span>
   </div>`;
@@ -327,15 +359,17 @@ function fieldHTML(player, order) { return order.map(r => rowHTML(player, r)).jo
 function weatherZoneHTML() {
   const active = ROWS.filter(r => G.weather[r]);
   const info = {
-    melee:  { k: "frost", g: "❄", n: "Biting Frost",     s: "Frost" },
-    ranged: { k: "fog",   g: "☁", n: "Impenetrable Fog", s: "Fog" },
-    siege:  { k: "rain",  g: "☂", n: "Torrential Rain",  s: "Rain" },
+    melee:  { k: "frost", n: "Biting Frost",     s: "Frost" },
+    ranged: { k: "fog",   n: "Impenetrable Fog", s: "Fog" },
+    siege:  { k: "rain",  n: "Torrential Rain",  s: "Rain" },
   };
   const cards = active.map(r => `<div class="wx-card ${info[r].k}" title="${info[r].n}">
-    <span class="wx-ic">${info[r].g}</span><span class="wx-n">${info[r].s}</span></div>`).join("");
-  return `<div class="weather-inner ${active.length ? "" : "empty"}" title="Weather card slot">
-    <span class="wx-tag">Weather</span>
-    <div class="wx-cards">${active.length ? cards : '<span class="wx-empty">Clear skies</span>'}</div>
+    <span class="wx-ic">${gicon(info[r].k)}</span><span class="wx-n">${info[r].s}</span></div>`).join("");
+  // "Weather" reads as a faint watermark behind the slot; once a weather card is
+  // played, only the card(s) show inside it.
+  return `<div class="weather-inner ${active.length ? "on" : "empty"}" title="Weather">
+    <span class="wx-bg" aria-hidden="true">Weather</span>
+    ${active.length ? `<div class="wx-cards">${cards}</div>` : ""}
   </div>`;
 }
 
