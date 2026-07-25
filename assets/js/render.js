@@ -198,72 +198,115 @@ function rowHTML(player, row) {
   </div>`;
 }
 
-// A card-back pile (deck / discard) with its count, for the stacks rail.
-function pileHTML(kind, n, label) {
-  return `<div class="pile ${kind} ${n ? "" : "empty"}" title="${label}: ${n}">
-    <span class="pile-n">${n}</span><span class="pile-lb">${label}</span></div>`;
+// The deck as a card-shaped face-down back with its count.
+function deckCardHTML(player) {
+  const n = player.deck.length;
+  return `<div class="stack-card deck-card ${n ? "" : "empty"}" title="Deck: ${n} cards">
+    <span class="stack-lb">Deck</span><span class="stack-n">${n}</span></div>`;
 }
+
+// The discard pile as a card: the top discarded card shown face-up, with a count.
+function graveCardHTML(player) {
+  const n = player.graveyard.length, top = player.graveyard[n - 1];
+  if (!top) return `<div class="stack-card grave-card empty" title="Discard pile: empty"><span class="stack-lb">Grave</span></div>`;
+  return `<div class="stack-card grave-card" title="Discard pile: ${n} — top: ${esc(top.name)}">
+    ${cardHTML(top)}<span class="stack-badge">${n}</span></div>`;
+}
+
+// A player's deck + discard, both shaped like cards.
+function stacksHTML(player) { return deckCardHTML(player) + graveCardHTML(player); }
 
 // A single face-down card back (for the opponent's concealed hand).
 function cardBackHTML() { return `<div class="card-back" aria-hidden="true"></div>`; }
 
-// The leader-card slot: shows the leader with its ability so the player can read
-// what it does. The viewer's own leader is playable (once per game) from here.
+// A gilt laurel wreath, drawn behind the leading player's score total.
+function laurelSVG() {
+  const leaves = side => {
+    let out = "", n = 7;
+    for (let i = 0; i < n; i++) {
+      const t = i / (n - 1), y = 50 - t * 34, x = 20 - t * 6, rot = -40 - t * 22;
+      const lx = side === "l" ? x : 64 - x, lr = side === "l" ? rot : -rot;
+      out += `<ellipse cx="${lx}" cy="${y}" rx="4.6" ry="2.2" transform="rotate(${lr} ${lx} ${y})"/>`;
+    }
+    return out;
+  };
+  return `<svg class="laurel" viewBox="0 0 64 64" aria-hidden="true">
+    <g fill="none" stroke="#e7cf94" stroke-width="1.3" stroke-linecap="round">
+      <path d="M18 52 C9 44 8 32 15 20"/><path d="M46 52 C55 44 56 32 49 20"/>
+    </g>
+    <g fill="#cBa85a" opacity=".9">${leaves("l")}${leaves("r")}</g>
+  </svg>`;
+}
+
+// The leader rendered as a proper card (same frame as units): a crown gem, the
+// faction crest as its emblem, a "Leader" label and the leader's name, with a
+// caption naming the ability. The viewer's own leader is playable from here.
 function leaderCardHTML(player, isViewer) {
   const L = player.leader;
-  if (!L) return `<div class="leader-slot empty" title="Leader card">Leader</div>`;
+  if (!L) return "";
+  const crest = typeof factionSvg === "function" ? factionSvg(FACTIONS[player.faction].icon) : "";
   const usable = isViewer && !player.isAI && !player.leaderUsed && humanControls();
-  const cls = `leader-card fac-${player.faction} ${player.leaderUsed ? "used" : ""} ${usable ? "usable" : ""}`;
+  const cls = `card leader fac-${player.faction} ${player.leaderUsed ? "used" : ""} ${usable ? "usable" : ""}`;
   const attrs = usable ? ` data-action="use-leader" tabindex="0" role="button"` : "";
-  return `<div class="${cls}"${attrs} title="${esc(L.name + " — " + L.desc + (player.leaderUsed ? " (spent)" : ""))}">
-    <span class="lc-flag">⚑</span>
-    <span class="lc-name">${esc(L.name)}</span>
-    <span class="lc-tag">${esc(L.tag)}</span>
-    ${player.leaderUsed ? '<span class="lc-spent">Spent</span>' : (usable ? '<span class="lc-use">Tap to use</span>' : "")}
+  const cap = player.leaderUsed ? `${esc(L.tag)} · spent` : usable ? `${esc(L.tag)} · tap` : esc(L.tag);
+  return `<div class="leader-wrap">
+    <div class="${cls}"${attrs} title="${esc(L.name + " — " + L.desc + (player.leaderUsed ? " (spent)" : ""))}">
+      <span class="c-crown" aria-hidden="true">♛</span>
+      <span class="c-kind" aria-hidden="true"><span class="c-kind-ic lead-crest">${crest}</span><span class="c-kind-lb">Leader</span></span>
+      <span class="c-name">${esc(L.name)}</span>
+    </div>
+    <span class="leader-cap ${player.leaderUsed ? "used" : ""}">${cap}</span>
   </div>`;
 }
 
-// One army: a left rail (name, faction, round gems, leader-card slot, big
-// score), the combat rows, and a right rail of deck/discard piles. `order`
-// lists rows from the board edge inward (siege→melee top, melee→siege bottom).
-function armyHTML(player, order, isCurrent, isViewer) {
+// The rail's inner content: identity crest/name, hand-count + round gems, the
+// leader card, turn state, and the big blue score gem (laurelled when leading).
+function railInnerHTML(player, isViewer, isCurrent) {
   const total = playerTotal(player), foeTotal = playerTotal(G.players[G.players.indexOf(player) ^ 1]);
-  const lead = total > foeTotal ? "lead" : "";
+  const lead = total > foeTotal;
   const state = player.passed ? '<span class="passed">passed</span>'
     : (isCurrent && !G.over && !G.roundOver ? '<span class="acting">to move</span>' : "");
-  const rows = order.map(r => rowHTML(player, r)).join("");
-  return `<div class="army-inner ${player.isAI ? "ai" : "you"} fac-${player.faction} ${isCurrent ? "active" : ""} ${lead}">
-    <div class="army-rail">
-      <div class="rail-head">
-        <span class="rail-name">${esc(player.name)}</span>
-        <span class="rail-fac">${esc(FACTIONS[player.faction].name)}</span>
-      </div>
-      <div class="rail-gems">${crownsHTML(player)}</div>
-      ${leaderCardHTML(player, isViewer)}
-      <div class="rail-state">${state}</div>
-      <div class="rail-gem"><span class="rail-total">${total}</span></div>
+  const crest = typeof factionSvg === "function" ? factionSvg(FACTIONS[player.faction].icon) : "";
+  return `
+    <div class="rail-head">
+      <span class="rail-crest">${crest}</span>
+      <span class="rail-id"><span class="rail-name">${esc(player.name)}</span><span class="rail-fac">${esc(FACTIONS[player.faction].name)}</span></span>
     </div>
-    <div class="army-field">${rows}</div>
-    <div class="army-stacks">
-      ${pileHTML("deck", player.deck.length, "Deck")}
-      ${pileHTML("grave", player.graveyard.length, "Grave")}
+    <div class="rail-meta">
+      <span class="rail-hand" title="Cards in hand"><span class="mini-back"></span>${player.hand.length}</span>
+      <span class="rail-gems">${crownsHTML(player)}</span>
     </div>
-  </div>`;
+    ${leaderCardHTML(player, isViewer)}
+    <div class="rail-state">${state}</div>
+    <div class="rail-gem">${lead ? laurelSVG() : ""}<span class="rail-total">${total}</span></div>`;
 }
 
-// The central weather slot — always visible, so the placement is clear. Holds a
-// mini weather card for each active effect (or reads empty under clear skies).
+// Apply a rail container's dynamic classes and content.
+function renderRail(id, player, isViewer, isCurrent) {
+  const total = playerTotal(player), foeTotal = playerTotal(G.players[G.players.indexOf(player) ^ 1]);
+  const el = $(id);
+  el.className = `army-rail ${player.isAI ? "ai" : "you"} fac-${player.faction} ${isCurrent ? "active" : ""} ${total > foeTotal ? "lead" : ""}`;
+  el.innerHTML = railInnerHTML(player, isViewer, isCurrent);
+}
+
+// A field of three combat rows for a player.
+function fieldHTML(player, order) { return order.map(r => rowHTML(player, r)).join(""); }
+
+// The weather slot — a column set to the side (between the rails and the field)
+// so the two battlefields sit back-to-back. Always visible; holds a mini
+// weather card for each active effect, or reads clear.
 function weatherZoneHTML() {
   const active = ROWS.filter(r => G.weather[r]);
   const info = {
-    melee:  { k: "frost", g: "❄", n: "Biting Frost" },
-    ranged: { k: "fog",   g: "☁", n: "Impenetrable Fog" },
-    siege:  { k: "rain",  g: "☂", n: "Torrential Rain" },
+    melee:  { k: "frost", g: "❄", n: "Biting Frost",     s: "Frost" },
+    ranged: { k: "fog",   g: "☁", n: "Impenetrable Fog", s: "Fog" },
+    siege:  { k: "rain",  g: "☂", n: "Torrential Rain",  s: "Rain" },
   };
-  const cards = active.map(r => `<div class="wcard ${info[r].k}" title="${info[r].n}"><span class="wc-ic">${info[r].g}</span><span class="wc-n">${info[r].n}</span></div>`).join("");
-  return `<div class="weather-slot ${active.length ? "" : "empty"}" title="Weather card slot">
-    <span class="ws-tag">Weather</span>
-    <div class="ws-cards">${active.length ? cards : '<span class="ws-empty">Clear skies</span>'}</div>
+  const cards = active.map(r => `<div class="wx-card ${info[r].k}" title="${info[r].n}">
+    <span class="wx-ic">${info[r].g}</span><span class="wx-n">${info[r].s}</span></div>`).join("");
+  return `<div class="weather-inner ${active.length ? "" : "empty"}" title="Weather card slot">
+    <span class="wx-tag">Weather</span>
+    <div class="wx-cards">${active.length ? cards : '<span class="wx-empty">Clear skies</span>'}</div>
   </div>`;
 }
 
@@ -294,10 +337,15 @@ function render() {
   if (oh) oh.innerHTML = Array.from({ length: foe.hand.length }, cardBackHTML).join("")
     + `<span class="oh-count" title="${esc(foe.name)}'s hand">${foe.hand.length}</span>`;
 
-  // Opponent army (siege at the top, melee nearest the centre) then your army,
-  // with the weather slot as the band between them.
-  $("armyOpp").innerHTML = armyHTML(foe, ["siege", "ranged", "melee"], G.current === (bottomIdx ^ 1), false);
-  $("armyYou").innerHTML = armyHTML(you, ["melee", "ranged", "siege"], G.current === bottomIdx, true);
+  // The board grid: rails (col 1), weather slot to the side (col 2), the two
+  // fields back-to-back (col 3, siege→melee on top / melee→siege below), and the
+  // deck/discard stacks (col 4).
+  renderRail("railOpp", foe, false, G.current === (bottomIdx ^ 1));
+  renderRail("railYou", you, true, G.current === bottomIdx);
+  $("fieldOpp").innerHTML = fieldHTML(foe, ["siege", "ranged", "melee"]);
+  $("fieldYou").innerHTML = fieldHTML(you, ["melee", "ranged", "siege"]);
+  $("stackOpp").innerHTML = stacksHTML(foe);
+  $("stackYou").innerHTML = stacksHTML(you);
   const wz = $("weatherZone"); if (wz) wz.innerHTML = weatherZoneHTML();
 
   // Your hand.
