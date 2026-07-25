@@ -33,6 +33,14 @@ const GICONS = {
   decoy:  '<path d="M4 9H16M13 6 16 9 13 12"/><path d="M20 15H8M11 12 8 15 11 18"/>',
   // Leader crown.
   crown:  '<path d="M4 8.5 7 12 12 6 17 12 20 8.5 18.8 18H5.2Z"/>',
+  // Unit abilities (shown as small corner badges on the card face).
+  medic:  '<path d="M9.6 4.2h4.8v5h5v4.8h-5v5H9.6v-5h-5V9.2h5Z"/>',
+  skull:  '<path d="M12 3C7.7 3 4.2 6.2 4.2 10.2c0 2.3 1.1 4.3 2.8 5.6v2.4a1 1 0 0 0 1 1h1.2v-2.2h1.6V19h2.4v-2.2h1.6V19h1.2a1 1 0 0 0 1-1v-2.4c1.7-1.3 2.8-3.3 2.8-5.6C19.8 6.2 16.3 3 12 3Z"/><circle cx="9.1" cy="10.6" r="1.7"/><circle cx="14.9" cy="10.6" r="1.7"/>',
+  spy:    '<path d="M2.6 12S6 6.2 12 6.2 21.4 12 21.4 12 18 17.8 12 17.8 2.6 12 2.6 12Z"/><circle cx="12" cy="12" r="2.3"/>',
+  muster: '<circle cx="12" cy="7.5" r="2.4"/><circle cx="7" cy="15.5" r="2.4"/><circle cx="17" cy="15.5" r="2.4"/>',
+  bond:   '<circle cx="9.3" cy="12" r="4.4"/><circle cx="14.7" cy="12" r="4.4"/>',
+  morale: '<path d="M12 19V6"/><path d="M6.4 11.6 12 6l5.6 5.6"/>',
+  agile:  '<path d="M12 4.5V19.5"/><path d="M8 8.2 12 4.2 16 8.2"/><path d="M8 15.8 12 19.8 16 15.8"/>',
 };
 function gicon(name) {
   const p = GICONS[name];
@@ -64,8 +72,16 @@ function cardHTML(card, opts) {
   const hideStr = card.type === "weather" || card.type === "horn" || card.type === "special";
   const shown = opts.value != null ? opts.value : card.str;
   const badge = hideStr ? "" : `<span class="c-str">${shown}</span>`;
-  const glyph = cardKindGlyph(card);
-  const kind = `<span class="c-kind" aria-hidden="true">${glyph ? `<span class="c-kind-ic">${glyph}</span>` : ""}<span class="c-kind-lb">${cardTypeLabel(card)}</span></span>`;
+  // Card face: the faction crest as faint "art" (uniform for every card), with
+  // two coins anchored bottom-right — the effect on the left, the combat row on
+  // the right — echoing the strength coin.
+  const crest = typeof factionSvg === "function" ? factionSvg((FACTIONS[card.faction] || {}).icon || "neutral") : "";
+  const art = `<span class="c-art crest" aria-hidden="true">${crest}</span>`;
+  const effKey = cardEffectKey(card);
+  const effIc = effKey ? (effKey === "scorch" ? gicon("skull") : gicon(effKey)) : "";
+  const effCoin = effKey ? `<span class="c-eff eff-${effKey}" aria-hidden="true">${effIc}</span>` : "";
+  const rowCoin = card.row ? `<span class="c-row" aria-hidden="true">${gicon(card.row)}</span>` : "";
+  const kind = `${art}<span class="c-coins">${effCoin}${rowCoin}</span>`;
   // Full details for the floating tooltip (shown on hover/focus) — the card face
   // truncates its name, so the tip is where the complete text lives.
   const meta = cardKindMeta(card), desc = cardDesc(card);
@@ -112,6 +128,20 @@ function cardKindGlyph(card) {
   // what lands in the weather slot; Clear Weather shows the sun.
   if (card.type === "weather") return gicon(card.ability === "clear" ? "clear" : (card.weather || "frost"));
   if (card.type === "horn") return gicon("horn");
+  return "";
+}
+
+// The effect shown on a card's bottom-right coin. Covers unit abilities and the
+// row-less specials (weather → its effect, scorch → skull, horn, decoy).
+function cardEffectKey(card) {
+  if (card.type === "weather") return card.ability === "clear" ? "clear" : (card.weather || "frost");
+  if (card.ability === "scorch") return "scorch";
+  if (card.ability === "decoy") return "decoy";
+  if (card.ability === "horn") return "horn";
+  if (["spy", "medic", "muster"].includes(card.ability)) return card.ability;
+  if (card.bond) return "bond";
+  if (card.morale) return "morale";
+  if (card.agile) return "agile";
   return "";
 }
 
@@ -220,7 +250,11 @@ function rowHTML(player, row) {
   const weatherOn = !!G.weather[row];
   const horn = player.horns[row];
   const eff = effectiveRow(player, row);
-  const cards = eff.cards.map(o => {
+  // Gwent orders a row by strength, lowest on the left; cards overlap when the
+  // row gets crowded, and the group sits centred (see .row-field).
+  const ordered = eff.cards.slice().sort((a, b) => a.value - b.value || a.card.str - b.card.str);
+  const crowd = ordered.length > 7 ? (ordered.length > 10 ? " dense" : " crowd") : "";
+  const cards = ordered.map(o => {
     const st = o.card.hero ? "" : (o.value > o.card.str ? "up" : o.value < o.card.str ? "down" : "");
     return cardHTML(o.card, { value: o.value, state: st });
   }).join("");
@@ -236,7 +270,7 @@ function rowHTML(player, row) {
     <div class="row ${weatherOn ? "weathered" : ""}" data-row="${row}" title="${ROW_NAME[row]}">
       <span class="row-emblem" aria-hidden="true">${gicon(row)}</span>
       ${hornCell}
-      <div class="row-field">${cards}</div>
+      <div class="row-field${crowd}">${cards}</div>
     </div>
   </div>`;
 }
@@ -292,6 +326,13 @@ function laurelSVG() {
   </svg>`;
 }
 
+// The Pass button, sitting beside the player's leader card. It asks for
+// confirmation first (see confirmPass) so a stray tap doesn't end the round.
+function passControlHTML() {
+  const canAct = humanControls();
+  return `<button class="gbtn pass-btn" data-action="confirm-pass" ${canAct ? "" : "disabled"} title="Pass the round">Pass</button>`;
+}
+
 // The round faction medallion — the banner's avatar/icon (faction crest only).
 function railAvatarHTML(player) {
   const crest = typeof factionSvg === "function" ? factionSvg(FACTIONS[player.faction].icon) : "";
@@ -314,7 +355,8 @@ function leaderCardHTML(player, isViewer) {
   const tip = ` data-tip-name="${esc(L.name)}" data-tip-meta="${esc(meta)}" data-tip-desc="${esc(desc)}"`;
   return `<div class="${cls}"${attrs}${tip}>
     <span class="c-crown" aria-hidden="true">${gicon("crown")}</span>
-    <span class="c-kind" aria-hidden="true"><span class="c-kind-ic lead-crest">${crest}</span><span class="c-kind-lb">Leader</span></span>
+    <span class="c-art crest lead-crest" aria-hidden="true">${crest}</span>
+    <span class="c-lead" aria-hidden="true">Leader</span>
     <span class="c-name">${esc(L.name)}</span>
   </div>`;
 }
@@ -405,24 +447,26 @@ function render() {
   renderRail("railOpp", foe, false, G.current === (bottomIdx ^ 1));
   renderRail("railYou", you, true, G.current === bottomIdx);
   const lo = $("leaderOpp"); if (lo) { lo.className = `leader-slot fac-${foe.faction}`; lo.innerHTML = leaderCardHTML(foe, false); }
-  const ly = $("leaderYou"); if (ly) { ly.className = `leader-slot fac-${you.faction}`; ly.innerHTML = leaderCardHTML(you, true); }
+  const ly = $("leaderYou"); if (ly) { ly.className = `leader-slot mine fac-${you.faction}`; ly.innerHTML = leaderCardHTML(you, true) + passControlHTML(); }
   $("fieldOpp").innerHTML = fieldHTML(foe, ["siege", "ranged", "melee"]);
   $("fieldYou").innerHTML = fieldHTML(you, ["melee", "ranged", "siege"]);
   $("stackOpp").innerHTML = stacksHTML(foe, false);
   $("stackYou").innerHTML = stacksHTML(you, true);
   const wz = $("weatherZone"); if (wz) wz.innerHTML = weatherZoneHTML();
 
-  // Your hand.
-  $("hand").innerHTML = you.hand
+  // Your hand — ordered by strength (lowest first), like a played row, so it's
+  // easy to read at a glance.
+  const handSorted = you.hand.slice().sort((a, b) => a.str - b.str || a.name.localeCompare(b.name));
+  const handEl = $("hand");
+  handEl.className = "hand";   // hand cards stay separate (they scroll, never overlap)
+  handEl.innerHTML = handSorted
     .map(c => cardHTML(c, { hand: humanControls(), selected: UI.selectedCard === c.id }))
     .join("") || '<div class="hand-empty">No cards in hand</div>';
 
-  // Controls — Pass and a hint. The leader ability is played from its card in
-  // the rail (see leaderCardHTML).
+  // The Pass button lives beside the player's leader card (see the leaderYou
+  // slot above); the HUD now carries only the hand.
   const canAct = humanControls();
-  $("controls").innerHTML = `
-    <button class="gbtn pass-btn" data-action="pass" ${canAct ? "" : "disabled"}>Pass</button>
-    <span class="ctrl-hint">${controlHint()}</span>`;
+  $("controls").innerHTML = "";
 
   document.body.classList.toggle("your-turn", canAct);
   if (typeof syncHeaderActions === "function") syncHeaderActions();

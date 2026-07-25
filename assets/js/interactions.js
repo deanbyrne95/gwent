@@ -50,6 +50,20 @@ function onPass() {
   pass();
 }
 
+// Confirm before passing, so an accidental tap doesn't end the round.
+function confirmPass() {
+  if (!humanControls()) return;
+  openModal(`
+    <div class="page-body">
+      <h2>Pass the round?</h2>
+      <p>You won't play any more cards this round.</p>
+      <div class="foot">
+        <button class="gbtn primary" data-action="pass">Pass</button>
+        <button class="gbtn ghost" data-action="cancel-modal">Cancel</button>
+      </div>
+    </div>`, true, "page");
+}
+
 // The human activates their leader's once-per-game ability. Horn-type leaders
 // ask which row to buff first.
 function onUseLeader() {

@@ -94,7 +94,7 @@ body.pre-game .theme-float{display:inline-flex}
 /* Fixed height so the slot doesn't resize when a weather card is placed. The
    word "Weather" is a faint watermark centred behind; a played card sits on top
    and the watermark fades out, so only the card shows. */
-.weather-inner{position:relative; width:100%; height:84px; display:flex; align-items:center; justify-content:center; padding:6px; border-radius:9px;
+.weather-inner{position:relative; width:100%; height:62px; display:flex; align-items:center; justify-content:center; padding:2px; border-radius:9px;
   background:linear-gradient(180deg, var(--leather), var(--felt-2)); border:1px solid var(--gilt-deep); box-shadow:inset 0 0 10px rgba(0,0,0,.5)}
 .weather-inner.empty{border-style:dashed}
 .wx-bg{position:absolute; left:0; right:0; top:50%; transform:translateY(-50%); text-align:center;
@@ -163,17 +163,25 @@ body.pre-game .theme-float{display:inline-flex}
    faction crest as its emblem, and the ability on hover via the shared tooltip. */
 .leader-slot{flex:0 0 auto; display:flex; align-items:center; justify-content:center}
 .leader-slot:empty{display:none}
+/* The player's slot pairs the leader card with the Pass button beside it. */
+.leader-slot.mine{gap:10px}
+.leader-slot .pass-btn{flex:0 0 auto; padding:8px 14px; font-size:13px; border-radius:9px;
+  background:linear-gradient(180deg, var(--wood-2), var(--wood)); border-color:var(--gilt-deep)}
+.leader-slot .pass-btn:not(:disabled):hover{border-color:var(--gilt); color:var(--gilt-soft)}
 .card.leader{width:56px; height:78px; flex:0 0 auto}
-.card.leader .c-crown{position:absolute; top:-4px; left:-4px; z-index:3; width:20px; height:20px; border-radius:50%;
+.card.leader .c-crown{position:absolute; top:-4px; left:-4px; z-index:4; width:20px; height:20px; border-radius:50%;
   display:flex; align-items:center; justify-content:center; font-size:12px; color:#221808;
   background:radial-gradient(circle at 38% 30%, #f4d572, #b8933f 78%); border:1px solid #6f5320; box-shadow:0 1px 2px rgba(0,0,0,.65)}
-.card.leader .lead-crest{display:flex; align-items:center; justify-content:center}
-.card.leader .lead-crest .fac-svg{width:26px; height:26px}
+.card.leader .c-art.lead-crest{bottom:30px}
+.card.leader .c-art.lead-crest .fac-svg{width:28px; height:28px; opacity:.9}
 .card.leader.fac-nr .lead-crest{color:#6ea0d8}
 .card.leader.fac-nilfgaard .lead-crest{color:#e0b552}
 .card.leader.fac-monsters .lead-crest{color:#cf6a58}
 .card.leader.fac-scoiatael .lead-crest{color:#79c06a}
 .card.leader.fac-skellige .lead-crest{color:#a97fcf}
+/* Small "Leader" caption between the crest and the name. */
+.card.leader .c-lead{position:absolute; left:0; right:0; bottom:21px; z-index:3; text-align:center;
+  font-size:6.5px; letter-spacing:1.2px; text-transform:uppercase; color:var(--gilt-soft); text-shadow:0 1px 2px #000}
 .card.leader.usable{cursor:pointer; border-color:var(--gilt); box-shadow:0 0 0 1px var(--gilt) inset, 0 0 12px rgba(184,147,63,.35)}
 .card.leader.used{opacity:.55}
 .card.leader.used .c-name{text-decoration:line-through}
@@ -254,6 +262,14 @@ body.pre-game .theme-float{display:inline-flex}
 .row-field{display:flex; align-items:center; gap:6px; padding:6px 8px; flex-wrap:nowrap;
   min-width:0; overflow-x:auto; scrollbar-width:none}
 .row-field::-webkit-scrollbar{display:none}
+/* Centre the group of cards, but fall back to start-aligned + scrollable when
+   they overflow (auto margins collapse to 0), so nothing gets clipped. */
+.row-field > .card:first-child{margin-left:auto}
+.row-field > .card:last-child{margin-right:auto}
+/* When a row gets crowded, cards overlap to save space (later cards on top). */
+.row-field.crowd{gap:0} .row-field.crowd > .card + .card{margin-left:-16px}
+.row-field.dense{gap:0} .row-field.dense > .card + .card{margin-left:-26px}
+.row-field > .card{transition:margin .12s ease}
 
 /* Cards — a gilt-framed portrait: strength gem, an emblem "illustration" over
    aged parchment, and a name banner along the foot. */
@@ -262,38 +278,35 @@ body.pre-game .theme-float{display:inline-flex}
   border:1px solid var(--gilt-deep);
   box-shadow:0 2px 6px rgba(0,0,0,.55), inset 0 0 0 1px rgba(0,0,0,.4);
   transition:transform .12s ease, border-color .12s ease, box-shadow .12s ease}
-/* Strength gem, top-left. */
-.card .c-str{position:absolute; top:-3px; left:-3px; z-index:3; width:18px; height:18px; border-radius:50%;
+/* Strength coin, top-left — white with a gold rim (Gwent's power token): green
+   when boosted, red when weakened, and a black spiked coin for heroes. */
+.card .c-str{position:absolute; top:-3px; left:-3px; z-index:4; width:18px; height:18px; border-radius:50%;
   display:flex; align-items:center; justify-content:center; font-family:"Cormorant Garamond",serif;
-  font-size:12px; font-weight:700; color:#221808;
-  background:radial-gradient(circle at 38% 30%, #f4d572, #b8933f 78%); border:1px solid #6f5320;
-  box-shadow:0 1px 2px rgba(0,0,0,.65)}
-/* Hero: ornate gilt frame with a warm glow. */
-.card.hero{border-color:var(--hero); box-shadow:0 0 0 1px var(--hero) inset, 0 2px 9px rgba(241,203,91,.35)}
-.card.hero .c-str{background:radial-gradient(circle at 38% 30%, #ffe79a, #e0a93f 78%); border-color:#8a6a24}
-/* Strength gem tints green when a unit is boosted, red when weakened. */
-.card.v-up .c-str{background:radial-gradient(circle at 38% 30%, #b6e592, #5c9e3f 78%); border-color:#3d7327; color:#12240a}
-.card.v-down .c-str{background:radial-gradient(circle at 38% 30%, #ee9d86, #b23f2c 78%); border-color:#742619; color:#2a0d07}
-/* Ability accent runs along the foot banner. */
-.card.ab-spy{border-color:var(--spy)}
-.card.ab-weather,.card.ab-clear{border-color:var(--weather)}
-.card.ab-horn{border-color:var(--horn)}
-/* Emblem "illustration" — the row/type glyph in a gilt-edged portrait window. */
-.card .c-kind{position:absolute; left:3px; right:3px; top:3px; bottom:21px;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
-  color:var(--gilt-soft); pointer-events:none; text-shadow:0 1px 2px rgba(0,0,0,.7);
-  border-radius:3px; border:1px solid rgba(184,147,63,.28);
-  background:radial-gradient(ellipse at 50% 38%, rgba(90,66,30,.35), rgba(0,0,0,.4) 90%)}
-.card .c-kind-ic{font-size:19px; line-height:1}
-.card .c-kind-lb{font-size:7px; letter-spacing:.4px; text-transform:uppercase; line-height:1; color:var(--ink-dim)}
-.card.hero .c-kind{color:var(--hero)}
-.card.ab-spy .c-kind{color:var(--spy)}
-.card.ab-weather .c-kind,.card.ab-clear .c-kind{color:var(--weather)}
-.card.ab-horn .c-kind{color:var(--horn)}
-/* Name banner along the foot. */
+  font-size:12px; font-weight:700; color:#20180c;
+  background:radial-gradient(circle at 38% 30%, #ffffff, #ccd1d7 82%); border:1.5px solid var(--gilt);
+  box-shadow:0 1px 2px rgba(0,0,0,.6)}
+.card.v-up .c-str{background:radial-gradient(circle at 38% 30%, #cdeea6, #5c9e3f 82%); border-color:#3d7327; color:#12240a}
+.card.v-down .c-str{background:radial-gradient(circle at 38% 30%, #f2b09c, #b23f2c 82%); border-color:#742619; color:#2a0d07}
+.card.hero .c-str{color:#f4ecd6; background:radial-gradient(circle at 40% 32%, #3b3b42, #09090b 80%); border-color:var(--gilt)}
+.card.hero .c-str::before{content:""; position:absolute; inset:-3.5px; border-radius:50%; z-index:-1;
+  background:repeating-conic-gradient(from 0deg, var(--gilt) 0deg 5deg, transparent 5deg 18deg)}
+/* Face "art" — the faction crest, faint and uniform for every card. */
+.card .c-art{position:absolute; left:3px; right:3px; top:3px; bottom:22px;
+  display:flex; align-items:center; justify-content:center; pointer-events:none; color:var(--gilt-soft);
+  border-radius:3px; border:1px solid rgba(184,147,63,.18);
+  background:radial-gradient(ellipse at 50% 38%, rgba(74,54,26,.45), rgba(0,0,0,.32) 92%)}
+.card .c-art.crest .fac-svg{width:30px; height:30px; opacity:.4}
+/* Effect + combat-row coins together at the bottom-right (effect on the left). */
+.card .c-coins{position:absolute; right:1px; bottom:19px; z-index:3; display:flex; align-items:center; gap:2px}
+.card .c-eff,.card .c-row{width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:11px; box-shadow:0 1px 2px rgba(0,0,0,.6)}
+.card .c-eff{color:#251c10; background:radial-gradient(circle at 38% 30%, #f3ecd9, #b7a983 82%); border:1px solid #6f5320}
+.card .c-row{color:#221808; background:radial-gradient(circle at 38% 30%, #f4d572, #b8933f 78%); border:1px solid #6f5320}
+/* Name banner along the foot — fully opaque so overlapping cards never show
+   through. */
 .card .c-name{position:absolute; left:0; right:0; bottom:0; z-index:2; height:20px; padding:2px 2px 3px;
   display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; overflow:hidden;
-  background:linear-gradient(180deg, rgba(20,13,6,.2), rgba(12,8,4,.7));
+  background:linear-gradient(180deg, #241a0e, #130c05);
   border-top:1px solid rgba(184,147,63,.4);
   font-size:7.5px; line-height:1.04; text-align:center; color:var(--ink); overflow-wrap:break-word}
 
@@ -310,10 +323,11 @@ body.pre-game .theme-float{display:inline-flex}
 /* Hand cards — larger, lift on hover/select. */
 .hand .card{width:62px; height:86px; cursor:pointer}
 .hand .card .c-name{height:24px; font-size:8.5px}
-.hand .card .c-kind{bottom:25px}
+.hand .card .c-art{bottom:26px}
+.hand .card .c-art.crest .fac-svg{width:38px; height:38px}
 .hand .card .c-str{width:22px; height:22px; font-size:14px; top:-4px; left:-4px}
-.hand .card .c-kind-ic{font-size:27px}
-.hand .card .c-kind-lb{font-size:8px}
+.hand .card .c-coins{bottom:24px}
+.hand .card .c-eff,.hand .card .c-row{width:20px; height:20px; font-size:14px}
 .hand .card:hover{transform:translateY(-8px); border-color:var(--gilt); box-shadow:0 8px 16px rgba(0,0,0,.55)}
 .hand .card.sel{transform:translateY(-10px); border-color:var(--gilt-soft);
   box-shadow:0 0 0 2px var(--gilt), 0 8px 18px rgba(0,0,0,.55)}
@@ -335,13 +349,16 @@ body.pre-game .wrap{display:none}
 .mull-hand{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:10px 0 4px}
 .mull-hand .card{width:58px; height:80px; cursor:pointer}
 .mull-hand .card .c-name{height:24px; font-size:8.5px}
-.mull-hand .card .c-kind{bottom:25px}
+.mull-hand .card .c-art{bottom:26px}
+.mull-hand .card .c-art.crest .fac-svg{width:38px; height:38px}
 .mull-hand .card .c-str{width:22px; height:22px; font-size:14px; top:-4px; left:-4px}
-.mull-hand .card .c-kind-ic{font-size:27px}
+.mull-hand .card .c-coins{bottom:24px}
+.mull-hand .card .c-eff,.mull-hand .card .c-row{width:20px; height:20px; font-size:14px}
 .mull-hand .card:hover{transform:translateY(-5px); border-color:var(--gilt)}
 .ctrl-hint{font-size:12px; color:var(--ink-dim)}
 .hand{display:flex; align-items:flex-end; gap:7px; overflow-x:auto; padding:6px 2px 2px; min-height:90px;
   scrollbar-width:thin; scrollbar-color:var(--line) transparent}
+.hand > .card:first-child{margin-left:auto} .hand > .card:last-child{margin-right:auto}
 .hand::-webkit-scrollbar{height:6px}
 .hand::-webkit-scrollbar-thumb{background:var(--line); border-radius:99px}
 .hand-empty{color:var(--ink-dim); font-size:13px; padding:20px 6px}
@@ -543,7 +560,7 @@ body.pre-game .modal.page .page-body.deckbuild{max-width:820px}
   .rail-medallion{width:44px; height:44px}
   .rail-medallion .fac-svg{width:28px; height:28px}
   .card.leader{width:48px; height:66px}
-  .card.leader .lead-crest .fac-svg{width:22px; height:22px}
+  .card.leader .c-art.lead-crest .fac-svg{width:24px; height:24px}
   .rail-name{font-size:14.5px}
   .rail-fac{font-size:9.5px}
   .rail-hand{font-size:12.5px}
@@ -553,7 +570,7 @@ body.pre-game .modal.page .page-body.deckbuild{max-width:820px}
   .rail-gem{width:42px; height:42px; right:-14px}
   .rail-gem .laurel{width:62px; height:62px}
   .rail-total{font-size:19px}
-  .weather-inner{height:76px; padding:5px 4px}
+  .weather-inner{height:56px; padding:2px}
   .wx-card{width:32px; height:44px}
   .wx-card .wx-ic{font-size:15px}
   .stack-card{width:44px; height:60px}
@@ -565,12 +582,16 @@ body.pre-game .modal.page .page-body.deckbuild{max-width:820px}
   .row-emblem{font-size:28px}
   .horn-card{width:28px; height:42px}
   .card{width:44px; height:60px}
-  .card .c-kind{bottom:19px}
-  .card .c-kind-ic{font-size:16px}
+  .card .c-art{bottom:19px}
+  .card .c-art.crest .fac-svg{width:24px; height:24px}
+  .card .c-coins{bottom:17px}
+  .card .c-eff,.card .c-row{width:14px; height:14px; font-size:9.5px}
   .card .c-name{height:18px; font-size:7px}
   .hand .card{width:54px; height:76px}
-  .hand .card .c-kind{bottom:23px}
-  .hand .card .c-kind-ic{font-size:23px}
+  .hand .card .c-art{bottom:23px}
+  .hand .card .c-art.crest .fac-svg{width:34px; height:34px}
+  .hand .card .c-coins{bottom:21px}
+  .hand .card .c-eff,.hand .card .c-row{width:18px; height:18px; font-size:12.5px}
 }
 
 @media (prefers-reduced-motion: reduce){
