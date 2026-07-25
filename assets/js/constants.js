@@ -229,11 +229,11 @@ let UI = { selectedCard: null, phase: "play", hornPick: null };
 // Leader cards — one per faction. Each grants a single Active ability usable
 // once per game (spending that turn), echoing the leaders' flavour in Witcher 3.
 const LEADERS = {
-  nr:        { name: "Foltest",            title: "The Steel-Forged",       act: "clearweather", desc: "Once per game: clear all weather effects." },
-  nilfgaard: { name: "Emhyr var Emreis",   title: "The White Flame",        act: "draw",         desc: "Once per game: draw a card from your deck." },
-  monsters:  { name: "Eredin",             title: "Destroyer of Worlds",    act: "recall",       desc: "Once per game: return your strongest fallen unit to your hand." },
-  scoiatael: { name: "Francesca Findabair", title: "Queen of Dol Blathanna", act: "horn",         desc: "Once per game: sound a Commander's Horn on a row you choose." },
-  skellige:  { name: "Crach an Craite",    title: "An Craite Jarl",         act: "summon",       desc: "Once per game: summon your strongest fallen unit to the battlefield." },
+  nr:        { name: "Foltest",            title: "The Steel-Forged",       act: "clearweather", tag: "Clear weather", desc: "Once per game: clear all weather effects." },
+  nilfgaard: { name: "Emhyr var Emreis",   title: "The White Flame",        act: "draw",         tag: "Draw a card",   desc: "Once per game: draw a card from your deck." },
+  monsters:  { name: "Eredin",             title: "Destroyer of Worlds",    act: "recall",       tag: "Recall a unit", desc: "Once per game: return your strongest fallen unit to your hand." },
+  scoiatael: { name: "Francesca Findabair", title: "Queen of Dol Blathanna", act: "horn",         tag: "Horn a row",    desc: "Once per game: sound a Commander's Horn on a row you choose." },
+  skellige:  { name: "Crach an Craite",    title: "An Craite Jarl",         act: "summon",       tag: "Summon a unit", desc: "Once per game: summon your strongest fallen unit to the battlefield." },
 };
 
 // Faction accent colours (from the rulebook's faction symbols), for board trim.
