@@ -37,6 +37,12 @@ body{
 h1,h2,h3{font-family:"Cormorant Garamond",serif; font-weight:700; margin:0}
 button{font-family:"Jost",sans-serif; cursor:pointer}
 .wrap{max-width:1080px; margin:0 auto; padding:16px 16px 260px}
+/* In play, center the board in the space between the topbar and the fixed hand,
+   so a tall/narrow window (e.g. a 50%-width tablet split) doesn't leave a dead
+   band below the board. If the board is taller than that space, margin:auto
+   collapses and the page just scrolls — the landscape view is unaffected. */
+body:not(.pre-game) .wrap{display:flex; flex-direction:column; min-height:100vh}
+body:not(.pre-game) .board{margin-block:auto}
 
 /* Topbar */
 .topbar{display:flex; align-items:center; gap:16px; border-bottom:1px solid var(--line); padding-bottom:12px; margin-bottom:14px}
@@ -74,7 +80,7 @@ body.pre-game .theme-float{display:inline-flex}
    weather area BETWEEN them; the middle holds the two fields back-to-back; the
    right holds each player's deck + discard, shaped as cards. */
 .board-grid{display:flex; gap:34px; align-items:stretch}
-.board-left{flex:0 0 158px; display:flex; flex-direction:column; gap:7px}
+.board-left{flex:0 0 210px; display:flex; flex-direction:column; gap:7px}
 .board-left .army-rail{flex:1 1 0}
 .board-field{flex:1 1 0; display:flex; flex-direction:column; gap:6px; min-width:0}
 .board-field .army-field{display:flex; flex-direction:column; gap:6px}
@@ -98,37 +104,61 @@ body.pre-game .theme-float{display:inline-flex}
 .wx-card.frost .wx-ic{color:var(--weather)} .wx-card.fog .wx-ic{color:#c9d6dd} .wx-card.rain .wx-ic{color:#8fb2c8}
 .wx-card .wx-n{font-size:8px; letter-spacing:.3px; text-transform:uppercase; color:var(--ink)}
 
-/* The rail is just the compact leader panel; the big score gem is floated out
-   of it onto the divider (see .rail-gem), so the panel doesn't grow to hold it. */
-.army-rail{position:relative; display:flex; align-items:center; justify-content:center;
-  padding:8px 34px 8px 10px; background:linear-gradient(180deg, var(--wood-2), var(--wood));
+/* The banner: a round faction medallion beside a two-row body — a cards + life
+   gems row and a name / faction row. It's mirrored like Gwent: the opponent
+   reads name-on-top, the player reads cards-on-top (see .ai / .you below). The
+   big score gem floats out onto the divider (see .rail-gem). */
+.army-rail{position:relative; display:flex; align-items:center;
+  padding:8px 40px 8px 10px; background:linear-gradient(180deg, var(--wood-2), var(--wood));
   border:1px solid var(--gilt-deep); border-radius:9px}
 .army-rail.active{border-color:var(--gilt); box-shadow:0 0 14px rgba(184,147,63,.22)}
-.rail-info{flex:1 1 0; display:flex; flex-direction:column; align-items:center; gap:5px; min-width:0}
-.rail-head{display:flex; align-items:center; gap:7px; line-height:1.12; max-width:100%; width:100%}
-.rail-crest{flex:0 0 auto; width:28px; height:28px; display:flex; align-items:center; justify-content:center; color:var(--gilt-soft)}
-.rail-crest .fac-svg{width:28px; height:28px}
-.army-rail.fac-nr .rail-crest{color:#6ea0d8}
-.army-rail.fac-nilfgaard .rail-crest{color:#e0b552}
-.army-rail.fac-monsters .rail-crest{color:#cf6a58}
-.army-rail.fac-scoiatael .rail-crest{color:#79c06a}
-.army-rail.fac-skellige .rail-crest{color:#a97fcf}
-.rail-id{display:flex; flex-direction:column; min-width:0}
-.rail-name{font-family:"Cormorant Garamond",serif; font-size:16px; color:var(--gilt-soft); letter-spacing:.3px;
+.rail-info{flex:1 1 0; display:flex; align-items:center; gap:11px; min-width:0}
+
+/* Round faction medallion — the banner's avatar/icon (faction crest). */
+.rail-medallion{position:relative; flex:0 0 auto; width:54px; height:54px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; color:var(--gilt-soft);
+  background:radial-gradient(circle at 38% 26%, #4a3a20, #191007 90%);
+  border:2px solid var(--gilt); box-shadow:inset 0 0 10px rgba(0,0,0,.55), 0 1px 4px rgba(0,0,0,.5)}
+.rail-medallion .fac-svg{width:34px; height:34px}
+.army-rail.fac-nr .rail-medallion{color:#7cb0e6}
+.army-rail.fac-nilfgaard .rail-medallion{color:#eec969}
+.army-rail.fac-monsters .rail-medallion{color:#e07a66}
+.army-rail.fac-scoiatael .rail-medallion{color:#8bd07a}
+.army-rail.fac-skellige .rail-medallion{color:#bd93e6}
+
+/* Two rows: cards+gems and name+faction. Mirror them per side. */
+.rail-body{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:4px}
+.army-rail.ai .rail-body{flex-direction:column-reverse}
+.rail-id{display:flex; flex-direction:column; min-width:0; gap:0}
+.rail-name{font-family:"Jost",sans-serif; font-weight:600; font-size:17px; color:#f4ecd6; letter-spacing:.2px; line-height:1.12;
   max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.rail-fac{font-size:9px; letter-spacing:.8px; text-transform:uppercase; color:var(--ink-dim);
+.rail-fac{font-family:"Jost",sans-serif; font-size:11px; letter-spacing:.2px; color:var(--ink-dim); line-height:1.2;
   max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+/* Cards-in-hand + life gems on one inline row. */
 .rail-meta{display:flex; align-items:center; gap:10px}
-.rail-hand{display:flex; align-items:center; gap:4px; font-size:11.5px; color:var(--ink-dim); font-variant-numeric:tabular-nums}
-.mini-back{width:11px; height:15px; border-radius:2px; display:inline-block;
-  background:repeating-linear-gradient(135deg, #2b1f11 0 3px, #241a0e 3px 6px); border:1px solid var(--gilt-deep)}
-.rail-gems{display:flex; gap:3px}
-.crown{font-size:14px; line-height:1; filter:drop-shadow(0 1px 1px rgba(0,0,0,.5))}
-.crown.on{color:#d9433a}
-.crown.off{color:var(--gilt-deep); opacity:.45}
-/* Leader rendered as a real card (reuses .card): a crown gem and the faction
-   crest as its emblem; the ability shows on hover via the shared tooltip. */
-.card.leader{width:58px; height:80px; align-self:center; flex:0 0 auto}
+.rail-hand{display:flex; align-items:center; gap:6px; font-size:14px; color:#e9ddc2; font-variant-numeric:tabular-nums}
+/* A little stack of face-down cards (offset shadows fake the cards behind). */
+.mini-back{width:14px; height:18px; border-radius:2px; display:inline-block;
+  background:repeating-linear-gradient(135deg, #3a2a14 0 3px, #2c1f10 3px 6px); border:1px solid var(--gilt-deep);
+  box-shadow:2px -2px 0 -1px #241a0e, 3px -3px 0 -1px var(--gilt-deep), 5px -5px 0 -1px #241a0e, 6px -6px 0 -1px var(--gilt-deep)}
+.rail-gems{display:flex; align-items:center; gap:6px}
+/* Faceted life gems — a pearl and a ruby; dimmed once the round is lost. */
+.life-gem{width:17px; height:17px; display:inline-block;
+  clip-path:polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  box-shadow:0 1px 2px rgba(0,0,0,.55)}
+.life-gem.pearl{background:linear-gradient(145deg, #ffffff 0%, #d3dade 40%, #939ca4 75%, #6f787f 100%)}
+.life-gem.ruby{background:linear-gradient(145deg, #ff9d86 0%, #e0503b 40%, #a5241a 75%, #6f1410 100%)}
+.life-gem.off{filter:grayscale(.9) brightness(.4); opacity:.55}
+.rail-state{min-height:12px; font-size:10px; margin-top:1px}
+.passed{color:var(--horn); text-transform:uppercase; letter-spacing:1px; font-size:10.5px}
+.acting{color:var(--gilt-soft); text-transform:uppercase; letter-spacing:1px; font-size:10.5px}
+
+/* Leader — its own portrait card, sitting OUTSIDE the banner (above the
+   opponent, below the player). Reuses the unit .card frame: a crown gem, the
+   faction crest as its emblem, and the ability on hover via the shared tooltip. */
+.leader-slot{flex:0 0 auto; display:flex; align-items:center; justify-content:center}
+.leader-slot:empty{display:none}
+.card.leader{width:56px; height:78px; flex:0 0 auto}
 .card.leader .c-crown{position:absolute; top:-4px; left:-4px; z-index:3; width:20px; height:20px; border-radius:50%;
   display:flex; align-items:center; justify-content:center; font-size:12px; color:#221808;
   background:radial-gradient(circle at 38% 30%, #f4d572, #b8933f 78%); border:1px solid #6f5320; box-shadow:0 1px 2px rgba(0,0,0,.65)}
@@ -142,9 +172,6 @@ body.pre-game .theme-float{display:inline-flex}
 .card.leader.usable{cursor:pointer; border-color:var(--gilt); box-shadow:0 0 0 1px var(--gilt) inset, 0 0 12px rgba(184,147,63,.35)}
 .card.leader.used{opacity:.55}
 .card.leader.used .c-name{text-decoration:line-through}
-.rail-state{min-height:13px; font-size:10.5px}
-.passed{color:var(--horn); text-transform:uppercase; letter-spacing:1px; font-size:10.5px}
-.acting{color:var(--gilt-soft); text-transform:uppercase; letter-spacing:1px; font-size:10.5px}
 /* Big score total — a blue sapphire gem with a gilt rim (Gwent's score coin);
    the leading player's is crowned by a golden laurel. */
 .rail-gem{position:absolute; right:-18px; top:50%; transform:translateY(-50%); width:52px; height:52px; border-radius:50%;
@@ -210,7 +237,11 @@ body.pre-game .theme-float{display:inline-flex}
   background:linear-gradient(180deg, var(--panel-2), #1c130a); border:1px solid var(--horn); color:var(--horn);
   box-shadow:0 0 8px rgba(221,143,69,.4)}
 .horn-card .hc-ic{font-size:16px} .horn-card .hc-lb{font-size:6.5px; letter-spacing:.4px; text-transform:uppercase; color:var(--ink-dim)}
-.row-field{display:flex; align-items:center; gap:6px; padding:6px 8px; flex-wrap:wrap; min-width:0}
+/* Units never wrap onto a second line — a full row scrolls sideways instead, so
+   every row keeps one fixed height and can't shove the rows below it off-screen. */
+.row-field{display:flex; align-items:center; gap:6px; padding:6px 8px; flex-wrap:nowrap;
+  min-width:0; overflow-x:auto; scrollbar-width:none}
+.row-field::-webkit-scrollbar{display:none}
 
 /* Cards — a gilt-framed portrait: strength gem, an emblem "illustration" over
    aged parchment, and a name banner along the foot. */
@@ -489,24 +520,27 @@ body.pre-game .modal.page .page-body.deckbuild{max-width:820px}
 .over-score{font-size:18px; color:var(--ink); margin:8px 0 4px}
 .over .foot{justify-content:center}
 
-@media (max-width:620px){
+@media (max-width:760px){
   /* Slim the rails and stacks so the battlefield keeps room on a phone. */
   .board{padding:8px}
   .board-grid{gap:26px}
-  .board-left{flex-basis:132px; gap:5px}
+  .board-left{flex-basis:172px; gap:5px}
   .board-stacks{flex-basis:50px; gap:5px}
-  .army-rail{padding:5px 28px 5px 6px; gap:5px}
-  .rail-head{gap:5px}
-  .rail-crest{width:18px; height:18px}
-  .rail-crest .fac-svg{width:18px; height:18px}
-  .rail-name{font-size:12px}
-  .rail-fac{font-size:8px}
-  .rail-meta{gap:6px}
+  .army-rail{padding:5px 30px 5px 7px; gap:5px}
+  .rail-info{gap:8px}
+  .rail-medallion{width:44px; height:44px}
+  .rail-medallion .fac-svg{width:28px; height:28px}
+  .card.leader{width:48px; height:66px}
+  .card.leader .lead-crest .fac-svg{width:22px; height:22px}
+  .rail-name{font-size:14.5px}
+  .rail-fac{font-size:9.5px}
+  .rail-hand{font-size:12.5px}
+  .mini-back{width:12px; height:16px}
+  .life-gem{width:15px; height:15px}
+  .rail-meta{gap:8px}
   .rail-gem{width:42px; height:42px; right:-14px}
   .rail-gem .laurel{width:62px; height:62px}
   .rail-total{font-size:19px}
-  .card.leader{width:50px; height:70px}
-  .card.leader .lead-crest .fac-svg{width:22px; height:22px}
   .weather-inner{height:76px; padding:5px 4px}
   .wx-card{width:32px; height:44px}
   .wx-card .wx-ic{font-size:15px}

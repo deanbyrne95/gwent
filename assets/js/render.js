@@ -11,10 +11,12 @@ const $ = id => document.getElementById(id);
 // Escape user-facing text before injecting into innerHTML.
 function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 
-// Crown pips: filled for crowns held, hollow for crowns lost.
+// Life gems: a pearl and a ruby (Gwent's two round tokens). Lit while the crown
+// is held, darkened once a round \u2014 and the gem \u2014 is lost.
 function crownsHTML(p) {
+  const kinds = ["pearl", "ruby"];
   let out = "";
-  for (let i = 0; i < START_CROWNS; i++) out += `<span class="crown ${i < p.crowns ? "on" : "off"}">\u265B</span>`;
+  for (let i = 0; i < START_CROWNS; i++) out += `<span class="life-gem ${kinds[i] || ""} ${i < p.crowns ? "on" : "off"}"></span>`;
   return out;
 }
 
@@ -254,10 +256,16 @@ function laurelSVG() {
   </svg>`;
 }
 
-// The leader rendered as a proper card (same frame as units): a crown gem, the
-// faction crest as its emblem, and the leader's name. Its ability shows on
-// hover/focus/tap via the same floating tooltip the other cards use. The
-// viewer's own leader is playable from here.
+// The round faction medallion — the banner's avatar/icon (faction crest only).
+function railAvatarHTML(player) {
+  const crest = typeof factionSvg === "function" ? factionSvg(FACTIONS[player.faction].icon) : "";
+  return `<div class="rail-medallion">${crest}</div>`;
+}
+
+// The leader as its own portrait card, shown OUTSIDE the banner (above the
+// opponent, below the player). A crown gem, the faction crest as its emblem and
+// the leader's name; the ability shows on hover/focus/tap via the shared
+// tooltip, and the viewer's own is clickable to use it.
 function leaderCardHTML(player, isViewer) {
   const L = player.leader;
   if (!L) return "";
@@ -275,27 +283,29 @@ function leaderCardHTML(player, isViewer) {
   </div>`;
 }
 
-// The rail: a leader panel (leader card, crest/name, hand-count + gems, state)
-// on the inside, and the big blue score gem on the OUTSIDE edge — sitting on the
-// boundary between the leader area and the play area, vertically centred.
+// The banner: a sleek player panel — round faction avatar beside the name,
+// faction, a hand-count + life-gems row and the turn state — with the big blue
+// score gem floated onto the OUTSIDE edge, on the boundary between the leader
+// area and the play area, vertically centred. The leader is a separate card.
 function railInnerHTML(player, isViewer, isCurrent) {
   const total = playerTotal(player), foeTotal = playerTotal(G.players[G.players.indexOf(player) ^ 1]);
   const lead = total > foeTotal;
   const state = player.passed ? '<span class="passed">passed</span>'
     : (isCurrent && !G.over && !G.roundOver ? '<span class="acting">to move</span>' : "");
-  const crest = typeof factionSvg === "function" ? factionSvg(FACTIONS[player.faction].icon) : "";
   return `
     <div class="rail-info">
-      ${leaderCardHTML(player, isViewer)}
-      <div class="rail-head">
-        <span class="rail-crest">${crest}</span>
-        <span class="rail-id"><span class="rail-name">${esc(player.name)}</span><span class="rail-fac">${esc(FACTIONS[player.faction].name)}</span></span>
+      ${railAvatarHTML(player)}
+      <div class="rail-body">
+        <div class="rail-meta">
+          <span class="rail-hand" title="Cards in hand"><span class="mini-back"></span>${player.hand.length}</span>
+          <span class="rail-gems">${crownsHTML(player)}</span>
+        </div>
+        <div class="rail-id">
+          <span class="rail-name">${esc(player.name)}</span>
+          <span class="rail-fac">${esc(FACTIONS[player.faction].name)}</span>
+          <span class="rail-state">${state}</span>
+        </div>
       </div>
-      <div class="rail-meta">
-        <span class="rail-hand" title="Cards in hand"><span class="mini-back"></span>${player.hand.length}</span>
-        <span class="rail-gems">${crownsHTML(player)}</span>
-      </div>
-      <div class="rail-state">${state}</div>
     </div>
     <div class="rail-gem">${lead ? laurelSVG() : ""}<span class="rail-total">${total}</span></div>`;
 }
@@ -356,6 +366,8 @@ function render() {
   // player's deck+discard mirrored on the right.
   renderRail("railOpp", foe, false, G.current === (bottomIdx ^ 1));
   renderRail("railYou", you, true, G.current === bottomIdx);
+  const lo = $("leaderOpp"); if (lo) { lo.className = `leader-slot fac-${foe.faction}`; lo.innerHTML = leaderCardHTML(foe, false); }
+  const ly = $("leaderYou"); if (ly) { ly.className = `leader-slot fac-${you.faction}`; ly.innerHTML = leaderCardHTML(you, true); }
   $("fieldOpp").innerHTML = fieldHTML(foe, ["siege", "ranged", "melee"]);
   $("fieldYou").innerHTML = fieldHTML(you, ["melee", "ranged", "siege"]);
   $("stackOpp").innerHTML = stacksHTML(foe, false);
