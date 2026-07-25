@@ -42,7 +42,7 @@ function gicon(name) {
 // Life gems: a pearl and a ruby (Gwent's two round tokens). Lit while the crown
 // is held, darkened once a round \u2014 and the gem \u2014 is lost.
 function crownsHTML(p) {
-  const kinds = ["pearl", "ruby"];
+  const kinds = ["ruby", "ruby"];
   let out = "";
   for (let i = 0; i < START_CROWNS; i++) out += `<span class="life-gem ${kinds[i] || ""} ${i < p.crowns ? "on" : "off"}"></span>`;
   return out;
@@ -269,22 +269,26 @@ function stacksHTML(player, mirror) {
 // A single face-down card back (for the opponent's concealed hand).
 function cardBackHTML() { return `<div class="card-back" aria-hidden="true"></div>`; }
 
-// A gilt laurel wreath, drawn behind the leading player's score total.
+// A gilt laurel wreath framing the leading player's score total: two curved
+// branches rising from the base, their leaves lying ALONG each branch (tangent,
+// not radiating out) so it reads as a laurel rather than spokes.
 function laurelSVG() {
-  const leaves = side => {
-    let out = "", n = 7;
-    for (let i = 0; i < n; i++) {
-      const t = i / (n - 1), y = 50 - t * 34, x = 20 - t * 6, rot = -40 - t * 22;
-      const lx = side === "l" ? x : 64 - x, lr = side === "l" ? rot : -rot;
-      out += `<ellipse cx="${lx}" cy="${y}" rx="4.6" ry="2.2" transform="rotate(${lr} ${lx} ${y})"/>`;
-    }
-    return out;
-  };
+  const cx = 32, cy = 33, R = 24, n = 8, FLARE = 26;
+  // A single pointed leaf, base at the origin, tip up (−y).
+  const leaf = "M0 0 C -2.4 -2.4 -2.5 -6.4 -0.6 -9.6 C 1.3 -6.6 1.6 -2.4 0 0 Z";
+  let branch = "";
+  for (let i = 0; i < n; i++) {
+    const t = i / (n - 1);
+    const deg = 248 - t * 116;                 // base (bottom) sweeping up the side
+    const th = deg * Math.PI / 180;
+    const px = cx + R * Math.cos(th), py = cy - R * Math.sin(th);
+    const rot = (180 - deg) - FLARE;           // tangent up the branch, tipped outward
+    const scale = 0.8 + 0.42 * Math.sin(t * Math.PI);   // fuller leaves mid-branch
+    branch += `<path transform="translate(${px.toFixed(2)} ${py.toFixed(2)}) rotate(${rot.toFixed(1)}) scale(${scale.toFixed(2)})" d="${leaf}"/>`;
+  }
+  const mirror = s => `${s}<g transform="translate(64 0) scale(-1 1)">${s}</g>`;
   return `<svg class="laurel" viewBox="0 0 64 64" aria-hidden="true">
-    <g fill="none" stroke="#e7cf94" stroke-width="1.3" stroke-linecap="round">
-      <path d="M18 52 C9 44 8 32 15 20"/><path d="M46 52 C55 44 56 32 49 20"/>
-    </g>
-    <g fill="#cBa85a" opacity=".9">${leaves("l")}${leaves("r")}</g>
+    <g fill="#dcc074" stroke="#b8933f" stroke-width=".4" stroke-linejoin="round">${mirror(branch)}</g>
   </svg>`;
 }
 
