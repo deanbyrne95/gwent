@@ -271,12 +271,12 @@ body.pre-game .theme-float{display:inline-flex}
 .row-field.dense{gap:0} .row-field.dense > .card + .card{margin-left:-26px}
 .row-field > .card{transition:margin .12s ease}
 
-/* Cards — a gilt-framed portrait: strength gem, an emblem "illustration" over
-   aged parchment, and a name banner along the foot. */
+/* Cards — a gilt-framed tile with a solid warm fill (the faction crest sits on
+   it as a watermark), a strength coin, effect + row coins, and a name banner. */
 .card{position:relative; width:50px; height:68px; border-radius:5px; flex:0 0 auto;
-  background:linear-gradient(180deg, var(--panel-2) 0 60%, #1c130a 60% 100%);
+  background:linear-gradient(160deg, #3d2d18, #2b2011 70%, #241a0e);
   border:1px solid var(--gilt-deep);
-  box-shadow:0 2px 6px rgba(0,0,0,.55), inset 0 0 0 1px rgba(0,0,0,.4);
+  box-shadow:0 2px 6px rgba(0,0,0,.55), inset 0 0 0 1px rgba(0,0,0,.35);
   transition:transform .12s ease, border-color .12s ease, box-shadow .12s ease}
 /* Strength coin, top-left — white with a gold rim (Gwent's power token): green
    when boosted, red when weakened, and a black spiked coin for heroes. */
@@ -290,12 +290,11 @@ body.pre-game .theme-float{display:inline-flex}
 .card.hero .c-str{color:#f4ecd6; background:radial-gradient(circle at 40% 32%, #3b3b42, #09090b 80%); border-color:var(--gilt)}
 .card.hero .c-str::before{content:""; position:absolute; inset:-3.5px; border-radius:50%; z-index:-1;
   background:repeating-conic-gradient(from 0deg, var(--gilt) 0deg 5deg, transparent 5deg 18deg)}
-/* Face "art" — the faction crest, faint and uniform for every card. */
+/* Face "art" — the faction crest as a watermark straight on the card fill (no
+   inset window, so the card reads as filled). */
 .card .c-art{position:absolute; left:3px; right:3px; top:3px; bottom:22px;
-  display:flex; align-items:center; justify-content:center; pointer-events:none; color:var(--gilt-soft);
-  border-radius:3px; border:1px solid rgba(184,147,63,.18);
-  background:radial-gradient(ellipse at 50% 38%, rgba(74,54,26,.45), rgba(0,0,0,.32) 92%)}
-.card .c-art.crest .fac-svg{width:30px; height:30px; opacity:.4}
+  display:flex; align-items:center; justify-content:center; pointer-events:none; color:var(--gilt-soft)}
+.card .c-art.crest .fac-svg{width:30px; height:30px; opacity:.5}
 /* Effect + combat-row coins together at the bottom-right (effect on the left). */
 .card .c-coins{position:absolute; right:1px; bottom:19px; z-index:3; display:flex; align-items:center; gap:2px}
 .card .c-eff,.card .c-row{width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center;
