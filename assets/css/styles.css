@@ -73,8 +73,8 @@ body.pre-game .theme-float{display:inline-flex}
 /* The board is three columns: the left holds both leaders' rails with the
    weather area BETWEEN them; the middle holds the two fields back-to-back; the
    right holds each player's deck + discard, shaped as cards. */
-.board-grid{display:flex; gap:8px; align-items:stretch}
-.board-left{flex:0 0 152px; display:flex; flex-direction:column; gap:7px}
+.board-grid{display:flex; gap:34px; align-items:stretch}
+.board-left{flex:0 0 158px; display:flex; flex-direction:column; gap:7px}
 .board-left .army-rail{flex:1 1 0}
 .board-field{flex:1 1 0; display:flex; flex-direction:column; gap:6px; min-width:0}
 .board-field .army-field{display:flex; flex-direction:column; gap:6px}
@@ -85,11 +85,12 @@ body.pre-game .theme-float{display:inline-flex}
 /* Weather area — sits between the two rails; holds a card for each active
    effect (or reads clear), with room to display them. */
 .weather-area{flex:0 0 auto; display:flex; align-items:center; justify-content:center}
-.weather-inner{width:100%; display:flex; flex-direction:column; align-items:center; gap:5px; padding:7px 6px; border-radius:9px;
+/* Fixed height so the slot doesn't resize when a weather card is placed. */
+.weather-inner{width:100%; height:84px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; padding:6px; border-radius:9px;
   background:linear-gradient(180deg, var(--leather), var(--felt-2)); border:1px solid var(--gilt-deep); box-shadow:inset 0 0 10px rgba(0,0,0,.5)}
 .weather-inner.empty{border-style:dashed}
 .wx-tag{font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--gilt-soft)}
-.wx-cards{display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:5px}
+.wx-cards{display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:5px; overflow:hidden}
 .wx-empty{font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink-dim)}
 .wx-card{width:40px; height:54px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; border-radius:5px;
   background:linear-gradient(180deg, var(--panel-2), #1c130a); border:1px solid var(--gilt-deep); box-shadow:0 1px 3px rgba(0,0,0,.5)}
@@ -97,11 +98,13 @@ body.pre-game .theme-float{display:inline-flex}
 .wx-card.frost .wx-ic{color:var(--weather)} .wx-card.fog .wx-ic{color:#c9d6dd} .wx-card.rain .wx-ic{color:#8fb2c8}
 .wx-card .wx-n{font-size:8px; letter-spacing:.3px; text-transform:uppercase; color:var(--ink)}
 
-/* Identity rail: crest/name, round gems, leader card, and the big score gem. */
-.army-rail{display:flex; flex-direction:column; gap:5px; justify-content:center; align-items:flex-start;
-  padding:7px 8px; background:linear-gradient(180deg, var(--wood-2), var(--wood));
-  border:1px solid var(--gilt-deep); border-radius:9px; overflow:hidden}
+/* The rail is just the compact leader panel; the big score gem is floated out
+   of it onto the divider (see .rail-gem), so the panel doesn't grow to hold it. */
+.army-rail{position:relative; display:flex; align-items:center; justify-content:center;
+  padding:8px 34px 8px 10px; background:linear-gradient(180deg, var(--wood-2), var(--wood));
+  border:1px solid var(--gilt-deep); border-radius:9px}
 .army-rail.active{border-color:var(--gilt); box-shadow:0 0 14px rgba(184,147,63,.22)}
+.rail-info{flex:1 1 0; display:flex; flex-direction:column; align-items:center; gap:5px; min-width:0}
 .rail-head{display:flex; align-items:center; gap:7px; line-height:1.12; max-width:100%; width:100%}
 .rail-crest{flex:0 0 auto; width:28px; height:28px; display:flex; align-items:center; justify-content:center; color:var(--gilt-soft)}
 .rail-crest .fac-svg{width:28px; height:28px}
@@ -123,10 +126,9 @@ body.pre-game .theme-float{display:inline-flex}
 .crown{font-size:14px; line-height:1; filter:drop-shadow(0 1px 1px rgba(0,0,0,.5))}
 .crown.on{color:#d9433a}
 .crown.off{color:var(--gilt-deep); opacity:.45}
-/* Leader rendered as a real card (reuses .card): a crown gem, the faction crest
-   as its emblem, and a caption naming the once-per-game ability. */
-.leader-wrap{display:flex; flex-direction:column; align-items:center; gap:2px; width:100%}
-.card.leader{width:60px; height:82px}
+/* Leader rendered as a real card (reuses .card): a crown gem and the faction
+   crest as its emblem; the ability shows on hover via the shared tooltip. */
+.card.leader{width:58px; height:80px; align-self:center; flex:0 0 auto}
 .card.leader .c-crown{position:absolute; top:-4px; left:-4px; z-index:3; width:20px; height:20px; border-radius:50%;
   display:flex; align-items:center; justify-content:center; font-size:12px; color:#221808;
   background:radial-gradient(circle at 38% 30%, #f4d572, #b8933f 78%); border:1px solid #6f5320; box-shadow:0 1px 2px rgba(0,0,0,.65)}
@@ -140,15 +142,13 @@ body.pre-game .theme-float{display:inline-flex}
 .card.leader.usable{cursor:pointer; border-color:var(--gilt); box-shadow:0 0 0 1px var(--gilt) inset, 0 0 12px rgba(184,147,63,.35)}
 .card.leader.used{opacity:.55}
 .card.leader.used .c-name{text-decoration:line-through}
-.leader-cap{font-size:8.5px; letter-spacing:.3px; text-transform:uppercase; color:var(--gilt-soft); text-align:center; line-height:1.15; max-width:100%}
-.leader-cap.used{color:var(--ink-dim)}
 .rail-state{min-height:13px; font-size:10.5px}
 .passed{color:var(--horn); text-transform:uppercase; letter-spacing:1px; font-size:10.5px}
 .acting{color:var(--gilt-soft); text-transform:uppercase; letter-spacing:1px; font-size:10.5px}
 /* Big score total — a blue sapphire gem with a gilt rim (Gwent's score coin);
    the leading player's is crowned by a golden laurel. */
-.rail-gem{position:relative; align-self:center; width:52px; height:52px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
+.rail-gem{position:absolute; right:-18px; top:50%; transform:translateY(-50%); width:52px; height:52px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; z-index:6;
   background:radial-gradient(circle at 38% 30%, #3f76ad, #14304d 78%);
   border:2px solid var(--gilt); box-shadow:inset 0 0 9px rgba(0,0,0,.6), 0 2px 6px rgba(0,0,0,.55)}
 .rail-total{position:relative; z-index:1; font-family:"Cormorant Garamond",serif; font-size:24px; font-weight:700; color:#eaf2ff; line-height:1;
@@ -184,26 +184,33 @@ body.pre-game .theme-float{display:inline-flex}
 .card-back:first-child{margin-left:0}
 .oh-count{margin-left:8px; font-size:11px; color:var(--ink-dim); font-variant-numeric:tabular-nums}
 
-/* Rows — score coin, Commander's Horn slot, then units over a range emblem. */
-.row{display:grid; grid-template-columns:36px 30px minmax(0,1fr); align-items:stretch;
+/* Rows — the Commander's Horn slot, then the units. The score coin floats on
+   the row's inner edge (the divider toward the leader area), taking no column.
+   The range emblem is a faint watermark centred behind the row. */
+.row-wrap{position:relative}
+.row-coin{position:absolute; left:-12px; top:50%; transform:translateY(-50%); z-index:4;
+  width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-family:"Cormorant Garamond",serif; font-size:15px; font-weight:700; color:#eaf2ff;
+  background:radial-gradient(circle at 38% 30%, #3f76ad, #14304d 78%); border:1.5px solid var(--gilt);
+  box-shadow:inset 0 0 6px rgba(0,0,0,.6), 0 2px 4px rgba(0,0,0,.6); text-shadow:0 1px 1px rgba(0,0,0,.5)}
+.row{position:relative; display:grid; grid-template-columns:42px minmax(0,1fr); align-items:stretch;
   background:linear-gradient(180deg, var(--panel), var(--leather));
   border:1px solid var(--gilt-deep); border-radius:8px; min-height:72px; overflow:hidden;
   box-shadow:inset 0 0 20px rgba(0,0,0,.4)}
 .row.weathered{background:linear-gradient(180deg, #223038, #16222a)}
-.row-score{display:flex; align-items:center; justify-content:center;
-  background:linear-gradient(180deg, var(--wood-2), var(--wood)); border-right:1px solid var(--gilt-deep)}
-.row-score span{width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-  font-family:"Cormorant Garamond",serif; font-size:15px; font-weight:700; color:#eaf2ff;
-  background:radial-gradient(circle at 38% 30%, #3f76ad, #14304d 78%); border:1.5px solid var(--gilt);
-  box-shadow:inset 0 0 6px rgba(0,0,0,.6), 0 1px 2px rgba(0,0,0,.5); text-shadow:0 1px 1px rgba(0,0,0,.5)}
-.horn-slot{display:flex; align-items:center; justify-content:center; font-size:15px; color:var(--horn);
+.row-emblem{position:absolute; left:0; right:0; top:50%; transform:translateY(-50%);
+  text-align:center; font-size:34px; color:var(--gilt-soft); opacity:.08; pointer-events:none; z-index:0}
+.horn-slot,.row-field{position:relative; z-index:1}
+.horn-slot{display:flex; align-items:center; justify-content:center; padding-left:6px; font-size:15px; color:var(--horn);
   background:linear-gradient(180deg, var(--felt-2), var(--leather)); border-right:1px solid var(--gilt-deep)}
 .horn-slot .hs-empty{color:var(--gilt-deep); opacity:.4}
-.horn-slot.on{background:radial-gradient(circle at 50% 40%, rgba(221,143,69,.25), transparent 70%);
-  text-shadow:0 0 6px rgba(221,143,69,.7)}
-.row-field{position:relative; display:flex; align-items:center; gap:6px; padding:6px 8px 6px 32px; flex-wrap:wrap; min-width:0}
-.row-emblem{position:absolute; left:7px; top:50%; transform:translateY(-50%);
-  font-size:20px; color:var(--gilt-soft); opacity:.16; pointer-events:none}
+.horn-slot.on{background:radial-gradient(circle at 50% 40%, rgba(221,143,69,.25), transparent 70%); text-shadow:0 0 6px rgba(221,143,69,.7)}
+/* The Commander's Horn card, resting in the row's slot. */
+.horn-card{width:34px; height:50px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; border-radius:4px;
+  background:linear-gradient(180deg, var(--panel-2), #1c130a); border:1px solid var(--horn); color:var(--horn);
+  box-shadow:0 0 8px rgba(221,143,69,.4)}
+.horn-card .hc-ic{font-size:16px} .horn-card .hc-lb{font-size:6.5px; letter-spacing:.4px; text-transform:uppercase; color:var(--ink-dim)}
+.row-field{display:flex; align-items:center; gap:6px; padding:6px 8px; flex-wrap:wrap; min-width:0}
 
 /* Cards — a gilt-framed portrait: strength gem, an emblem "illustration" over
    aged parchment, and a name banner along the foot. */
@@ -485,33 +492,32 @@ body.pre-game .modal.page .page-body.deckbuild{max-width:820px}
 @media (max-width:620px){
   /* Slim the rails and stacks so the battlefield keeps room on a phone. */
   .board{padding:8px}
-  .board-grid{gap:5px}
-  .board-left{flex-basis:96px; gap:5px}
+  .board-grid{gap:26px}
+  .board-left{flex-basis:132px; gap:5px}
   .board-stacks{flex-basis:50px; gap:5px}
-  .army-rail{padding:5px 6px; gap:4px}
+  .army-rail{padding:5px 28px 5px 6px; gap:5px}
   .rail-head{gap:5px}
-  .rail-crest{width:19px; height:19px}
-  .rail-crest .fac-svg{width:19px; height:19px}
-  .rail-name{font-size:12.5px}
+  .rail-crest{width:18px; height:18px}
+  .rail-crest .fac-svg{width:18px; height:18px}
+  .rail-name{font-size:12px}
   .rail-fac{font-size:8px}
   .rail-meta{gap:6px}
-  .rail-gem{width:44px; height:44px}
-  .rail-gem .laurel{width:64px; height:64px}
-  .rail-total{font-size:20px}
-  .card.leader{width:52px; height:72px}
+  .rail-gem{width:42px; height:42px; right:-14px}
+  .rail-gem .laurel{width:62px; height:62px}
+  .rail-total{font-size:19px}
+  .card.leader{width:50px; height:70px}
   .card.leader .lead-crest .fac-svg{width:22px; height:22px}
-  .leader-cap{font-size:8px}
-  .weather-inner{padding:6px 4px}
-  .wx-card{width:34px; height:46px}
-  .wx-card .wx-ic{font-size:16px}
+  .weather-inner{height:76px; padding:5px 4px}
+  .wx-card{width:32px; height:44px}
+  .wx-card .wx-ic{font-size:15px}
   .stack-card{width:44px; height:60px}
   .stack-card .card{width:44px; height:60px}
   .deck-card .stack-n{font-size:16px}
-  .card-back{width:18px; height:25px; margin-left:-5px}
-  .row{grid-template-columns:28px 24px minmax(0,1fr); min-height:64px}
-  .row-score span{width:24px; height:24px; font-size:13px}
-  .row-field{padding:5px 6px 5px 26px; gap:5px}
-  .row-emblem{font-size:16px; left:5px}
+  .row{grid-template-columns:32px minmax(0,1fr); min-height:64px}
+  .row-coin{width:23px; height:23px; font-size:12px; left:-8px}
+  .row-field{padding:5px 6px; gap:5px}
+  .row-emblem{font-size:28px}
+  .horn-card{width:28px; height:42px}
   .card{width:44px; height:60px}
   .card .c-kind{bottom:19px}
   .card .c-kind-ic{font-size:16px}

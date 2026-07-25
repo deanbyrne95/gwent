@@ -145,8 +145,7 @@ function applyPlay(p, card, opts) {
     }
     case "horn": {
       const row = opts.row || strongestRow(p);
-      p.horns[row] = true;
-      p.graveyard.push(card);
+      p.horns[row] = card;   // the Horn card sits in the row's slot until the round ends
       sfx("horn");
       log(`<b>${p.name}</b> sounds the <b>${card.name}</b> on ${ROW_NAME[row]}.`);
       break;
@@ -402,12 +401,14 @@ function resolveRound() {
     if (pool.length) kept[i] = pool[Math.floor(Math.random() * pool.length)];
   });
 
-  // Sweep the board into graveyards, sparing any Monsters-kept unit.
+  // Sweep the board into graveyards, sparing any Monsters-kept unit. A Horn
+  // card resting in a row slot is discarded now, at round's end.
   G.players.forEach((p, i) => {
     ROWS.forEach(r => {
       const keep = kept[i] && kept[i].r === r ? kept[i].c : null;
       p.graveyard.push(...p.rows[r].filter(c => c !== keep));
       p.rows[r] = keep ? [keep] : [];
+      if (p.horns[r] && typeof p.horns[r] === "object") p.graveyard.push(p.horns[r]);
       p.horns[r] = false;
     });
     p.passed = false;
