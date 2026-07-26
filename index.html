@@ -27,11 +27,23 @@
   <div class="banner" id="banner"></div>
 
   <div class="board">
-    <div class="plate-slot" id="oppPlate"></div>
-    <div class="side opp" id="oppRows"></div>
-    <div class="divider"><span>The board</span></div>
-    <div class="side you" id="youRows"></div>
-    <div class="plate-slot" id="youPlate"></div>
+    <div class="board-grid">
+      <div class="board-left">
+        <div class="leader-slot" id="leaderOpp"></div>
+        <div class="army-rail" id="railOpp"></div>
+        <div class="weather-area" id="weatherZone"></div>
+        <div class="army-rail" id="railYou"></div>
+        <div class="leader-slot" id="leaderYou"></div>
+      </div>
+      <div class="board-field">
+        <div class="army-field" id="fieldOpp"></div>
+        <div class="army-field front-line" id="fieldYou"></div>
+      </div>
+      <div class="board-stacks">
+        <div class="army-stacks" id="stackOpp"></div>
+        <div class="army-stacks" id="stackYou"></div>
+      </div>
+    </div>
   </div>
 </div>
 

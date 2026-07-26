@@ -524,25 +524,91 @@ function howTo() {
         <li><b>Hand</b> — you draw 10 cards and they <i>persist</i> between rounds, so spending cards is a real cost.</li>
         <li><b>Weather</b> — Frost/Fog/Rain drop every non-hero unit in a row to 1 until Clear Weather.</li>
         <li><b>Commander's Horn</b> — doubles a row you choose.</li>
-        <li><b>Hero</b> — immune to weather.</li>
+        <li><b>Hero</b> — immune to weather and special effects.</li>
         <li><b>Spy</b> — goes to the enemy's row but lets you draw 2 cards.</li>
         <li><b>Medic</b> — revives your strongest fallen unit.</li>
+        <li><b>Muster</b> — summons every copy of the card from your deck and hand.</li>
+        <li><b>Tight Bond</b> — copies of a unit in the same row multiply each other.</li>
+        <li><b>Morale Boost</b> — adds +1 to every other unit in its row.</li>
+        <li><b>Agile</b> — deploys to Close Combat or Ranged, your choice.</li>
+        <li><b>Scorch</b> — destroys the highest-strength unit(s) on the board.</li>
+        <li><b>Decoy</b> — swap for one of your units to take it back into your hand.</li>
+      </ul>
+      <p><b>Leaders.</b> Each faction has a leader with a once-per-game ability — use it
+      from the button by <b>Pass</b> (it takes your turn, like playing a card).</p>
+      <ul class="rules">
+        <li><b>Northern Realms</b> — draws a card whenever it wins a round.</li>
+        <li><b>Nilfgaard</b> — wins the round on a draw.</li>
+        <li><b>Monsters</b> — one random unit stays on the board between rounds.</li>
+        <li><b>Scoia'tael</b> — decides who plays first.</li>
+        <li><b>Skellige</b> — revives two fallen units at the start of round three.</li>
       </ul>
       <div class="foot"><button class="gbtn primary" data-action="${backAction()}">Got it</button></div>
     </div>`, true, "page");
 }
 
+/* ---------- opening redraw (mulligan) ---------- */
+
+// After deal: AI seats redraw silently; human seats get a prompt in turn, then
+// play begins. Called by startGame (non-silent starts only).
+function runMulliganPhase() {
+  const humans = [];
+  G.players.forEach((p, i) => { if (p.isAI) aiMulligan(p); else humans.push(i); });
+  UI._mullQueue = humans;
+  nextMulligan();
+}
+function nextMulligan() {
+  const q = UI._mullQueue || [];
+  if (!q.length) { beginPlay(); return; }
+  UI.mulligan = { idx: q[0], left: 2 };
+  openMulliganModal();
+}
+function openMulliganModal() {
+  const idx = UI.mulligan.idx, left = UI.mulligan.left, p = G.players[idx];
+  const who = G.mode === "hotseat" ? `${esc(p.name)} — opening hand` : "Your opening hand";
+  openModal(`
+    <div class="page-body mulligan">
+      <h2>${who}</h2>
+      <p>Tap up to two cards to redraw them, or keep your hand as dealt.
+      Redraws left: <b>${left}</b>.</p>
+      <div class="mull-hand">${p.hand.map(c => cardHTML(c, { mulligan: left > 0 })).join("")}</div>
+      <div class="foot"><button class="gbtn primary" data-action="mull-done">${left < 2 ? "Done" : "Keep hand"}</button></div>
+    </div>`, false, "page");
+}
+function onMulliganCard(id) {
+  if (!UI.mulligan || UI.mulligan.left <= 0) return;
+  mulliganCard(G.players[UI.mulligan.idx], +id);
+  UI.mulligan.left--;
+  sfx("select");
+  openMulliganModal();
+}
+function onMulliganDone() {
+  UI.mulligan = null;
+  (UI._mullQueue || []).shift();
+  closeModal();
+  nextMulligan();
+}
+// The first turn begins once every seat has finished its redraw.
+function beginPlay() {
+  render();
+  autoSave();
+  if (!G.over && me().isAI) scheduleAI();
+}
+
 /* ---------- horn row picker ---------- */
 
-// Ask which row to buff, then invoke `cb(row)`. AI callers bypass this.
-function chooseRow(player, cb) {
+// Ask which row to target, then invoke `cb(row)`. Defaults to all three rows
+// with the Commander's Horn framing; agile units pass a two-row subset and
+// their own title. AI callers bypass this and pass a row directly.
+function chooseRow(player, cb, rows, title, prompt) {
   UI._rowCb = cb;
+  rows = rows || ROWS;
   openModal(`
     <div class="page-body">
-      <h2>Commander's Horn</h2>
-      <p>Choose a row to double.</p>
+      <h2>${esc(title || "Commander's Horn")}</h2>
+      <p>${esc(prompt || "Choose a row to double.")}</p>
       <div class="chips row-pick">
-        ${ROWS.map(r => `<button class="chip" data-action="pick-row" data-row="${r}">${ROW_NAME[r]} <b>(${rowStrength(player, r)})</b></button>`).join("")}
+        ${rows.map(r => `<button class="chip" data-action="pick-row" data-row="${r}">${ROW_NAME[r]} <b>(${rowStrength(player, r)})</b></button>`).join("")}
       </div>
     </div>`, false, "page");
 }
@@ -550,6 +616,44 @@ function pickRow(row) {
   const cb = UI._rowCb; UI._rowCb = null;
   closeModal();
   if (cb) cb(row);
+}
+
+// Ask which friendly unit to recall with a Decoy, then invoke `cb(id)`.
+function chooseDecoyTarget(player, cb) {
+  UI._decoyCb = cb;
+  const targets = decoyTargets(player);
+  openModal(`
+    <div class="page-body">
+      <h2>Decoy</h2>
+      <p>Choose one of your units to return to your hand.</p>
+      <div class="chips row-pick">
+        ${targets.map(c => `<button class="chip" data-action="pick-decoy" data-id="${c.id}">${esc(c.name)} <b>(${ROW_NAME[c.row]})</b></button>`).join("")}
+        <button class="chip ghost" data-action="pick-decoy" data-id="">Cancel</button>
+      </div>
+    </div>`, false, "page");
+}
+function pickDecoy(id) {
+  const cb = UI._decoyCb; UI._decoyCb = null;
+  closeModal();
+  if (id && cb) cb(+id); else render();   // empty id = cancel; keep the Decoy in hand
+}
+
+// Ask which fallen unit a Medic should raise, then invoke `cb(id)`. The
+// graveyard's revivable cards are shown as real cards, not text buttons.
+function chooseRevive(player, cb) {
+  UI._reviveCb = cb;
+  const targets = revivableGrave(player).slice().sort((a, b) => b.str - a.str);
+  openModal(`
+    <div class="page-body">
+      <h2>Field Medic</h2>
+      <p>Choose a fallen unit to bring back to the field.</p>
+      <div class="mull-hand">${targets.map(c => cardHTML(c, { revive: true })).join("")}</div>
+    </div>`, false, "page");
+}
+function pickRevive(id) {
+  const cb = UI._reviveCb; UI._reviveCb = null;
+  closeModal();
+  if (id && cb) cb(+id);
 }
 
 /* ---------- round / game-over banners ---------- */

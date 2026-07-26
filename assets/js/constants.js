@@ -61,17 +61,19 @@ const CARDS = {
   rain:   { name: "Torrential Rain",     str: 0, row: null, type: "weather", ability: "weather", weather: "rain",   faction: "neutral" },
   clear:  { name: "Clear Weather",       str: 0, row: null, type: "weather", ability: "clear",   faction: "neutral" },
   horn:   { name: "Commander's Horn",    str: 0, row: null, type: "horn",    ability: "horn",    faction: "neutral" },
+  scorch: { name: "Scorch",              str: 0, row: null, type: "special", ability: "scorch",  faction: "neutral" },
+  decoy:  { name: "Decoy",               str: 0, row: null, type: "special", ability: "decoy",   faction: "neutral" },
   // --- neutral heroes ---
   geralt: { name: "Geralt of Rivia",     str: 7, row: "melee",  type: "hero", ability: null, faction: "neutral" },
   ciri:   { name: "Cirilla Fiona",       str: 6, row: "melee",  type: "hero", ability: null, faction: "neutral" },
   vesemir:{ name: "Vesemir",             str: 6, row: "melee",  type: "hero", ability: null, faction: "neutral" },
   // --- neutral units (supplement any deck) ---
-  zoltan: { name: "Zoltan Chivay",       str: 5, row: "melee",  type: "unit", ability: null,    faction: "neutral" },
+  zoltan: { name: "Zoltan Chivay",       str: 5, row: "melee",  type: "unit", ability: null,    faction: "neutral", agile: true },
   yennefer:{name: "Yennefer of Vengerberg",str: 0,row: "ranged", type: "unit", ability: "medic", faction: "neutral" },
   avallach:{name: "Avallac'h",           str: 0, row: "ranged", type: "unit", ability: "spy",   faction: "neutral" },
 
   // --- Northern Realms ---
-  blue:    { name: "Blue Stripes Commando", str: 4, row: "melee",  type: "unit", ability: null,    faction: "nr" },
+  blue:    { name: "Blue Stripes Commando", str: 4, row: "melee",  type: "unit", ability: null,    faction: "nr", bond: "blue" },
   infantry:{ name: "Poor Infantry",         str: 1, row: "melee",  type: "unit", ability: null,    faction: "nr" },
   reaver:  { name: "Crinfrid Reavers",      str: 5, row: "ranged", type: "unit", ability: null,    faction: "nr" },
   ballista:{ name: "Ballista",              str: 6, row: "siege",  type: "unit", ability: null,    faction: "nr" },
@@ -84,21 +86,21 @@ const CARDS = {
 
   // --- Monsters ---
   ghoul:   { name: "Ghoul",             str: 1, row: "melee",  type: "unit", ability: null, faction: "monsters" },
-  nekker:  { name: "Nekker",            str: 2, row: "melee",  type: "unit", ability: null, faction: "monsters" },
+  nekker:  { name: "Nekker",            str: 2, row: "melee",  type: "unit", ability: "muster", faction: "monsters", muster: "nekker" },
   foglet:  { name: "Foglet",            str: 2, row: "melee",  type: "unit", ability: null, faction: "monsters" },
   harpy:   { name: "Harpy",             str: 2, row: "ranged", type: "unit", ability: null, faction: "monsters" },
   griffin: { name: "Griffin",           str: 5, row: "ranged", type: "unit", ability: null, faction: "monsters" },
   katakan: { name: "Katakan",           str: 5, row: "melee",  type: "unit", ability: null, faction: "monsters" },
   werewolf:{ name: "Werewolf",          str: 5, row: "melee",  type: "unit", ability: null, faction: "monsters" },
   forktail:{ name: "Forktail",          str: 5, row: "siege",  type: "unit", ability: null, faction: "monsters" },
-  arachas: { name: "Arachas",           str: 4, row: "siege",  type: "unit", ability: null, faction: "monsters" },
+  arachas: { name: "Arachas",           str: 4, row: "siege",  type: "unit", ability: "muster", faction: "monsters", muster: "arachas" },
   fiend:   { name: "Fiend",             str: 6, row: "melee",  type: "unit", ability: null, faction: "monsters" },
   draug:   { name: "Draug",             str: 7, row: "siege",  type: "hero", ability: null, faction: "monsters" },
   imlerith:{ name: "Nithral",           str: 10,row: "melee",  type: "hero", ability: null, faction: "monsters" },
 
   // --- Nilfgaardian Empire ---
-  nauzicaa: { name: "Nauzicaa Brigade",     str: 4, row: "melee",  type: "unit", ability: null,    faction: "nilfgaard" },
-  impera:   { name: "Impera Brigade Guard",  str: 3, row: "ranged", type: "unit", ability: null,    faction: "nilfgaard" },
+  nauzicaa: { name: "Nauzicaa Brigade",     str: 4, row: "melee",  type: "unit", ability: null,    faction: "nilfgaard", agile: true },
+  impera:   { name: "Impera Brigade Guard",  str: 3, row: "ranged", type: "unit", ability: null,    faction: "nilfgaard", morale: true },
   blackarch:{ name: "Black Infantry Archer",str: 6, row: "ranged", type: "unit", ability: null,    faction: "nilfgaard" },
   siegesup: { name: "Siege Engineer",        str: 6, row: "siege",  type: "unit", ability: null,    faction: "nilfgaard" },
   arbalest: { name: "Arbalest",              str: 4, row: "siege",  type: "unit", ability: null,    faction: "nilfgaard" },
@@ -109,10 +111,10 @@ const CARDS = {
   morvran:  { name: "Morvran Voorhis",       str: 10,row: "siege",  type: "hero", ability: null,    faction: "nilfgaard" },
 
   // --- Scoia'tael ---
-  dwarf:    { name: "Dwarven Skirmisher",    str: 3, row: "melee",  type: "unit", ability: null,    faction: "scoiatael" },
-  mahakam:  { name: "Mahakam Defender",      str: 5, row: "melee",  type: "unit", ability: null,    faction: "scoiatael" },
+  dwarf:    { name: "Dwarven Skirmisher",    str: 3, row: "melee",  type: "unit", ability: "muster", faction: "scoiatael", muster: "dwarf" },
+  mahakam:  { name: "Mahakam Defender",      str: 5, row: "melee",  type: "unit", ability: null,    faction: "scoiatael", morale: true },
   dolarcher:{ name: "Dol Blathanna Archer",  str: 4, row: "ranged", type: "unit", ability: null,    faction: "scoiatael" },
-  vrihedd:  { name: "Vrihedd Brigade Officer",str: 6,row: "ranged", type: "unit", ability: null,    faction: "scoiatael" },
+  vrihedd:  { name: "Vrihedd Brigade Officer",str: 6,row: "ranged", type: "unit", ability: null,    faction: "scoiatael", agile: true },
   havekar:  { name: "Havekar Smuggler",      str: 5, row: "siege",  type: "unit", ability: null,    faction: "scoiatael" },
   ithlinne: { name: "Ithlinne",              str: 0, row: "ranged", type: "unit", ability: "medic", faction: "scoiatael" },
   yaevinn:  { name: "Yaevinn",               str: 0, row: "ranged", type: "unit", ability: "spy",   faction: "scoiatael" },
@@ -123,7 +125,7 @@ const CARDS = {
   // --- Skellige ---
   tordarroch:{name: "Clan Tordarroch Armorsmith",str:3,row:"melee", type: "unit", ability: null,    faction: "skellige" },
   berserker:{ name: "Young Berserker",       str: 4, row: "melee",  type: "unit", ability: null,    faction: "skellige" },
-  shieldmaid:{name: "Shieldmaiden",          str: 5, row: "melee",  type: "unit", ability: null,    faction: "skellige" },
+  shieldmaid:{name: "Shieldmaiden",          str: 5, row: "melee",  type: "unit", ability: null,    faction: "skellige", bond: "shieldmaid" },
   donar:    { name: "Donar an Hindar",       str: 5, row: "ranged", type: "unit", ability: null,    faction: "skellige" },
   dimun:    { name: "Clan Dimun Pirate",     str: 4, row: "siege",  type: "unit", ability: null,    faction: "skellige" },
   longship: { name: "War Longship",          str: 6, row: "siege",  type: "unit", ability: null,    faction: "skellige" },
@@ -139,6 +141,7 @@ const CARDS = {
 // exercised from the first game and every faction shares the same neutral pool.
 const NEUTRAL_KIT = [
   ["frost", 1], ["fog", 1], ["rain", 1], ["clear", 1], ["horn", 1],
+  ["scorch", 1], ["decoy", 1],
   ["geralt", 1], ["zoltan", 1], ["yennefer", 1],
 ];
 const DECKS = {
@@ -179,6 +182,11 @@ const START_CROWNS = 2;
 let CARD_ID = 0;
 
 // Instantiate a live card from a template key (fresh id, copied fields).
+// Beyond the core fields, cards may carry Witcher-3 modifiers:
+//   bond   — tight-bond group; copies of it in a row multiply each other
+//   morale — morale boost; +1 to every other unit in its row
+//   muster — muster group; playing one summons its kin from hand & deck
+//   agile  — may deploy to Close Combat or Ranged (player's choice)
 function makeCard(key) {
   const t = CARDS[key];
   if (!t) throw new Error("unknown card: " + key);
@@ -187,6 +195,7 @@ function makeCard(key) {
     name: t.name, str: t.str, row: t.row, type: t.type,
     ability: t.ability || null, weather: t.weather || null, faction: t.faction,
     hero: t.type === "hero",
+    bond: t.bond || null, morale: !!t.morale, muster: t.muster || null, agile: !!t.agile,
   };
 }
 
@@ -217,6 +226,21 @@ function shuffle(a) {
 let G = null;
 let UI = { selectedCard: null, phase: "play", hornPick: null };
 
+// Leader cards — one per faction. Each grants a single Active ability usable
+// once per game (spending that turn), echoing the leaders' flavour in Witcher 3.
+const LEADERS = {
+  nr:        { name: "Foltest",            title: "The Steel-Forged",       act: "clearweather", tag: "Clear weather", desc: "Once per game: clear all weather effects." },
+  nilfgaard: { name: "Emhyr var Emreis",   title: "The White Flame",        act: "draw",         tag: "Draw a card",   desc: "Once per game: draw a card from your deck." },
+  monsters:  { name: "Eredin",             title: "Destroyer of Worlds",    act: "recall",       tag: "Recall a unit", desc: "Once per game: return your strongest fallen unit to your hand." },
+  scoiatael: { name: "Francesca Findabair", title: "Queen of Dol Blathanna", act: "horn",         tag: "Horn a row",    desc: "Once per game: sound a Commander's Horn on a row you choose." },
+  skellige:  { name: "Crach an Craite",    title: "An Craite Jarl",         act: "summon",       tag: "Summon a unit", desc: "Once per game: summon your strongest fallen unit to the battlefield." },
+};
+
+// Faction accent colours (from the rulebook's faction symbols), for board trim.
+const FACTION_COLOR = {
+  nr: "#4f7fb5", nilfgaard: "#d0a03a", monsters: "#b5432f", scoiatael: "#5c9e4f", skellige: "#8a5bb0", neutral: "#b8933f",
+};
+
 // Create a blank player with an empty board, deck, hand, and graveyard.
 function newPlayer(name, isAI, faction) {
   return {
@@ -227,6 +251,8 @@ function newPlayer(name, isAI, faction) {
     crowns: START_CROWNS,
     roundsWon: 0,
     passed: false,
+    leader: LEADERS[faction] || null,
+    leaderUsed: false,
   };
 }
 
@@ -272,7 +298,10 @@ function startGame(opts, silent) {
     p.hand = p.deck.splice(0, HAND_SIZE);
   });
 
-  const starter = Math.floor(Math.random() * 2);
+  // Scoia'tael's passive lets them decide who goes first; here they take the
+  // lead. Otherwise a coin flip. (players[0] = you, players[1] = foe.)
+  const sc0 = you.faction === "scoiatael", sc1 = foe.faction === "scoiatael";
+  const starter = (sc0 && !sc1) ? 0 : (sc1 && !sc0) ? 1 : Math.floor(Math.random() * 2);
   G = {
     players: [you, foe],
     mode, level,
@@ -280,6 +309,7 @@ function startGame(opts, silent) {
     leadPlayer: starter,
     round: 1,
     weather: { melee: false, ranged: false, siege: false },
+    weatherCards: [],   // played weather cards, held until the skies clear
     roundOver: false,
     over: false,
     winner: null,
@@ -296,5 +326,7 @@ function startGame(opts, silent) {
     log(`<b>${G.players[starter].name}</b> ${leadVerb} the first round.`);
   }
   render();
-  if (!silent && !G.over && me().isAI) scheduleAI();
+  if (silent) return;   // a game primed behind the menu — no redraw, no AI yet
+  // Opening redraw, then the first turn begins (see beginPlay in ui.js).
+  runMulliganPhase();
 }

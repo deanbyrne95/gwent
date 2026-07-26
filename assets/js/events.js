@@ -65,8 +65,17 @@ document.addEventListener("click", (e) => {
 
     // gameplay
     case "hand-card": onHandCard(+t.dataset.id); break;
-    case "pass": onPass(); break;
+    case "confirm-pass": confirmPass(); break;
+    case "pass": closeModal(); onPass(); break;
+    case "cancel-modal": closeModal(); break;
+    case "use-leader": onUseLeader(); break;
     case "pick-row": pickRow(t.dataset.row); break;
+    case "pick-decoy": pickDecoy(t.dataset.id); break;
+    case "pick-revive": pickRevive(t.dataset.id); break;
+    case "pick-target-row": onPickTargetRow(t.dataset.row); break;
+    case "pick-target-card": onPickTargetCard(t.dataset.id); break;
+    case "mull-card": onMulliganCard(t.dataset.id); break;
+    case "mull-done": onMulliganDone(); break;
 
     // ledger
     case "toggle-ledger": toggleLedger(); break;
