@@ -66,6 +66,7 @@ function cardHTML(card, opts) {
   if (card.hero) cls.push("hero");
   if (card.ability) cls.push("ab-" + card.ability);
   if (opts.selected) cls.push("sel");
+  if (opts.pick) cls.push("pickable");            // a Decoy target on the board
   if (opts.state) cls.push("v-" + opts.state);   // gem tint when boosted/reduced
   // Special (Scorch/Decoy), weather and horn carry no strength number. On the
   // board a unit shows its *effective* strength (opts.value); in hand, its base.
@@ -93,6 +94,10 @@ function cardHTML(card, opts) {
     ? ` data-action="hand-card" data-id="${card.id}" tabindex="0" role="button" aria-label="${esc(label)}"`
     : opts.mulligan
     ? ` data-action="mull-card" data-id="${card.id}" tabindex="0" role="button" aria-label="Redraw ${esc(label)}"`
+    : opts.pick
+    ? ` data-action="pick-target-card" data-id="${card.id}" tabindex="0" role="button" aria-label="Recall ${esc(label)}"`
+    : opts.revive
+    ? ` data-action="pick-revive" data-id="${card.id}" tabindex="0" role="button" aria-label="Revive ${esc(label)}"`
     : "";
   return `<div class="${cls.join(" ")}"${attrs}${tip}>
     ${badge}${kind}<span class="c-name">${esc(card.name)}</span>
@@ -246,7 +251,8 @@ const CardTip = {
 // One combat row: a score coin, a Commander's Horn slot (which holds the Horn
 // card once played), then the units over a faint, centred range emblem. Each
 // unit shows its effective strength (tinted when changed).
-function rowHTML(player, row) {
+function rowHTML(player, row, opts) {
+  opts = opts || {};
   const weatherOn = !!G.weather[row];
   const horn = player.horns[row];
   const eff = effectiveRow(player, row);
@@ -256,18 +262,22 @@ function rowHTML(player, row) {
   const crowd = ordered.length > 7 ? (ordered.length > 10 ? " dense" : " crowd") : "";
   const cards = ordered.map(o => {
     const st = o.card.hero ? "" : (o.value > o.card.str ? "up" : o.value < o.card.str ? "down" : "");
-    return cardHTML(o.card, { value: o.value, state: st });
+    return cardHTML(o.card, { value: o.value, state: st, pick: opts.decoyPick && !o.card.hero });
   }).join("");
+  // A tap target while an agile card or Commander's Horn is being placed.
+  const rowPick = !!(opts.pickRows && opts.pickRows.includes(row));
   const hornCell = (horn && typeof horn === "object")
     ? `<div class="horn-slot filled" title="Commander's Horn"><div class="horn-card"><span class="hc-ic">${gicon("horn")}</span><span class="hc-lb">Horn</span></div></div>`
     : horn
     ? `<div class="horn-slot on" title="Commander's Horn (leader)">${gicon("horn")}</div>`
     : `<div class="horn-slot" title="Commander's Horn slot \u2014 ${ROW_NAME[row]}"><span class="hs-empty">${gicon("horn")}</span></div>`;
-  // The score coin floats on the row's inner edge (the divider toward the leader
-  // area); the row grid itself is just the horn slot and the unit field.
+  // The row's score coin floats in the widened divider between the leader area
+  // and the field (the big army total floats there too, but on the panel side —
+  // see .board-left / .rail-gem — so the two never meet). The row itself is just
+  // the Commander's Horn slot and the unit field.
   return `<div class="row-wrap">
     <div class="row-coin" title="Row strength"><span>${eff.total}</span></div>
-    <div class="row ${weatherOn ? "weathered" : ""}" data-row="${row}" title="${ROW_NAME[row]}">
+    <div class="row ${weatherOn ? "weathered" : ""}${rowPick ? " row-pick" : ""}" data-row="${row}"${rowPick ? ` data-action="pick-target-row"` : ""} title="${ROW_NAME[row]}">
       <span class="row-emblem" aria-hidden="true">${gicon(row)}</span>
       ${hornCell}
       <div class="row-field${crowd}">${cards}</div>
@@ -396,8 +406,9 @@ function renderRail(id, player, isViewer, isCurrent) {
   el.innerHTML = railInnerHTML(player, isViewer, isCurrent);
 }
 
-// A field of three combat rows for a player.
-function fieldHTML(player, order) { return order.map(r => rowHTML(player, r)).join(""); }
+// A field of three combat rows for a player. `opts` carries board-targeting
+// state (agile deploy rows / Decoy-pickable units) for the viewer's own field.
+function fieldHTML(player, order, opts) { return order.map(r => rowHTML(player, r, opts)).join(""); }
 
 // The weather slot — a column set to the side (between the rails and the field)
 // so the two battlefields sit back-to-back. Always visible; holds a mini
@@ -448,8 +459,14 @@ function render() {
   renderRail("railYou", you, true, G.current === bottomIdx);
   const lo = $("leaderOpp"); if (lo) { lo.className = `leader-slot fac-${foe.faction}`; lo.innerHTML = leaderCardHTML(foe, false); }
   const ly = $("leaderYou"); if (ly) { ly.className = `leader-slot mine fac-${you.faction}`; ly.innerHTML = leaderCardHTML(you, true) + passControlHTML(); }
+  const tgt = (typeof UI !== "undefined" && UI.target) ? UI.target : null;
+  const pickRows = tgt && tgt.kind === "agile" ? ["melee", "ranged"]
+    : tgt && tgt.kind === "horn" ? ROWS.slice() : null;
   $("fieldOpp").innerHTML = fieldHTML(foe, ["siege", "ranged", "melee"]);
-  $("fieldYou").innerHTML = fieldHTML(you, ["melee", "ranged", "siege"]);
+  $("fieldYou").innerHTML = fieldHTML(you, ["melee", "ranged", "siege"], {
+    pickRows,
+    decoyPick: !!(tgt && tgt.kind === "decoy"),
+  });
   $("stackOpp").innerHTML = stacksHTML(foe, false);
   $("stackYou").innerHTML = stacksHTML(you, true);
   const wz = $("weatherZone"); if (wz) wz.innerHTML = weatherZoneHTML();

@@ -117,7 +117,7 @@ function playCard(cardId, opts) {
   applyPlay(p, card, opts);
   G.turn++;
 
-  UI.selectedCard = null; UI.hornCard = null; UI.phase = "play";
+  UI.selectedCard = null; UI.hornCard = null; UI.phase = "play"; UI.target = null;
   render();
   autoSave();
   advanceTurn();
@@ -130,14 +130,16 @@ function applyPlay(p, card, opts) {
   const o = opp();
   switch (card.ability) {
     case "weather": {
+      // The weather card stays in the weather area (not the graveyard) until the
+      // skies clear — then it's buried with its owner (see clearWeather).
       G.weather[WEATHER[card.weather].row] = true;
-      p.graveyard.push(card);
+      (G.weatherCards || (G.weatherCards = [])).push({ card, owner: G.players.indexOf(p) });
       sfx("weather");
       log(`<b>${p.name}</b> summons <b>${card.name}</b>.`);
       break;
     }
     case "clear": {
-      G.weather.melee = G.weather.ranged = G.weather.siege = false;
+      clearWeather();
       p.graveyard.push(card);
       sfx("clear");
       log(`<b>${p.name}</b> plays <b>${card.name}</b> — the skies clear.`);
@@ -159,7 +161,9 @@ function applyPlay(p, card, opts) {
     }
     case "medic": {
       p.rows[card.row].push(card);
-      const revived = reviveStrongest(p);
+      // A human picks which fallen unit to raise (opts.reviveId); the AI takes
+      // the strongest.
+      const revived = opts.reviveId != null ? reviveById(p, opts.reviveId) : reviveStrongest(p);
       sfx("medic");
       if (revived) log(`<b>${p.name}</b> plays <b>${card.name}</b> and revives <b>${revived.name}</b>.`);
       else log(`<b>${p.name}</b> plays <b>${card.name}</b>.`);
@@ -268,7 +272,7 @@ function useLeader(opts) {
   const L = p.leader;
   switch (L.act) {
     case "clearweather":
-      G.weather.melee = G.weather.ranged = G.weather.siege = false;
+      clearWeather();
       sfx("clear"); log(`<b>${p.name}</b> — <b>${L.name}</b> clears the skies.`);
       break;
     case "draw": {
@@ -322,6 +326,29 @@ function reviveStrongest(p) {
   const c = p.graveyard.splice(bi, 1)[0];
   p.rows[c.row].push(c);
   return c;
+}
+
+// The fallen units a Medic could raise (ordinary units in the graveyard).
+function revivableGrave(p) {
+  return p.graveyard.filter(c => c.type === "unit" && !c.ability && c.row);
+}
+
+// Revive a specific graveyard unit by id (a human's Medic choice); falls back to
+// the strongest if the id isn't a valid target.
+function reviveById(p, id) {
+  const i = p.graveyard.findIndex(c => c.id === id && c.type === "unit" && !c.ability && c.row);
+  if (i < 0) return reviveStrongest(p);
+  const c = p.graveyard.splice(i, 1)[0];
+  p.rows[c.row].push(c);
+  return c;
+}
+
+// The skies clear: every weather card held in the weather area is buried with
+// the player who summoned it, and the effects lift.
+function clearWeather() {
+  (G.weatherCards || []).forEach(w => G.players[w.owner].graveyard.push(w.card));
+  G.weatherCards = [];
+  G.weather.melee = G.weather.ranged = G.weather.siege = false;
 }
 
 // The row where a player currently has the most strength (horn targeting).
@@ -413,7 +440,7 @@ function resolveRound() {
     });
     p.passed = false;
   });
-  G.weather.melee = G.weather.ranged = G.weather.siege = false;
+  clearWeather();   // buries the round's weather cards with their owners
   kept.forEach((k, i) => { if (k) log(`<b>${G.players[i].name}</b> (Monsters) — <b>${k.c.name}</b> holds the field.`); });
 
   // Round-result cue from the human's perspective — but stay silent when this

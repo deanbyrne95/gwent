@@ -71,6 +71,9 @@ document.addEventListener("click", (e) => {
     case "use-leader": onUseLeader(); break;
     case "pick-row": pickRow(t.dataset.row); break;
     case "pick-decoy": pickDecoy(t.dataset.id); break;
+    case "pick-revive": pickRevive(t.dataset.id); break;
+    case "pick-target-row": onPickTargetRow(t.dataset.row); break;
+    case "pick-target-card": onPickTargetCard(t.dataset.id); break;
     case "mull-card": onMulliganCard(t.dataset.id); break;
     case "mull-done": onMulliganDone(); break;
 

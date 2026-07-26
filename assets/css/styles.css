@@ -79,8 +79,10 @@ body.pre-game .theme-float{display:inline-flex}
 /* The board is three columns: the left holds both leaders' rails with the
    weather area BETWEEN them; the middle holds the two fields back-to-back; the
    right holds each player's deck + discard, shaped as cards. */
-.board-grid{display:flex; gap:34px; align-items:stretch}
-.board-left{flex:0 0 210px; display:flex; flex-direction:column; gap:7px}
+/* Only the leader/field divider is wide (it holds the floating score coins on
+   both sides); the field/stacks gap stays tight. */
+.board-grid{display:flex; gap:16px; align-items:stretch}
+.board-left{flex:0 0 210px; margin-right:46px; display:flex; flex-direction:column; gap:7px}
 .board-left .army-rail{flex:1 1 0}
 .board-field{flex:1 1 0; display:flex; flex-direction:column; gap:6px; min-width:0}
 .board-field .army-field{display:flex; flex-direction:column; gap:6px}
@@ -235,12 +237,14 @@ body.pre-game .theme-float{display:inline-flex}
    the row's inner edge (the divider toward the leader area), taking no column.
    The range emblem is a faint watermark centred behind the row. */
 .row-wrap{position:relative}
-.row-coin{position:absolute; left:-12px; top:50%; transform:translateY(-50%); z-index:4;
+/* The row's score coin floats in the widened divider, on the field side; the big
+   army total floats on the panel side, so they don't meet. */
+.row-coin{position:absolute; left:-30px; top:50%; transform:translateY(-50%); z-index:4;
   width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center;
   font-family:"Cormorant Garamond",serif; font-size:15px; font-weight:700; color:#eaf2ff;
   background:radial-gradient(circle at 38% 30%, #3f76ad, #14304d 78%); border:1.5px solid var(--gilt);
   box-shadow:inset 0 0 6px rgba(0,0,0,.6), 0 2px 4px rgba(0,0,0,.6); text-shadow:0 1px 1px rgba(0,0,0,.5)}
-.row{position:relative; display:grid; grid-template-columns:42px minmax(0,1fr); align-items:stretch;
+.row{position:relative; display:grid; grid-template-columns:58px minmax(0,1fr); align-items:stretch;
   background:linear-gradient(180deg, var(--panel), var(--leather));
   border:1px solid var(--gilt-deep); border-radius:8px; min-height:72px; overflow:hidden;
   box-shadow:inset 0 0 20px rgba(0,0,0,.4)}
@@ -248,15 +252,16 @@ body.pre-game .theme-float{display:inline-flex}
 .row-emblem{position:absolute; left:0; right:0; top:50%; transform:translateY(-50%);
   text-align:center; font-size:34px; color:var(--gilt-soft); opacity:.08; pointer-events:none; z-index:0}
 .horn-slot,.row-field{position:relative; z-index:1}
-.horn-slot{display:flex; align-items:center; justify-content:center; padding-left:6px; font-size:15px; color:var(--horn);
-  background:linear-gradient(180deg, var(--felt-2), var(--leather)); border-right:1px solid var(--gilt-deep)}
+/* The horn slot centres a card-sized Commander's Horn, with the divider padding
+   giving space to the units and the score coin sitting clear on the outer edge. */
+.horn-slot{display:flex; align-items:center; justify-content:center; padding:0 3px; font-size:16px; color:var(--horn)}
 .horn-slot .hs-empty{color:var(--gilt-deep); opacity:.4}
-.horn-slot.on{background:radial-gradient(circle at 50% 40%, rgba(221,143,69,.25), transparent 70%); text-shadow:0 0 6px rgba(221,143,69,.7)}
-/* The Commander's Horn card, resting in the row's slot. */
-.horn-card{width:34px; height:50px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; border-radius:4px;
-  background:linear-gradient(180deg, var(--panel-2), #1c130a); border:1px solid var(--horn); color:var(--horn);
-  box-shadow:0 0 8px rgba(221,143,69,.4)}
-.horn-card .hc-ic{font-size:16px} .horn-card .hc-lb{font-size:6.5px; letter-spacing:.4px; text-transform:uppercase; color:var(--ink-dim)}
+.horn-slot.on{color:var(--horn); text-shadow:0 0 6px rgba(221,143,69,.7)}
+/* The Commander's Horn card, sized like a regular card. */
+.horn-card{width:46px; height:62px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; border-radius:5px;
+  background:linear-gradient(160deg, #3d2d18, #2b2011 70%, #241a0e); border:1px solid var(--horn); color:var(--horn);
+  box-shadow:0 0 9px rgba(221,143,69,.35), 0 2px 5px rgba(0,0,0,.5)}
+.horn-card .hc-ic{font-size:20px} .horn-card .hc-lb{font-size:7px; letter-spacing:.5px; text-transform:uppercase; color:var(--ink-dim)}
 /* Units never wrap onto a second line — a full row scrolls sideways instead, so
    every row keeps one fixed height and can't shove the rows below it off-screen. */
 .row-field{display:flex; align-items:center; gap:6px; padding:6px 8px; flex-wrap:nowrap;
@@ -331,6 +336,12 @@ body.pre-game .theme-float{display:inline-flex}
 .hand .card.sel{transform:translateY(-10px); border-color:var(--gilt-soft);
   box-shadow:0 0 0 2px var(--gilt), 0 8px 18px rgba(0,0,0,.55)}
 .card:focus-visible{outline:2px solid var(--gilt-soft); outline-offset:2px}
+/* Board targeting — a Decoy-pickable unit, and an agile-deploy row. */
+.card.pickable{cursor:pointer; border-color:var(--gilt); box-shadow:0 0 0 2px var(--gilt-soft), 0 0 12px rgba(241,203,91,.55)}
+.card.pickable:hover{transform:translateY(-4px)}
+.row.row-pick{cursor:pointer; box-shadow:inset 0 0 0 2px var(--gilt-soft), inset 0 0 22px rgba(241,203,91,.22)}
+.row.row-pick .row-field{pointer-events:none}
+.row.row-pick:hover{box-shadow:inset 0 0 0 2px var(--gilt), inset 0 0 26px rgba(241,203,91,.32)}
 
 /* HUD */
 .hud{position:fixed; left:0; right:0; bottom:0; z-index:44;
@@ -355,7 +366,9 @@ body.pre-game .wrap{display:none}
 .mull-hand .card .c-eff,.mull-hand .card .c-row{width:20px; height:20px; font-size:14px}
 .mull-hand .card:hover{transform:translateY(-5px); border-color:var(--gilt)}
 .ctrl-hint{font-size:12px; color:var(--ink-dim)}
-.hand{display:flex; align-items:flex-end; gap:7px; overflow-x:auto; padding:6px 2px 2px; min-height:90px;
+/* Extra top padding gives hovered/selected cards room to lift without being
+   clipped by the hand's horizontal scroll container. */
+.hand{display:flex; align-items:flex-end; gap:7px; overflow-x:auto; padding:20px 2px 2px; min-height:104px;
   scrollbar-width:thin; scrollbar-color:var(--line) transparent}
 .hand > .card:first-child{margin-left:auto} .hand > .card:last-child{margin-right:auto}
 .hand::-webkit-scrollbar{height:6px}
@@ -551,8 +564,8 @@ body.pre-game .modal.page .page-body.deckbuild{max-width:820px}
 @media (max-width:760px){
   /* Slim the rails and stacks so the battlefield keeps room on a phone. */
   .board{padding:8px}
-  .board-grid{gap:26px}
-  .board-left{flex-basis:172px; gap:5px}
+  .board-grid{gap:14px}
+  .board-left{flex-basis:150px; margin-right:34px; gap:5px}
   .board-stacks{flex-basis:50px; gap:5px}
   .army-rail{padding:5px 30px 5px 7px; gap:5px}
   .rail-info{gap:8px}
@@ -575,11 +588,12 @@ body.pre-game .modal.page .page-body.deckbuild{max-width:820px}
   .stack-card{width:44px; height:60px}
   .stack-card .card{width:44px; height:60px}
   .deck-card .stack-n{font-size:16px}
-  .row{grid-template-columns:32px minmax(0,1fr); min-height:64px}
-  .row-coin{width:23px; height:23px; font-size:12px; left:-8px}
+  .row{grid-template-columns:46px minmax(0,1fr); min-height:64px}
+  .row-coin{width:24px; height:24px; font-size:12px; left:-22px}
   .row-field{padding:5px 6px; gap:5px}
   .row-emblem{font-size:28px}
-  .horn-card{width:28px; height:42px}
+  .horn-card{width:34px; height:48px}
+  .horn-card .hc-ic{font-size:16px}
   .card{width:44px; height:60px}
   .card .c-art{bottom:19px}
   .card .c-art.crest .fac-svg{width:24px; height:24px}

@@ -309,6 +309,7 @@ function startGame(opts, silent) {
     leadPlayer: starter,
     round: 1,
     weather: { melee: false, ranged: false, siege: false },
+    weatherCards: [],   // played weather cards, held until the skies clear
     roundOver: false,
     over: false,
     winner: null,

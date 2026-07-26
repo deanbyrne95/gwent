@@ -638,6 +638,24 @@ function pickDecoy(id) {
   if (id && cb) cb(+id); else render();   // empty id = cancel; keep the Decoy in hand
 }
 
+// Ask which fallen unit a Medic should raise, then invoke `cb(id)`. The
+// graveyard's revivable cards are shown as real cards, not text buttons.
+function chooseRevive(player, cb) {
+  UI._reviveCb = cb;
+  const targets = revivableGrave(player).slice().sort((a, b) => b.str - a.str);
+  openModal(`
+    <div class="page-body">
+      <h2>Field Medic</h2>
+      <p>Choose a fallen unit to bring back to the field.</p>
+      <div class="mull-hand">${targets.map(c => cardHTML(c, { revive: true })).join("")}</div>
+    </div>`, false, "page");
+}
+function pickRevive(id) {
+  const cb = UI._reviveCb; UI._reviveCb = null;
+  closeModal();
+  if (id && cb) cb(+id);
+}
+
 /* ---------- round / game-over banners ---------- */
 
 function showRoundBanner() {
