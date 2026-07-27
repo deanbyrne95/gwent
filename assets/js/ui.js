@@ -206,6 +206,8 @@ function ngInit() {
     buildPos: 0,     // which of buildList is currently on screen
     decks: {},       // seat index -> { cardKey: count }
     leaders: {},     // seat index -> leader selected? (one leader per faction)
+    colFilter: "all",  // collection panel row/type filter tab
+    deckFilter: "all", // in-deck panel row/type filter tab
   };
 }
 
@@ -260,12 +262,14 @@ function ngDeckStatus(seat) {
   const faction = ngSeatFaction(seat);
   const counts = NG.decks[seat] || {};
   const owned = ngCollection(faction);
-  let units = 0, specials = 0, total = 0, overOwned = false;
+  let units = 0, specials = 0, total = 0, overOwned = false, strength = 0, heroes = 0;
   Object.keys(counts).forEach(key => {
     const n = counts[key]; if (!n) return;
+    const c = CARDS[key];
     total += n;
     if (n > (owned[key] || 0)) overOwned = true;
-    if (ngIsSpecial(CARDS[key])) specials += n; else units += n;
+    if (ngIsSpecial(c)) { specials += n; }
+    else { units += n; strength += (c.str || 0) * n; if (c.type === "hero") heroes += n; }
   });
   const leaderSel = !!NG.leaders[seat];
   const unitsOk = units >= MIN_UNITS;
@@ -277,7 +281,7 @@ function ngDeckStatus(seat) {
   if (!unitsOk) { const d = MIN_UNITS - units; problems.push(`Add ${d} more Unit card${d === 1 ? "" : "s"} (min ${MIN_UNITS}).`); }
   if (!specialsOk) { const d = specials - MAX_SPECIALS; problems.push(`Remove ${d} Special card${d === 1 ? "" : "s"} (max ${MAX_SPECIALS}).`); }
   if (!ownedOk) problems.push("A card exceeds the copies you own.");
-  return { faction, counts, owned, units, specials, total, leaderSel, unitsOk, specialsOk, ownedOk, valid, problems };
+  return { faction, counts, owned, units, specials, total, strength, heroes, leaderSel, unitsOk, specialsOk, ownedOk, valid, problems };
 }
 
 function ngCountsToRecipe(counts) { return Object.keys(counts).filter(k => counts[k] > 0).map(k => [k, counts[k]]); }
@@ -366,94 +370,141 @@ function ngFactionStep() {
     </div>`, false, "page");
 }
 
+// Stable ordering for a mixed key list: Units first (own faction before
+// neutral, then by combat row, then strongest first), Specials after in a fixed
+// weather-first order — so both panels read predictably as cards move across.
+const NG_SPECIAL_ORDER = ["frost", "fog", "rain", "clear", "horn", "scorch", "decoy"];
+const NG_ROW_ORDER = { melee: 0, ranged: 1, siege: 2 };
+function ngCardCmp(a, b) {
+  const ca = CARDS[a], cb = CARDS[b];
+  const sa = ngIsSpecial(ca) ? 1 : 0, sb = ngIsSpecial(cb) ? 1 : 0;
+  if (sa !== sb) return sa - sb;
+  if (sa === 1) {
+    const oa = NG_SPECIAL_ORDER.indexOf(a), ob = NG_SPECIAL_ORDER.indexOf(b);
+    return (oa < 0 ? 99 : oa) - (ob < 0 ? 99 : ob) || ca.name.localeCompare(cb.name);
+  }
+  const fa = ca.faction === "neutral" ? 1 : 0, fb = cb.faction === "neutral" ? 1 : 0;
+  if (fa !== fb) return fa - fb;
+  const ra = NG_ROW_ORDER[ca.row] == null ? 9 : NG_ROW_ORDER[ca.row];
+  const rb = NG_ROW_ORDER[cb.row] == null ? 9 : NG_ROW_ORDER[cb.row];
+  if (ra !== rb) return ra - rb;
+  if (cb.str !== ca.str) return cb.str - ca.str;
+  return ca.name.localeCompare(cb.name);
+}
+
+// Does a card belong under the active filter tab (All / a combat row / Special)?
+function ngCardMatchesFilter(c, f) {
+  if (!f || f === "all") return true;
+  if (f === "special") return ngIsSpecial(c);
+  return ngIsUnit(c) && c.row === f;      // melee / ranged / siege
+}
+
+// A generic "stacked cards" glyph for the All-cards filter tab (the row/type
+// tabs reuse the in-game combat/special glyphs).
+const NG_ALL_ICON = '<svg class="gic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="6.5" width="11" height="14" rx="1.6"/><path d="M8 3.5h10a1.6 1.6 0 0 1 1.6 1.6V17"/></svg>';
+
+// The row/type filter tab bar shared by both panels.
+function ngFilterTabs(side, active) {
+  const tabs = [
+    ["all", NG_ALL_ICON, "All cards"],
+    ["melee", gicon("melee"), "Melee"],
+    ["ranged", gicon("ranged"), "Ranged"],
+    ["siege", gicon("siege"), "Siege"],
+    ["special", gicon("scorch"), "Special"],
+  ];
+  return `<div class="db2-tabs" role="tablist" aria-label="Filter ${side === "col" ? "collection" : "deck"}">${
+    tabs.map(([v, ic, label]) =>
+      `<button class="db2-tab ${active === v ? "on" : ""}" role="tab" aria-selected="${active === v}" data-action="ng-${side}-filter" data-v="${v}" title="${esc(label)}" aria-label="${esc(label)}">${ic}</button>`
+    ).join("")}</div>`;
+}
+
 function ngDeckStep() {
   const seat = NG.buildList[NG.buildPos];
   const faction = ngSeatFaction(seat);
   const st = ngDeckStatus(seat);
   const last = NG.buildPos === NG.buildList.length - 1;
+  const capReached = st.specials >= MAX_SPECIALS;
 
-  // Split the collection into Units and Specials; order faction cards ahead of
-  // neutrals, then by strength so the strongest read first.
-  const keys = Object.keys(st.owned);
-  const byFacThenStr = (a, b) => {
-    const ca = CARDS[a], cb = CARDS[b];
-    const fa = ca.faction === "neutral" ? 1 : 0, fb = cb.faction === "neutral" ? 1 : 0;
-    if (fa !== fb) return fa - fb;
-    if (cb.str !== ca.str) return cb.str - ca.str;
-    return ca.name.localeCompare(cb.name);
-  };
-  const unitKeys = keys.filter(k => ngIsUnit(CARDS[k])).sort(byFacThenStr);
-  const specialOrder = ["frost", "fog", "rain", "clear", "horn", "scorch", "decoy"];
-  const specialKeys = keys.filter(k => ngIsSpecial(CARDS[k]))
-    .sort((a, b) => specialOrder.indexOf(a) - specialOrder.indexOf(b));
+  const allKeys = Object.keys(st.owned).sort(ngCardCmp);
 
-  // One collection tile: the card face, an in-deck count badge, and a stepper.
-  // Add is disabled once the deck holds every copy owned, or (for Specials) once
-  // the 10-card Special cap is reached.
-  const tileFor = key => {
+  // Collection tile: click adds one copy to the deck. The badge shows copies
+  // still available (owned minus in-deck); the card leaves the panel at zero.
+  // Specials grey out (and refuse the click) once the 10-card cap is reached.
+  const collTile = key => {
     const c = CARDS[key];
-    const n = st.counts[key] || 0, ownedN = st.owned[key] || 0;
-    const special = ngIsSpecial(c);
-    const capReached = special && st.specials >= MAX_SPECIALS;
-    const addDisabled = n >= ownedN || capReached;
-    return `<div class="db-card ${n > 0 ? "in" : ""} ${addDisabled ? "maxed" : ""}">
-      <div class="db-face">${cardHTML(ngTemplateCard(key), {})}${n > 0 ? `<span class="db-badge">${n}</span>` : ""}</div>
-      <div class="db-ctl">
-        <button class="stp" data-action="ng-deck-dec" data-key="${key}" ${n <= 0 ? "disabled" : ""} aria-label="Remove one ${esc(c.name)}">\u2212</button>
-        <span class="db-ct">${n}<span class="db-mx">/${ownedN}</span></span>
-        <button class="stp" data-action="ng-deck-inc" data-key="${key}" ${addDisabled ? "disabled" : ""} aria-label="Add one ${esc(c.name)}">+</button>
-      </div>
+    const remaining = (st.owned[key] || 0) - (st.counts[key] || 0);
+    const blocked = ngIsSpecial(c) && capReached;
+    return `<div class="db2-card ${blocked ? "blocked" : ""}" data-action="ng-deck-inc" data-key="${key}" role="button" tabindex="0" aria-label="Add ${esc(c.name)} to deck">
+      ${cardHTML(ngTemplateCard(key), {})}
+      <span class="db2-qty">\u00d7${remaining}</span>
+    </div>`;
+  };
+  // Deck tile: click removes one copy (back to the collection). Badge = in-deck.
+  const deckTile = key => {
+    const c = CARDS[key];
+    const n = st.counts[key] || 0;
+    return `<div class="db2-card in" data-action="ng-deck-dec" data-key="${key}" role="button" tabindex="0" aria-label="Remove ${esc(c.name)} from deck">
+      ${cardHTML(ngTemplateCard(key), {})}
+      <span class="db2-qty">\u00d7${n}</span>
     </div>`;
   };
 
-  // The Leader is chosen separately and never counts toward the deck size. Each
+  const collKeys = allKeys.filter(k => ((st.owned[k] || 0) - (st.counts[k] || 0)) > 0 && ngCardMatchesFilter(CARDS[k], NG.colFilter));
+  const deckKeys = allKeys.filter(k => (st.counts[k] || 0) > 0 && ngCardMatchesFilter(CARDS[k], NG.deckFilter));
+
+  // The Leader is chosen separately and never counts toward deck size. Each
   // faction fields several Leader variants (Witcher-3 base game); the player
-  // picks exactly one, shown as selectable cards.
+  // picks exactly one. The chosen leader shows large in the centre, with the
+  // remaining variants as a selectable strip beneath it.
   const variants = LEADERS[faction] || [];
   const chosenKey = NG.leaders[seat] || null;
   const chosenLeader = variants.find(v => v.key === chosenKey) || null;
-  const leaderTile = variants.map(v => {
-    const on = v.key === chosenKey;
-    const fakeP = { leader: v, faction, leaderUsed: false, isAI: true };
-    return `<div class="db-card leader-pick ${on ? "in" : ""}" data-action="ng-leader-pick" data-key="${v.key}" role="button" tabindex="0" aria-pressed="${on}">
-      <div class="db-face">${leaderCardHTML(fakeP, false)}${on ? '<span class="db-badge check">\u2713</span>' : ""}</div>
-    </div>`;
-  }).join("");
+  const leadFace = v => leaderCardHTML({ leader: v, faction, leaderUsed: false, isAI: true }, false);
+  const leaderMain = chosenLeader
+    ? `<div class="db2-lead-card">${leadFace(chosenLeader)}</div><div class="db2-lead-name">${esc(chosenLeader.name)}</div>`
+    : `<div class="db2-lead-empty">Choose a Leader</div>`;
+  const leaderVars = variants.length
+    ? `<div class="db2-lead-vars">${variants.map(v => {
+        const on = v.key === chosenKey;
+        return `<button class="db2-lead-var ${on ? "on" : ""}" data-action="ng-leader-pick" data-key="${v.key}" aria-pressed="${on}" title="${esc(v.name)}" aria-label="${esc(v.name)}">${leadFace(v)}</button>`;
+      }).join("")}</div>`
+    : "";
 
-  const capNote = st.specials >= MAX_SPECIALS ? " \u00b7 limit reached" : "";
-  const summary = `
-      <aside class="db-summary">
-        <h3>Deck summary</h3>
-        <div class="db-sum-fac"><span class="fac-ic sm">${factionSvg(FACTIONS[faction].icon)}</span> ${esc(FACTIONS[faction].name)}</div>
-        <div class="db-sum-row"><span>Leader</span><b class="${st.leaderSel ? "" : "bad"}">${st.leaderSel && chosenLeader ? esc(chosenLeader.name) : "None"}</b></div>
-        <div class="db-sum-row ${st.unitsOk ? "ok" : "bad"}"><span>Units</span><b>${st.units} <em>/ min ${MIN_UNITS}</em></b></div>
-        <div class="db-sum-row ${st.specialsOk ? "ok" : "bad"}"><span>Specials</span><b>${st.specials} <em>/ max ${MAX_SPECIALS}</em></b></div>
-        <div class="db-sum-row"><span>Total</span><b>${st.total} cards</b></div>
+  const statRow = (label, value, cls) => `<li class="${cls || ""}"><span>${label}</span><b>${value}</b></li>`;
+  const center = `
+      <div class="db2-center">
+        <div class="db2-lead">
+          <h3 class="db2-lead-h">Leader${st.leaderSel ? "" : ' <span class="db2-req">required</span>'}</h3>
+          ${leaderMain}
+          ${leaderVars}
+        </div>
+        <ul class="db2-stats">
+          ${statRow("Total cards in deck", st.total)}
+          ${statRow("Number of Unit Cards", `${st.units}<em>/${MIN_UNITS}</em>`, st.unitsOk ? "ok" : "bad")}
+          ${statRow("Special Cards", `${st.specials}<em>/${MAX_SPECIALS}</em>`, st.specialsOk ? "ok" : "bad")}
+          ${statRow("Total Unit Card Strength", st.strength)}
+          ${statRow("Hero Cards", st.heroes)}
+        </ul>
         <div class="db-verdict ${st.valid ? "ok" : "bad"}">${st.valid ? "Deck ready" : "Deck not ready"}</div>
         ${st.problems.length ? `<ul class="db-problems">${st.problems.map(p => `<li>${esc(p)}</li>`).join("")}</ul>` : ""}
-        <p class="db-hint">Smaller decks draw your key cards more often \u2014 keep close to ${MIN_UNITS} Units.</p>
-      </aside>`;
+        <p class="db2-hint">Smaller decks draw your key cards more often \u2014 keep close to ${MIN_UNITS} Units.</p>
+      </div>`;
+
+  const panel = (side, title, sub, keys, tileFn) => `
+      <section class="db2-col">
+        <header class="db2-head"><span class="db2-title">${title}</span><span class="db2-sub">${esc(sub)}</span></header>
+        ${ngFilterTabs(side, side === "col" ? NG.colFilter : NG.deckFilter)}
+        <div class="db2-grid">${keys.length ? keys.map(tileFn).join("") : '<p class="db2-empty">No cards here.</p>'}</div>
+      </section>`;
 
   openModal(`
     <div class="page-body newgame deckbuild">
       ${ngCrumb()}
       <h2>${esc(ngDeckTitle(seat))}</h2>
-      <div class="db-layout">
-        <div class="db-main">
-          <section class="db-sec">
-            <h3 class="db-h">Leader ${st.leaderSel ? "" : '<span class="db-note warn">required</span>'}</h3>
-            <div class="db-grid leaders">${leaderTile}</div>
-          </section>
-          <section class="db-sec">
-            <h3 class="db-h">Unit cards <span class="db-note ${st.unitsOk ? "" : "warn"}">${st.units} / min ${MIN_UNITS}</span></h3>
-            <div class="db-grid">${unitKeys.map(tileFor).join("")}</div>
-          </section>
-          <section class="db-sec">
-            <h3 class="db-h">Special cards <span class="db-note ${st.specialsOk && !capNote ? "" : "warn"}">${st.specials} / max ${MAX_SPECIALS}${capNote}</span></h3>
-            <div class="db-grid">${specialKeys.map(tileFor).join("")}</div>
-          </section>
-        </div>
-        ${summary}
+      <div class="db2">
+        ${panel("col", "Card Collection", FACTIONS[faction].name, collKeys, collTile)}
+        ${center}
+        ${panel("deck", "Cards in Deck", `${st.total} card${st.total === 1 ? "" : "s"}`, deckKeys, deckTile)}
       </div>
       <div class="foot">
         <button class="gbtn ghost" data-action="ng-back">Back</button>
@@ -516,6 +567,13 @@ function ngDeckAdjust(key, delta) {
   } else {
     counts[key] = Math.max(0, cur - 1);
   }
+  ngRender();
+}
+
+// Switch the active row/type filter tab on the collection or in-deck panel.
+function ngSetFilter(which, v) {
+  if (!NG || NG.step !== "deck" || !v) return;
+  if (which === "col") NG.colFilter = v; else NG.deckFilter = v;
   ngRender();
 }
 
