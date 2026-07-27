@@ -191,7 +191,22 @@ window.addEventListener("resize", () => { if (G) render(); });
 
 applySettings();
 CardTip.init();
-// Prime a silent game so the board sits behind the opening menu.
-startGame({ mode: "ai", faction: SETTINGS.faction || "nr", foeFaction: SETTINGS.foeFaction || "monsters", level: SETTINGS.aiLevel || "normal" }, true);
-syncHeaderActions();
-openMainMenu();
+// Card + leader definitions load from assets/data/cards.json before anything
+// that reads them. Note: fetch needs the page served over http(s) — open the
+// game via a local server, not a file:// path.
+loadCardData()
+  .then(() => {
+    // Prime a silent game so the board sits behind the opening menu.
+    startGame({ mode: "ai", faction: SETTINGS.faction || "nr", foeFaction: SETTINGS.foeFaction || "monsters", level: SETTINGS.aiLevel || "normal" }, true);
+    syncHeaderActions();
+    openMainMenu();
+  })
+  .catch((err) => {
+    console.error("Failed to load card data:", err);
+    openModal(`
+      <div class="page-body">
+        <h2>Couldn't load the cards</h2>
+        <p class="rules">The card database (<code>assets/data/cards.json</code>) failed to load: ${esc(String(err && err.message || err))}.</p>
+        <p class="rules">This game must be served over <b>http</b> (e.g. <code>npx serve</code> or a local web server), not opened directly from a <code>file://</code> path.</p>
+      </div>`, false, "page");
+  });

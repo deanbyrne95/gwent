@@ -217,13 +217,6 @@ function openNewGame() { ngInit(); ngRender(); }
 function ngBuilders(mode) { return mode === "hotseat" ? [0, 1] : mode === "watch" ? [] : [0]; }
 function ngSeatFaction(idx) { return idx === 0 ? NG.you : NG.foe; }
 
-// Per-faction recipe folded into { cardKey: copies } — the curated default deck.
-function ngRecipeMax(faction) {
-  const max = {};
-  (DECKS[faction] || DECKS.nr).forEach(([key, n]) => { max[key] = (max[key] || 0) + n; });
-  return max;
-}
-
 // Card categories. Units (and heroes, which are unit cards) satisfy the 22-card
 // minimum; the row-less Specials — weather, Commander's Horn, Scorch, Decoy —
 // share the 10-card cap.
@@ -231,16 +224,14 @@ function ngIsSpecial(c) { return c.type === "weather" || c.type === "horn" || c.
 function ngIsUnit(c) { return !ngIsSpecial(c); }
 
 // The player's collection for a faction: every faction card plus the shared
-// neutral pool, each with the number of copies owned. Faction units keep their
-// recipe copies (e.g. Poor Infantry ×4); neutral units are singletons; Specials
-// grant two copies each so the 10-card Special cap is meaningful to bump into.
+// neutral pool, each with the number of copies owned (from the card's `copies`
+// field). Adding a card to cards.json makes it appear here automatically.
 function ngCollection(faction) {
-  const rec = ngRecipeMax(faction);
   const owned = {};
   Object.keys(CARDS).forEach(key => {
     const c = CARDS[key];
     if (c.faction !== faction && c.faction !== "neutral") return;
-    owned[key] = ngIsSpecial(c) ? 2 : (rec[key] || 1);
+    owned[key] = c.copies || 1;
   });
   return owned;
 }

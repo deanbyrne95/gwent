@@ -323,6 +323,8 @@ body.pre-game .theme-float{display:inline-flex}
 .card-tip .ct-name{font-family:"Cormorant Garamond",serif; font-weight:600; font-size:16px; line-height:1.1; color:var(--gilt-soft)}
 .card-tip .ct-meta{font-size:10px; letter-spacing:.7px; text-transform:uppercase; color:var(--ink-dim)}
 .card-tip .ct-desc{font-size:11.5px; line-height:1.3; color:var(--ink)}
+.card-tip .ct-flav{font-size:11px; line-height:1.35; color:var(--ink-dim); font-style:italic;
+  margin-top:1px; padding-top:5px; border-top:1px solid var(--line)}
 
 /* Hand cards — larger, lift on hover/select. */
 .hand .card{width:62px; height:86px; cursor:pointer}

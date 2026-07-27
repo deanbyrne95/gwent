@@ -42,136 +42,83 @@ const FACTION_KEYS = Object.keys(FACTIONS);
 const NEUTRAL_INFO = { name: "Neutral cards", icon: "neutral", blurb: "Heroes, weather and horns that reinforce any deck." };
 
 /* ---------- card database ----------
- * Every card is a template keyed by `key`. Fields:
+ * Card templates and leader definitions live in a single data file,
+ * assets/data/cards.json, loaded once at boot (see loadCardData below). Every
+ * card is a template keyed by `key`. Fields (all but name/type/faction default):
  *   name    display name
- *   str     base strength (0 for pure-utility cards)
+ *   str     base strength (default 0 for pure-utility cards)
  *   row     "melee" | "ranged" | "siege" | null (special cards with no row)
- *   type    "unit" | "hero" | "weather" | "horn"
- *   ability null | "spy" | "medic" | "horn" | "weather" | "clear"
+ *   type    "unit" | "hero" | "weather" | "horn" | "special"  (default "unit")
+ *   ability null | "spy" | "medic" | "horn" | "weather" | "clear" | "muster" | "scorch" | "decoy"
  *   weather which weather key this card summons (weather cards only)
  *   faction "neutral" | a faction key
+ *   bond/muster/morale/agile  optional Witcher-3 modifiers (see makeCard)
+ *   copies  how many the player owns (also the default-deck count; default 1)
+ *   flavour in-world quote shown on the card tooltip
  * Heroes are immune to weather (their strength never drops to 1).
  * `ability` is the single extension hook the engine dispatches on play — add a
  * new ability by giving cards a new tag and handling it in game.js:applyAbility.
+ * Adding a card is purely a data edit: append an entry to cards.json.
  */
-const CARDS = {
-  // --- neutral specials (available to every faction) ---
-  frost:  { name: "Biting Frost",        str: 0, row: null, type: "weather", ability: "weather", weather: "frost",  faction: "neutral" },
-  fog:    { name: "Impenetrable Fog",    str: 0, row: null, type: "weather", ability: "weather", weather: "fog",    faction: "neutral" },
-  rain:   { name: "Torrential Rain",     str: 0, row: null, type: "weather", ability: "weather", weather: "rain",   faction: "neutral" },
-  clear:  { name: "Clear Weather",       str: 0, row: null, type: "weather", ability: "clear",   faction: "neutral" },
-  horn:   { name: "Commander's Horn",    str: 0, row: null, type: "horn",    ability: "horn",    faction: "neutral" },
-  scorch: { name: "Scorch",              str: 0, row: null, type: "special", ability: "scorch",  faction: "neutral" },
-  decoy:  { name: "Decoy",               str: 0, row: null, type: "special", ability: "decoy",   faction: "neutral" },
-  // --- neutral heroes ---
-  geralt: { name: "Geralt of Rivia",     str: 7, row: "melee",  type: "hero", ability: null, faction: "neutral" },
-  ciri:   { name: "Cirilla Fiona",       str: 6, row: "melee",  type: "hero", ability: null, faction: "neutral" },
-  vesemir:{ name: "Vesemir",             str: 6, row: "melee",  type: "hero", ability: null, faction: "neutral" },
-  // --- neutral units (supplement any deck) ---
-  zoltan: { name: "Zoltan Chivay",       str: 5, row: "melee",  type: "unit", ability: null,    faction: "neutral", agile: true },
-  yennefer:{name: "Yennefer of Vengerberg",str: 0,row: "ranged", type: "unit", ability: "medic", faction: "neutral" },
-  avallach:{name: "Avallac'h",           str: 0, row: "ranged", type: "unit", ability: "spy",   faction: "neutral" },
+const CARDS = {};
 
-  // --- Northern Realms ---
-  blue:    { name: "Blue Stripes Commando", str: 4, row: "melee",  type: "unit", ability: null,    faction: "nr", bond: "blue" },
-  infantry:{ name: "Poor Infantry",         str: 1, row: "melee",  type: "unit", ability: null,    faction: "nr" },
-  reaver:  { name: "Crinfrid Reavers",      str: 5, row: "ranged", type: "unit", ability: null,    faction: "nr" },
-  ballista:{ name: "Ballista",              str: 6, row: "siege",  type: "unit", ability: null,    faction: "nr" },
-  trebuchet:{name: "Trebuchet",             str: 6, row: "siege",  type: "unit", ability: null,    faction: "nr" },
-  catapult:{ name: "Catapult",              str: 8, row: "siege",  type: "unit", ability: null,    faction: "nr" },
-  siegfried:{name: "Siegfried of Denesle",  str: 5, row: "melee",  type: "hero", ability: null,    faction: "nr" },
-  medic_nr:{ name: "Field Medic",           str: 0, row: "ranged", type: "unit", ability: "medic", faction: "nr" },
-  dijkstra:{ name: "Sigismund Dijkstra",    str: 0, row: "melee",  type: "unit", ability: "spy",   faction: "nr" },
-  stennis: { name: "Prince Stennis",        str: 5, row: "melee",  type: "unit", ability: "spy",   faction: "nr" },
+// Faction default decks, derived from the collection at load: every faction and
+// neutral card belongs to the faction's pool; the default deck takes all its
+// Units plus one of each Special. Filled by loadCardData().
+const DECKS = {};
 
-  // --- Monsters ---
-  ghoul:   { name: "Ghoul",             str: 1, row: "melee",  type: "unit", ability: null, faction: "monsters" },
-  nekker:  { name: "Nekker",            str: 2, row: "melee",  type: "unit", ability: "muster", faction: "monsters", muster: "nekker" },
-  foglet:  { name: "Foglet",            str: 2, row: "melee",  type: "unit", ability: null, faction: "monsters" },
-  harpy:   { name: "Harpy",             str: 2, row: "ranged", type: "unit", ability: null, faction: "monsters" },
-  griffin: { name: "Griffin",           str: 5, row: "ranged", type: "unit", ability: null, faction: "monsters" },
-  katakan: { name: "Katakan",           str: 5, row: "melee",  type: "unit", ability: null, faction: "monsters" },
-  werewolf:{ name: "Werewolf",          str: 5, row: "melee",  type: "unit", ability: null, faction: "monsters" },
-  forktail:{ name: "Forktail",          str: 5, row: "siege",  type: "unit", ability: null, faction: "monsters" },
-  arachas: { name: "Arachas",           str: 4, row: "siege",  type: "unit", ability: "muster", faction: "monsters", muster: "arachas" },
-  fiend:   { name: "Fiend",             str: 6, row: "melee",  type: "unit", ability: null, faction: "monsters" },
-  draug:   { name: "Draug",             str: 7, row: "siege",  type: "hero", ability: null, faction: "monsters" },
-  imlerith:{ name: "Nithral",           str: 10,row: "melee",  type: "hero", ability: null, faction: "monsters" },
+// Categorise a template. Units (and heroes) satisfy the deck minimum; the
+// row-less Specials — weather, Commander's Horn, Scorch, Decoy — are capped.
+function isSpecialCard(c) { return c.type === "weather" || c.type === "horn" || c.type === "special"; }
 
-  // --- Nilfgaardian Empire ---
-  nauzicaa: { name: "Nauzicaa Brigade",     str: 4, row: "melee",  type: "unit", ability: null,    faction: "nilfgaard", agile: true },
-  impera:   { name: "Impera Brigade Guard",  str: 3, row: "ranged", type: "unit", ability: null,    faction: "nilfgaard", morale: true },
-  blackarch:{ name: "Black Infantry Archer",str: 6, row: "ranged", type: "unit", ability: null,    faction: "nilfgaard" },
-  siegesup: { name: "Siege Engineer",        str: 6, row: "siege",  type: "unit", ability: null,    faction: "nilfgaard" },
-  arbalest: { name: "Arbalest",              str: 4, row: "siege",  type: "unit", ability: null,    faction: "nilfgaard" },
-  menno:    { name: "Menno Coehoorn",        str: 0, row: "ranged", type: "unit", ability: "medic", faction: "nilfgaard" },
-  vattier:  { name: "Vattier de Rideaux",    str: 0, row: "melee",  type: "unit", ability: "spy",   faction: "nilfgaard" },
-  stefan:   { name: "Stefan Skellen",        str: 0, row: "siege",  type: "unit", ability: "spy",   faction: "nilfgaard" },
-  cahir:    { name: "Cahir Mawr Dyffryn",    str: 6, row: "melee",  type: "hero", ability: null,    faction: "nilfgaard" },
-  morvran:  { name: "Morvran Voorhis",       str: 10,row: "siege",  type: "hero", ability: null,    faction: "nilfgaard" },
+// Rebuild DECKS from CARDS: a sensible, valid default deck per faction (all
+// owned Units + one of each Special), used for AI/Watch seats and as the
+// deck-builder starting point.
+function buildDefaultDecks() {
+  const factions = Object.keys(FACTIONS).filter(f => f !== "neutral");
+  factions.forEach(f => {
+    const recipe = [];
+    Object.keys(CARDS).forEach(key => {
+      const c = CARDS[key];
+      if (c.faction !== f && c.faction !== "neutral") return;
+      const n = isSpecialCard(c) ? 1 : (c.copies || 1);
+      if (n > 0) recipe.push([key, n]);
+    });
+    DECKS[f] = recipe;
+  });
+}
 
-  // --- Scoia'tael ---
-  dwarf:    { name: "Dwarven Skirmisher",    str: 3, row: "melee",  type: "unit", ability: "muster", faction: "scoiatael", muster: "dwarf" },
-  mahakam:  { name: "Mahakam Defender",      str: 5, row: "melee",  type: "unit", ability: null,    faction: "scoiatael", morale: true },
-  dolarcher:{ name: "Dol Blathanna Archer",  str: 4, row: "ranged", type: "unit", ability: null,    faction: "scoiatael" },
-  vrihedd:  { name: "Vrihedd Brigade Officer",str: 6,row: "ranged", type: "unit", ability: null,    faction: "scoiatael", agile: true },
-  havekar:  { name: "Havekar Smuggler",      str: 5, row: "siege",  type: "unit", ability: null,    faction: "scoiatael" },
-  ithlinne: { name: "Ithlinne",              str: 0, row: "ranged", type: "unit", ability: "medic", faction: "scoiatael" },
-  yaevinn:  { name: "Yaevinn",               str: 0, row: "ranged", type: "unit", ability: "spy",   faction: "scoiatael" },
-  ciaran:   { name: "Ciaran aep Easnillen",  str: 4, row: "melee",  type: "unit", ability: null,    faction: "scoiatael" },
-  filavandrel:{name: "Filavandrel aén Fidháil",str:6,row: "ranged", type: "hero", ability: null,    faction: "scoiatael" },
-  isengrim: { name: "Isengrim Faoiltiarna",  str: 10,row: "melee",  type: "hero", ability: null,    faction: "scoiatael" },
-
-  // --- Skellige ---
-  tordarroch:{name: "Clan Tordarroch Armorsmith",str:3,row:"melee", type: "unit", ability: null,    faction: "skellige" },
-  berserker:{ name: "Young Berserker",       str: 4, row: "melee",  type: "unit", ability: null,    faction: "skellige" },
-  shieldmaid:{name: "Shieldmaiden",          str: 5, row: "melee",  type: "unit", ability: null,    faction: "skellige", bond: "shieldmaid" },
-  donar:    { name: "Donar an Hindar",       str: 5, row: "ranged", type: "unit", ability: null,    faction: "skellige" },
-  dimun:    { name: "Clan Dimun Pirate",     str: 4, row: "siege",  type: "unit", ability: null,    faction: "skellige" },
-  longship: { name: "War Longship",          str: 6, row: "siege",  type: "unit", ability: null,    faction: "skellige" },
-  birna:    { name: "Birna Bran",            str: 0, row: "ranged", type: "unit", ability: "medic", faction: "skellige" },
-  holger:   { name: "Holger Blackhand",      str: 0, row: "melee",  type: "unit", ability: "spy",   faction: "skellige" },
-  madman:   { name: "Madman Lugos",          str: 6, row: "siege",  type: "hero", ability: null,    faction: "skellige" },
-  hjalmar:  { name: "Hjalmar an Craite",     str: 10,row: "melee",  type: "hero", ability: null,    faction: "skellige" },
-};
-
-// Deck recipes: which templates make up each faction deck, and how many copies.
-// Every deck folds in a shared band of neutral cards — weather, a Commander's
-// Horn, a hero, plus a couple of neutral supports — so the ability system is
-// exercised from the first game and every faction shares the same neutral pool.
-const NEUTRAL_KIT = [
-  ["frost", 1], ["fog", 1], ["rain", 1], ["clear", 1], ["horn", 1],
-  ["scorch", 1], ["decoy", 1],
-  ["geralt", 1], ["zoltan", 1], ["yennefer", 1],
-];
-const DECKS = {
-  nr: [
-    ["blue", 3], ["infantry", 4], ["reaver", 3], ["ballista", 1], ["trebuchet", 1],
-    ["catapult", 1], ["siegfried", 1], ["medic_nr", 1], ["dijkstra", 1], ["stennis", 1],
-    ...NEUTRAL_KIT, ["ciri", 1],
-  ],
-  nilfgaard: [
-    ["nauzicaa", 3], ["impera", 3], ["blackarch", 2], ["siegesup", 2], ["arbalest", 2],
-    ["menno", 1], ["vattier", 1], ["stefan", 1], ["cahir", 1], ["morvran", 1],
-    ...NEUTRAL_KIT, ["avallach", 1],
-  ],
-  monsters: [
-    ["ghoul", 3], ["nekker", 3], ["foglet", 2], ["harpy", 2], ["griffin", 1],
-    ["katakan", 1], ["werewolf", 1], ["forktail", 1], ["arachas", 2], ["fiend", 1],
-    ["draug", 1], ["imlerith", 1],
-    ...NEUTRAL_KIT,
-  ],
-  scoiatael: [
-    ["dwarf", 3], ["mahakam", 2], ["dolarcher", 3], ["vrihedd", 2], ["havekar", 2],
-    ["ciaran", 2], ["ithlinne", 1], ["yaevinn", 1], ["filavandrel", 1], ["isengrim", 1],
-    ...NEUTRAL_KIT,
-  ],
-  skellige: [
-    ["tordarroch", 2], ["berserker", 3], ["shieldmaid", 3], ["donar", 2], ["dimun", 2],
-    ["longship", 2], ["birna", 1], ["holger", 1], ["madman", 1], ["hjalmar", 1],
-    ...NEUTRAL_KIT, ["vesemir", 1],
-  ],
-};
+// Load card + leader definitions from assets/data/cards.json and populate the
+// CARDS / LEADERS / DECKS tables in place (they are referenced elsewhere, so we
+// fill the existing objects rather than reassign). Applies field defaults so the
+// JSON can stay terse. Must resolve before the first startGame().
+function loadCardData() {
+  return fetch("assets/data/cards.json")
+    .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(data => {
+      Object.keys(data.cards || {}).forEach(key => {
+        const c = data.cards[key];
+        CARDS[key] = {
+          name: c.name,
+          str: c.str || 0,
+          row: c.row || null,
+          type: c.type || "unit",
+          ability: c.ability || null,
+          weather: c.weather || null,
+          faction: c.faction || "neutral",
+          bond: c.bond || null,
+          muster: c.muster || null,
+          morale: !!c.morale,
+          agile: !!c.agile,
+          copies: c.copies || 1,
+          flavour: c.flavour || "",
+        };
+      });
+      Object.keys(data.leaders || {}).forEach(f => { LEADERS[f] = data.leaders[f]; });
+      buildDefaultDecks();
+      return data;
+    });
+}
 
 // Number of cards drawn into the opening hand.
 const HAND_SIZE = 10;
@@ -196,6 +143,7 @@ function makeCard(key) {
     ability: t.ability || null, weather: t.weather || null, faction: t.faction,
     hero: t.type === "hero",
     bond: t.bond || null, morale: !!t.morale, muster: t.muster || null, agile: !!t.agile,
+    flavour: t.flavour || null,
   };
 }
 
@@ -226,15 +174,9 @@ function shuffle(a) {
 let G = null;
 let UI = { selectedCard: null, phase: "play", hornPick: null };
 
-// Leader cards — one per faction. Each grants a single Active ability usable
-// once per game (spending that turn), echoing the leaders' flavour in Witcher 3.
-const LEADERS = {
-  nr:        { name: "Foltest",            title: "The Steel-Forged",       act: "clearweather", tag: "Clear weather", desc: "Once per game: clear all weather effects." },
-  nilfgaard: { name: "Emhyr var Emreis",   title: "The White Flame",        act: "draw",         tag: "Draw a card",   desc: "Once per game: draw a card from your deck." },
-  monsters:  { name: "Eredin",             title: "Destroyer of Worlds",    act: "recall",       tag: "Recall a unit", desc: "Once per game: return your strongest fallen unit to your hand." },
-  scoiatael: { name: "Francesca Findabair", title: "Queen of Dol Blathanna", act: "horn",         tag: "Horn a row",    desc: "Once per game: sound a Commander's Horn on a row you choose." },
-  skellige:  { name: "Crach an Craite",    title: "An Craite Jarl",         act: "summon",       tag: "Summon a unit", desc: "Once per game: summon your strongest fallen unit to the battlefield." },
-};
+// Leader cards — one per faction (loaded from cards.json). Each grants a single
+// Active ability usable once per game, echoing the leaders' role in Witcher 3.
+const LEADERS = {};
 
 // Faction accent colours (from the rulebook's faction symbols), for board trim.
 const FACTION_COLOR = {
