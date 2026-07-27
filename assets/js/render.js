@@ -85,8 +85,8 @@ function cardHTML(card, opts) {
   const kind = `${art}<span class="c-coins">${effCoin}${rowCoin}</span>`;
   // Full details for the floating tooltip (shown on hover/focus) — the card face
   // truncates its name, so the tip is where the complete text lives.
-  const meta = cardKindMeta(card), desc = cardDesc(card);
-  const tip = ` data-tip-name="${esc(card.name)}" data-tip-meta="${esc(meta)}"${desc ? ` data-tip-desc="${esc(desc)}"` : ""}`;
+  const meta = cardKindMeta(card), desc = cardDesc(card), flav = card.flavour || "";
+  const tip = ` data-tip-name="${esc(card.name)}" data-tip-meta="${esc(meta)}"${desc ? ` data-tip-desc="${esc(desc)}"` : ""}${flav ? ` data-tip-flav="${esc(flav)}"` : ""}`;
   // Hand cards are interactive: give them an accessible label carrying the full
   // text so keyboard and screen-reader users get what the truncation hides.
   const label = [card.name, meta, desc].filter(Boolean).join(". ");
@@ -198,10 +198,11 @@ const CardTip = {
     const name = cardEl.dataset.tipName;
     if (!name) return;
     const el = this.ensure();
-    const meta = cardEl.dataset.tipMeta || "", desc = cardEl.dataset.tipDesc || "";
+    const meta = cardEl.dataset.tipMeta || "", desc = cardEl.dataset.tipDesc || "", flav = cardEl.dataset.tipFlav || "";
     el.innerHTML = `<span class="ct-name">${esc(name)}</span>`
       + (meta ? `<span class="ct-meta">${esc(meta)}</span>` : "")
-      + (desc ? `<span class="ct-desc">${esc(desc)}</span>` : "");
+      + (desc ? `<span class="ct-desc">${esc(desc)}</span>` : "")
+      + (flav ? `<span class="ct-flav">${esc(flav)}</span>` : "");
     el.hidden = false;
     this.forEl = cardEl;
     this.pinned = !!pinned;
@@ -362,7 +363,8 @@ function leaderCardHTML(player, isViewer) {
   const attrs = usable ? ` data-action="use-leader" tabindex="0" role="button"` : "";
   const meta = `Leader · ${FACTIONS[player.faction].name}`;
   const desc = L.desc + (player.leaderUsed ? " (spent)" : usable ? " Tap to use." : "");
-  const tip = ` data-tip-name="${esc(L.name)}" data-tip-meta="${esc(meta)}" data-tip-desc="${esc(desc)}"`;
+  const flav = L.flavour ? ` data-tip-flav="${esc(L.flavour)}"` : "";
+  const tip = ` data-tip-name="${esc(L.name)}" data-tip-meta="${esc(meta)}" data-tip-desc="${esc(desc)}"${flav}`;
   return `<div class="${cls}"${attrs}${tip}>
     <span class="c-crown" aria-hidden="true">${gicon("crown")}</span>
     <span class="c-art crest lead-crest" aria-hidden="true">${crest}</span>
