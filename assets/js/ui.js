@@ -168,8 +168,11 @@ const MODE_SIDES = {
   watch:   { a: "Side A faction",   b: "Side B faction",   hasDiff: true,  diff: "AI difficulty" },
 };
 
-// Minimum cards a custom deck must hold before a match can begin.
-const MIN_DECK = 22;
+// Deck-building rules (mirroring Witcher 3 Gwent): a deck needs at least this
+// many Unit cards (no upper bound — smaller decks just draw better), and its
+// Special cards are capped at a combined maximum.
+const MIN_UNITS = 22;
+const MAX_SPECIALS = 10;
 
 // Gilded-style mode cards (icon over title over subtitle); picking one commits
 // and advances, so the only footer control on this step is Back.
@@ -202,6 +205,7 @@ function ngInit() {
     buildList: [],   // seat indices that build a custom deck this match
     buildPos: 0,     // which of buildList is currently on screen
     decks: {},       // seat index -> { cardKey: count }
+    leaders: {},     // seat index -> leader selected? (one leader per faction)
   };
 }
 
@@ -213,29 +217,84 @@ function openNewGame() { ngInit(); ngRender(); }
 function ngBuilders(mode) { return mode === "hotseat" ? [0, 1] : mode === "watch" ? [] : [0]; }
 function ngSeatFaction(idx) { return idx === 0 ? NG.you : NG.foe; }
 
-// Per-faction recipe folded into { cardKey: maxCopies }; the default deck starts
-// every card at its max, so building is a matter of trimming toward the minimum.
+// Per-faction recipe folded into { cardKey: copies } — the curated default deck.
 function ngRecipeMax(faction) {
   const max = {};
   (DECKS[faction] || DECKS.nr).forEach(([key, n]) => { max[key] = (max[key] || 0) + n; });
   return max;
 }
-function ngDefaultCounts(faction) { return ngRecipeMax(faction); }
-function ngDeckSize(counts) { return Object.keys(counts).reduce((t, k) => t + counts[k], 0); }
+
+// Card categories. Units (and heroes, which are unit cards) satisfy the 22-card
+// minimum; the row-less Specials — weather, Commander's Horn, Scorch, Decoy —
+// share the 10-card cap.
+function ngIsSpecial(c) { return c.type === "weather" || c.type === "horn" || c.type === "special"; }
+function ngIsUnit(c) { return !ngIsSpecial(c); }
+
+// The player's collection for a faction: every faction card plus the shared
+// neutral pool, each with the number of copies owned. Faction units keep their
+// recipe copies (e.g. Poor Infantry ×4); neutral units are singletons; Specials
+// grant two copies each so the 10-card Special cap is meaningful to bump into.
+function ngCollection(faction) {
+  const rec = ngRecipeMax(faction);
+  const owned = {};
+  Object.keys(CARDS).forEach(key => {
+    const c = CARDS[key];
+    if (c.faction !== faction && c.faction !== "neutral") return;
+    owned[key] = ngIsSpecial(c) ? 2 : (rec[key] || 1);
+  });
+  return owned;
+}
+
+// The starting deck for a seat: every owned Unit plus one of each Special. This
+// is comfortably valid (>=22 units, <=10 specials) so building is a matter of
+// trimming toward the recommended minimum.
+function ngDefaultCounts(faction) {
+  const owned = ngCollection(faction);
+  const counts = {};
+  Object.keys(owned).forEach(key => {
+    counts[key] = ngIsSpecial(CARDS[key]) ? Math.min(1, owned[key]) : owned[key];
+  });
+  return counts;
+}
+
+// A lightweight card object (template + derived hero flag) for cardHTML, so the
+// builder reuses the exact in-game card face.
+function ngTemplateCard(key) { const t = CARDS[key]; return Object.assign({}, t, { key, hero: t.type === "hero" }); }
+
+// Continuously-computed validation for the seat being built: unit/special/total
+// tallies, per-rule pass flags, and a plain-language list of what's still unmet.
+function ngDeckStatus(seat) {
+  const faction = ngSeatFaction(seat);
+  const counts = NG.decks[seat] || {};
+  const owned = ngCollection(faction);
+  let units = 0, specials = 0, total = 0, overOwned = false;
+  Object.keys(counts).forEach(key => {
+    const n = counts[key]; if (!n) return;
+    total += n;
+    if (n > (owned[key] || 0)) overOwned = true;
+    if (ngIsSpecial(CARDS[key])) specials += n; else units += n;
+  });
+  const leaderSel = NG.leaders[seat] !== false;
+  const unitsOk = units >= MIN_UNITS;
+  const specialsOk = specials <= MAX_SPECIALS;
+  const ownedOk = !overOwned;
+  const valid = leaderSel && unitsOk && specialsOk && ownedOk;
+  const problems = [];
+  if (!leaderSel) problems.push("Select a Leader.");
+  if (!unitsOk) { const d = MIN_UNITS - units; problems.push(`Add ${d} more Unit card${d === 1 ? "" : "s"} (min ${MIN_UNITS}).`); }
+  if (!specialsOk) { const d = specials - MAX_SPECIALS; problems.push(`Remove ${d} Special card${d === 1 ? "" : "s"} (max ${MAX_SPECIALS}).`); }
+  if (!ownedOk) problems.push("A card exceeds the copies you own.");
+  return { faction, counts, owned, units, specials, total, leaderSel, unitsOk, specialsOk, ownedOk, valid, problems };
+}
+
 function ngCountsToRecipe(counts) { return Object.keys(counts).filter(k => counts[k] > 0).map(k => [k, counts[k]]); }
+
 
 function ngSeatName(idx) {
   if (NG.mode === "hotseat") return idx === 0 ? "Player 1" : "Player 2";
   return idx === 0 ? "You" : esc(FACTIONS[NG.foe].name);
 }
 function ngDeckTitle(idx) { return NG.mode === "hotseat" ? `${ngSeatName(idx)}\u2019s deck` : "Your deck"; }
-
-// A compact tag for a card in the builder (ability / hero / row).
-function ngCardTag(c) {
-  if (c.ability) return abilityLabel(c.ability);
-  if (c.type === "hero") return "Hero";
-  return ROW_NAME[c.row] || "";
-}
 
 // The step breadcrumb, rendered as the page eyebrow. Already-visited ("done")
 // steps are clickable buttons for quick back-navigation; the current step and
@@ -317,50 +376,90 @@ function ngFactionStep() {
 function ngDeckStep() {
   const seat = NG.buildList[NG.buildPos];
   const faction = ngSeatFaction(seat);
-  const counts = NG.decks[seat];
-  const max = ngRecipeMax(faction);
-  const size = ngDeckSize(counts);
-  const ok = size >= MIN_DECK;
+  const st = ngDeckStatus(seat);
   const last = NG.buildPos === NG.buildList.length - 1;
 
-  // Unique card keys in recipe order, split into faction and neutral pools.
-  const seen = {}, order = [];
-  (DECKS[faction] || DECKS.nr).forEach(([key]) => { if (!seen[key]) { seen[key] = 1; order.push(key); } });
-  const facCards = order.filter(k => CARDS[k].faction !== "neutral");
-  const neuCards = order.filter(k => CARDS[k].faction === "neutral");
+  // Split the collection into Units and Specials; order faction cards ahead of
+  // neutrals, then by strength so the strongest read first.
+  const keys = Object.keys(st.owned);
+  const byFacThenStr = (a, b) => {
+    const ca = CARDS[a], cb = CARDS[b];
+    const fa = ca.faction === "neutral" ? 1 : 0, fb = cb.faction === "neutral" ? 1 : 0;
+    if (fa !== fb) return fa - fb;
+    if (cb.str !== ca.str) return cb.str - ca.str;
+    return ca.name.localeCompare(cb.name);
+  };
+  const unitKeys = keys.filter(k => ngIsUnit(CARDS[k])).sort(byFacThenStr);
+  const specialOrder = ["frost", "fog", "rain", "clear", "horn", "scorch", "decoy"];
+  const specialKeys = keys.filter(k => ngIsSpecial(CARDS[k]))
+    .sort((a, b) => specialOrder.indexOf(a) - specialOrder.indexOf(b));
 
-  const rowFor = key => {
-    const c = CARDS[key], n = counts[key] || 0, mx = max[key] || 0;
-    const str = (c.type === "weather" || c.type === "horn") ? "\u2726" : c.str;
-    return `<div class="deck-row ${n === 0 ? "off" : ""}">
-      <span class="deck-info">
-        <span class="deck-str">${str}</span>
-        <span class="deck-nm">${esc(c.name)}</span>
-        <span class="deck-tag">${esc(ngCardTag(c))}</span>
-      </span>
-      <span class="deck-stepper">
-        <button class="stp" data-action="ng-deck-dec" data-key="${key}" ${n <= 0 ? "disabled" : ""} aria-label="Remove one">\u2212</button>
-        <span class="deck-ct">${n}<span class="deck-mx">/${mx}</span></span>
-        <button class="stp" data-action="ng-deck-inc" data-key="${key}" ${n >= mx ? "disabled" : ""} aria-label="Add one">+</button>
-      </span>
+  // One collection tile: the card face, an in-deck count badge, and a stepper.
+  // Add is disabled once the deck holds every copy owned, or (for Specials) once
+  // the 10-card Special cap is reached.
+  const tileFor = key => {
+    const c = CARDS[key];
+    const n = st.counts[key] || 0, ownedN = st.owned[key] || 0;
+    const special = ngIsSpecial(c);
+    const capReached = special && st.specials >= MAX_SPECIALS;
+    const addDisabled = n >= ownedN || capReached;
+    return `<div class="db-card ${n > 0 ? "in" : ""} ${addDisabled ? "maxed" : ""}">
+      <div class="db-face">${cardHTML(ngTemplateCard(key), {})}${n > 0 ? `<span class="db-badge">${n}</span>` : ""}</div>
+      <div class="db-ctl">
+        <button class="stp" data-action="ng-deck-dec" data-key="${key}" ${n <= 0 ? "disabled" : ""} aria-label="Remove one ${esc(c.name)}">\u2212</button>
+        <span class="db-ct">${n}<span class="db-mx">/${ownedN}</span></span>
+        <button class="stp" data-action="ng-deck-inc" data-key="${key}" ${addDisabled ? "disabled" : ""} aria-label="Add one ${esc(c.name)}">+</button>
+      </div>
     </div>`;
   };
+
+  // The Leader is chosen separately and never counts toward the deck size; each
+  // faction fields a single Leader, shown as a selectable card.
+  const L = LEADERS[faction];
+  const fakeP = { leader: L, faction, leaderUsed: false, isAI: true };
+  const leaderTile = `<div class="db-card leader-pick ${st.leaderSel ? "in" : ""}" data-action="ng-leader-toggle" role="button" tabindex="0" aria-pressed="${st.leaderSel}">
+      <div class="db-face">${leaderCardHTML(fakeP, false)}${st.leaderSel ? '<span class="db-badge check">\u2713</span>' : ""}</div>
+      <div class="db-ctl"><span class="db-lead-state">${st.leaderSel ? "Selected" : "Tap to select"}</span></div>
+    </div>`;
+
+  const capNote = st.specials >= MAX_SPECIALS ? " \u00b7 limit reached" : "";
+  const summary = `
+      <aside class="db-summary">
+        <h3>Deck summary</h3>
+        <div class="db-sum-fac"><span class="fac-ic sm">${factionSvg(FACTIONS[faction].icon)}</span> ${esc(FACTIONS[faction].name)}</div>
+        <div class="db-sum-row"><span>Leader</span><b class="${st.leaderSel ? "" : "bad"}">${st.leaderSel ? esc(L.name) : "None"}</b></div>
+        <div class="db-sum-row ${st.unitsOk ? "ok" : "bad"}"><span>Units</span><b>${st.units} <em>/ min ${MIN_UNITS}</em></b></div>
+        <div class="db-sum-row ${st.specialsOk ? "ok" : "bad"}"><span>Specials</span><b>${st.specials} <em>/ max ${MAX_SPECIALS}</em></b></div>
+        <div class="db-sum-row"><span>Total</span><b>${st.total} cards</b></div>
+        <div class="db-verdict ${st.valid ? "ok" : "bad"}">${st.valid ? "Deck ready" : "Deck not ready"}</div>
+        ${st.problems.length ? `<ul class="db-problems">${st.problems.map(p => `<li>${esc(p)}</li>`).join("")}</ul>` : ""}
+        <p class="db-hint">Smaller decks draw your key cards more often \u2014 keep close to ${MIN_UNITS} Units.</p>
+      </aside>`;
 
   openModal(`
     <div class="page-body newgame deckbuild">
       ${ngCrumb()}
       <h2>${esc(ngDeckTitle(seat))}</h2>
-      <div class="deck-summary">
-        <span class="deck-fac"><span class="fac-ic sm">${factionSvg(FACTIONS[faction].icon)}</span> ${esc(FACTIONS[faction].name)}</span>
-        <span class="deck-count ${ok ? "ok" : "warn"}">${size} cards${ok ? "" : ` · add ${MIN_DECK - size} more (min ${MIN_DECK})`}</span>
-      </div>
-      <div class="deck-cols">
-        <div class="deck-col"><h3>Faction cards</h3>${facCards.map(rowFor).join("")}</div>
-        <div class="deck-col"><h3>Neutral cards</h3>${neuCards.map(rowFor).join("")}</div>
+      <div class="db-layout">
+        <div class="db-main">
+          <section class="db-sec">
+            <h3 class="db-h">Leader ${st.leaderSel ? "" : '<span class="db-note warn">required</span>'}</h3>
+            <div class="db-grid leaders">${leaderTile}</div>
+          </section>
+          <section class="db-sec">
+            <h3 class="db-h">Unit cards <span class="db-note ${st.unitsOk ? "" : "warn"}">${st.units} / min ${MIN_UNITS}</span></h3>
+            <div class="db-grid">${unitKeys.map(tileFor).join("")}</div>
+          </section>
+          <section class="db-sec">
+            <h3 class="db-h">Special cards <span class="db-note ${st.specialsOk && !capNote ? "" : "warn"}">${st.specials} / max ${MAX_SPECIALS}${capNote}</span></h3>
+            <div class="db-grid">${specialKeys.map(tileFor).join("")}</div>
+          </section>
+        </div>
+        ${summary}
       </div>
       <div class="foot">
         <button class="gbtn ghost" data-action="ng-back">Back</button>
-        <button class="gbtn primary" data-action="ng-next" ${ok ? "" : "disabled"}>${last ? "Start" : "Next player"}</button>
+        <button class="gbtn primary" data-action="ng-next" ${st.valid ? "" : "disabled"}>${last ? "Start" : "Next player"}</button>
       </div>
     </div>`, false, "page");
 }
@@ -377,13 +476,16 @@ function ngNext() {
     SETTINGS.faction = NG.you; SETTINGS.foeFaction = NG.foe; SETTINGS.aiLevel = NG.level; saveSettings();
     NG.buildList = ngBuilders(NG.mode);
     NG.buildPos = 0;
-    NG.buildList.forEach(i => { NG.decks[i] = NG.decks[i] || ngDefaultCounts(ngSeatFaction(i)); });
+    NG.buildList.forEach(i => {
+      NG.decks[i] = NG.decks[i] || ngDefaultCounts(ngSeatFaction(i));
+      if (NG.leaders[i] === undefined) NG.leaders[i] = true;
+    });
     if (!NG.buildList.length) return ngStart();       // Watch → straight to play
     NG.step = "deck"; return ngRender();
   }
   if (NG.step === "deck") {
     const seat = NG.buildList[NG.buildPos];
-    if (ngDeckSize(NG.decks[seat]) < MIN_DECK) return;  // guard (button also disabled)
+    if (!ngDeckStatus(seat).valid) return;  // guard (button also disabled)
     if (NG.buildPos < NG.buildList.length - 1) { NG.buildPos++; return ngRender(); }
     return ngStart();
   }
@@ -398,14 +500,33 @@ function ngBack() {
   }
 }
 
-// Adjust a card's copy count within [0, max] for the seat being built.
+// Adjust a card's copy count for the seat being built. Adding is bounded by the
+// copies owned and, for Specials, the combined 10-card cap (with a nudge toast).
 function ngDeckAdjust(key, delta) {
   if (!NG || NG.step !== "deck") return;
   const seat = NG.buildList[NG.buildPos];
   const counts = NG.decks[seat];
-  const mx = (ngRecipeMax(ngSeatFaction(seat))[key]) || 0;
-  const next = Math.max(0, Math.min(mx, (counts[key] || 0) + delta));
-  counts[key] = next;
+  const cur = counts[key] || 0;
+  if (delta > 0) {
+    const owned = (ngCollection(ngSeatFaction(seat))[key]) || 0;
+    if (cur >= owned) return;                       // own no more copies
+    if (ngIsSpecial(CARDS[key]) && ngDeckStatus(seat).specials >= MAX_SPECIALS) {
+      flash(`Special card limit reached — max ${MAX_SPECIALS}.`);
+      return;
+    }
+    counts[key] = cur + 1;
+  } else {
+    counts[key] = Math.max(0, cur - 1);
+  }
+  ngRender();
+}
+
+// Toggle the seat's Leader selection. Exactly one Leader must stay selected for
+// the deck to be valid; deselecting flags the deck as not ready.
+function ngLeaderToggle() {
+  if (!NG || NG.step !== "deck") return;
+  const seat = NG.buildList[NG.buildPos];
+  NG.leaders[seat] = NG.leaders[seat] === false;
   ngRender();
 }
 

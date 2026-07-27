@@ -48,6 +48,7 @@ document.addEventListener("click", (e) => {
     case "ng-back": ngBack(); break;
     case "ng-deck-inc": ngDeckAdjust(t.dataset.key, +1); break;
     case "ng-deck-dec": ngDeckAdjust(t.dataset.key, -1); break;
+    case "ng-leader-toggle": ngLeaderToggle(); break;
 
     // settings
     case "toggle-theme": toggleTheme(); break;

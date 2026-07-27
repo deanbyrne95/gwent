@@ -513,31 +513,68 @@ body.pre-game .modal.page .page-body.newgame.ng-narrow{max-width:600px}
 .ng-step.on{opacity:1; color:var(--gilt-soft)}
 .ng-arrow{opacity:.4}
 
-/* Deck-builder: two responsive columns of card rows with copy steppers. */
-body.pre-game .modal.page .page-body.deckbuild{max-width:820px}
-.deck-summary{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
-  margin:0 0 14px; padding:10px 14px; background:var(--felt-2); border:1px solid var(--line); border-radius:10px}
-.deck-fac{display:flex; align-items:center; gap:8px; font-family:"Cormorant Garamond",serif; font-size:18px; color:var(--gilt-soft)}
-.deck-count{font-size:13px; font-weight:600}
-.deck-count.ok{color:var(--gilt-soft)}
-.deck-count.warn{color:#d8894f}
-.deck-cols{display:flex; flex-wrap:wrap; gap:20px}
-.deck-col{flex:1 1 320px; min-width:0}
-.deck-col h3{font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-dim); margin:0 0 8px; padding-bottom:6px; border-bottom:1px solid var(--line)}
-.deck-row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:6px 4px; border-bottom:1px solid rgba(255,255,255,.04)}
-.deck-row.off{opacity:.45}
-.deck-info{display:flex; align-items:center; gap:9px; min-width:0}
-.deck-str{flex:0 0 22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;
-  color:var(--gilt-soft); background:var(--panel-2); border:1px solid var(--line); border-radius:6px}
-.deck-nm{font-size:13.5px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.deck-tag{flex:0 0 auto; font-size:10px; letter-spacing:.4px; text-transform:uppercase; color:var(--ink-dim)}
-.deck-stepper{flex:0 0 auto; display:flex; align-items:center; gap:6px}
-.deck-stepper .stp{width:24px; height:24px; display:flex; align-items:center; justify-content:center; cursor:pointer;
-  background:var(--felt-2); color:var(--ink); border:1px solid var(--line); border-radius:6px; font-size:15px; line-height:1}
-.deck-stepper .stp:hover:not(:disabled){border-color:var(--gilt); color:var(--gilt-soft)}
-.deck-stepper .stp:disabled{opacity:.3; cursor:not-allowed}
-.deck-ct{min-width:34px; text-align:center; font-size:13px; font-variant-numeric:tabular-nums}
-.deck-mx{color:var(--ink-dim); font-size:11px}
+/* Deck-builder: a card-grid collection with copy steppers on the left and a
+   live validity summary on the right. */
+body.pre-game .modal.page .page-body.deckbuild{max-width:1000px}
+.db-layout{display:flex; gap:18px; align-items:flex-start}
+.db-main{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:20px;
+  max-height:min(64vh,560px); overflow:auto; padding:2px 6px 2px 2px}
+.db-h{display:flex; align-items:baseline; gap:8px; font-size:11px; letter-spacing:1.5px; text-transform:uppercase;
+  color:var(--ink-dim); margin:0 0 12px; padding-bottom:6px; border-bottom:1px solid var(--line)}
+.db-note{font-size:11px; letter-spacing:.4px; text-transform:none; color:var(--ink-dim); font-weight:600}
+.db-note.warn{color:#d8894f}
+.db-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(72px,1fr)); gap:14px 8px}
+.db-grid.leaders{grid-template-columns:repeat(auto-fill, minmax(84px,1fr))}
+.db-card{display:flex; flex-direction:column; align-items:center; gap:6px}
+.db-face{position:relative}
+/* Reuse the in-game card face at hand-card scale for legibility in the grid. */
+.db-face .card{width:60px; height:84px; cursor:default}
+.db-face .card .c-name{height:24px; font-size:8.5px}
+.db-face .card .c-art{bottom:26px}
+.db-face .card .c-art.crest .fac-svg{width:36px; height:36px}
+.db-face .card .c-str{width:22px; height:22px; font-size:14px; top:-4px; left:-4px}
+.db-face .card .c-coins{bottom:24px}
+.db-face .card .c-eff,.db-face .card .c-row{width:20px; height:20px; font-size:14px}
+.db-card.in .db-face .card{border-color:var(--gilt-soft); box-shadow:0 0 0 1px var(--gilt-soft), 0 2px 6px rgba(0,0,0,.55)}
+.db-card.maxed .db-face{opacity:.62; filter:grayscale(.35)}
+/* In-deck copy badge (gilt), and the leader's selected check (green). */
+.db-badge{position:absolute; top:-7px; right:-7px; z-index:6; min-width:20px; height:20px; padding:0 5px; border-radius:11px;
+  display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#20180c;
+  background:radial-gradient(circle at 38% 30%, #f4d572, #b8933f 78%); border:1px solid #6f5320; box-shadow:0 1px 3px rgba(0,0,0,.6)}
+.db-badge.check{color:#12240a; background:radial-gradient(circle at 38% 30%, #bfe6a2, #5c9e3f 82%); border-color:#3d7327}
+.db-ctl{display:flex; align-items:center; gap:5px}
+.db-ctl .stp{width:22px; height:22px; display:flex; align-items:center; justify-content:center; cursor:pointer;
+  background:var(--felt-2); color:var(--ink); border:1px solid var(--line); border-radius:6px; font-size:14px; line-height:1}
+.db-ctl .stp:hover:not(:disabled){border-color:var(--gilt); color:var(--gilt-soft)}
+.db-ctl .stp:disabled{opacity:.3; cursor:not-allowed}
+.db-ct{min-width:30px; text-align:center; font-size:12px; font-variant-numeric:tabular-nums}
+.db-mx{color:var(--ink-dim); font-size:10px}
+.db-card.leader-pick{cursor:pointer}
+.db-lead-state{font-size:11px; color:var(--ink-dim)}
+.db-card.leader-pick.in .db-lead-state{color:var(--gilt-soft)}
+/* Live summary panel — sticks alongside the scrolling collection. */
+.db-summary{flex:0 0 224px; align-self:flex-start; position:sticky; top:2px;
+  background:var(--felt-2); border:1px solid var(--line); border-radius:12px; padding:14px 16px;
+  display:flex; flex-direction:column; gap:8px}
+.db-summary h3{margin:0; font-family:"Cormorant Garamond",serif; font-size:20px; color:var(--gilt-soft)}
+.db-sum-fac{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-dim);
+  padding-bottom:8px; margin-bottom:2px; border-bottom:1px solid var(--line)}
+.db-sum-row{display:flex; align-items:baseline; justify-content:space-between; gap:8px; font-size:13.5px; color:var(--ink)}
+.db-sum-row > span{color:var(--ink-dim)}
+.db-sum-row b{font-weight:600}
+.db-sum-row em{font-style:normal; color:var(--ink-dim); font-size:11px}
+.db-sum-row.ok b{color:var(--gilt-soft)}
+.db-sum-row.bad b,.db-sum-row b.bad{color:#d8894f}
+.db-verdict{margin-top:4px; text-align:center; padding:7px; border-radius:8px; font-weight:700; font-size:13px; letter-spacing:.5px}
+.db-verdict.ok{color:#12240a; background:radial-gradient(circle at 50% 0%, #bfe6a2, #7bb35e)}
+.db-verdict.bad{color:#2a0d07; background:radial-gradient(circle at 50% 0%, #f0b79c, #cf6a58)}
+.db-problems{margin:2px 0 0; padding-left:16px; font-size:11.5px; color:#d8894f; line-height:1.5}
+.db-hint{margin:6px 0 0; font-size:11px; color:var(--ink-dim); line-height:1.4}
+@media (max-width:720px){
+  .db-layout{flex-direction:column}
+  .db-main{max-height:none; width:100%}
+  .db-summary{position:static; flex-basis:auto; width:100%}
+}
 .neutral-note{display:flex; align-items:center; gap:10px; margin:0 0 16px; padding:10px 12px;
   background:var(--felt-2); border:1px dashed var(--line); border-radius:10px; font-size:12.5px; color:var(--ink-dim)}
 .neutral-note b{color:var(--gilt-soft)}
