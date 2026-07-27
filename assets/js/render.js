@@ -56,6 +56,17 @@ function crownsHTML(p) {
   return out;
 }
 
+// Hand ordering rank: the row-less Specials group first — weather (0) →
+// Commander's Horn (1) → Scorch/Decoy/other (2) — then units & heroes (3),
+// which are further ordered by strength. (Witcher 3 has no official hand-sort
+// rule; this is a readability choice, keeping like cards together.)
+function handSortRank(card) {
+  if (card.type === "weather") return 0;
+  if (card.type === "horn") return 1;
+  if (card.type === "unit" || card.type === "hero") return 3;
+  return 2;
+}
+
 // One card tile. `opts.hand` makes it a selectable hand card; `opts.selected`
 // draws the selection ring. Every tile carries two type cues: a corner label
 // naming what the card is, and a central glyph showing its combat row (or its
@@ -481,9 +492,15 @@ function render() {
   $("stackYou").innerHTML = stacksHTML(you, true);
   const wz = $("weatherZone"); if (wz) wz.innerHTML = weatherZoneHTML();
 
-  // Your hand — ordered by strength (lowest first), like a played row, so it's
-  // easy to read at a glance.
-  const handSorted = you.hand.slice().sort((a, b) => a.str - b.str || a.name.localeCompare(b.name));
+  // Your hand — grouped so like cards stay together no matter what you draw:
+  // the row-less Specials first (weather, then Commander's Horn, then
+  // Scorch/Decoy), then units & heroes by strength (lowest first). Each group is
+  // alphabetical within itself. Specials carry no strength, so they must be
+  // ranked separately or a raw strength sort leaves them (NaN) scattered.
+  const handSorted = you.hand.slice().sort((a, b) =>
+    handSortRank(a) - handSortRank(b)
+    || (a.str || 0) - (b.str || 0)
+    || a.name.localeCompare(b.name));
   const handEl = $("hand");
   handEl.className = "hand";   // hand cards stay separate (they scroll, never overlap)
   handEl.innerHTML = handSorted
