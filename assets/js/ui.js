@@ -866,16 +866,76 @@ function showRoundBanner() {
 
 function showGameOver() {
   const you = G.players[0], foe = G.players[1];
-  const title = G.winner == null ? "Match drawn" : (G.winner === 0 ? "Victory" : "Defeat");
+  const outcome = G.winner == null ? "draw" : (G.winner === 0 ? "win" : "lose");
+  const title = outcome === "win" ? "Victory!" : outcome === "lose" ? "Defeat" : "Draw";
+  const history = G.roundHistory || [];
+
+  // Header cells: one per round played.
+  const heads = history.map((_, i) => `<div class="vic-round">Round ${i + 1}</div>`).join("");
+  // A score row for a seat; the round's higher score is gilded, the loser dimmed.
+  const scoreRow = (name, pick) => `<div class="vic-name">${esc(name)}</div>` + history.map(r => {
+    const mine = pick(r), theirs = pick(r) === r.a ? r.b : r.a;
+    const cls = mine > theirs ? "won" : mine < theirs ? "lost" : "tied";
+    return `<div class="vic-score ${cls}">${mine}</div>`;
+  }).join("");
+
+  const board = history.length ? `
+    <div class="vic-grid" style="grid-template-columns:minmax(72px,auto) repeat(${history.length},1fr)">
+      <div class="vic-corner"></div>${heads}
+      ${scoreRow(you.name, r => r.a)}
+      ${scoreRow(foe.name, r => r.b)}
+    </div>` : "";
+
   openModal(`
-    <div class="page-body over">
-      <h2 class="over-title ${G.winner === 0 ? "win" : G.winner === 1 ? "lose" : "draw"}">${title}</h2>
-      <p class="over-score">${esc(you.name)} ${you.roundsWon} \u2013 ${foe.roundsWon} ${esc(foe.name)}</p>
-      <div class="foot">
+    <div class="vic vic-${outcome}">
+      <div class="vic-emblem">
+        ${victoryEmblemSVG(outcome)}
+        <div class="vic-title">${title}</div>
+      </div>
+      ${board}
+      <div class="vic-actions">
         <button class="gbtn primary" data-action="open-newgame">Play again</button>
         <button class="gbtn ghost" data-action="return-mainmenu">Main menu</button>
       </div>
-    </div>`, false, "page");
+    </div>`, false, `over-modal vic-${outcome}`);
+}
+
+// The heraldic crest behind the title: crossed swords with a central plaque,
+// framed by laurel branches. A crown tops a victory, a skull marks a defeat,
+// and a draw keeps the bare laurel — a stylised nod to Witcher 3's emblem.
+function victoryEmblemSVG(outcome) {
+  const win = outcome === "win", lose = outcome === "lose";
+  const laurel = !lose ? `
+    <path d="M170 66 q-34 -6 -46 -34 q26 4 40 20"/>
+    <path d="M230 66 q34 -6 46 -34 q-26 4 -40 20"/>` : "";
+  const crown = win ? `
+    <path d="M162 62 l6 -30 20 18 12 -26 12 26 20 -18 6 30z"/>
+    <path d="M160 70 l80 0" stroke-width="6"/>
+    <circle cx="200" cy="24" r="4" fill="currentColor"/>` : "";
+  const skull = lose ? `
+    <path d="M200 24 q-40 0 -40 40 q0 20 12 30 l0 12 56 0 0 -12 q12 -10 12 -30 q0 -40 -40 -40z"
+      fill="var(--panel)" fill-opacity=".55"/>
+    <circle cx="184" cy="60" r="10" fill="currentColor" fill-opacity=".9"/>
+    <circle cx="216" cy="60" r="10" fill="currentColor" fill-opacity=".9"/>
+    <path d="M200 66 l-7 16 14 0z" fill="currentColor" fill-opacity=".9"/>
+    <path d="M182 96 l0 8 M192 96 l0 10 M200 96 l0 10 M208 96 l0 10 M218 96 l0 8" stroke-width="2"/>` : "";
+  return `<svg class="vic-crest" viewBox="0 0 400 250" fill="none" aria-hidden="true">
+    <g stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+      <!-- crossed swords: hilts up top, blades crossing down behind the plaque -->
+      <g fill="currentColor" fill-opacity=".12">
+        <path d="M96 40 L320 230"/><path d="M304 40 L80 230"/>
+      </g>
+      <path d="M96 40 l-18 -14 8 -8 18 18z" fill="currentColor" fill-opacity=".2"/>
+      <path d="M304 40 l18 -14 -8 -8 -18 18z" fill="currentColor" fill-opacity=".2"/>
+      <path d="M108 70 l30 20"/><path d="M292 70 l-30 20"/>
+      <circle cx="82" cy="24" r="7"/><circle cx="318" cy="24" r="7"/>
+      ${laurel}${crown}${skull}
+      <!-- plaque -->
+      <rect x="96" y="96" width="208" height="104" rx="12"
+        fill="var(--panel)" fill-opacity=".9" stroke-width="4"/>
+      <rect x="106" y="106" width="188" height="84" rx="8" stroke-width="2" stroke-opacity=".7"/>
+    </g>
+  </svg>`;
 }
 
 function returnToMainMenu() {
@@ -968,7 +1028,6 @@ function loadSession(id) {
 function deleteSession(id) {
   writeSessions(readSessions().filter(s => s.id !== id));
   if (currentSessionId === id) currentSessionId = null;
-  openSessions();
 }
 
 /* ---------- header ---------- */

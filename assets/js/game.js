@@ -650,6 +650,7 @@ function resolveRound() {
   }
 
   G.lastRound = { round: G.round, a: sa, b: sb };
+  (G.roundHistory || (G.roundHistory = [])).push({ a: sa, b: sb });
 
   // Monsters keep one random non-hero unit on the field through the sweep.
   const kept = [null, null];
@@ -731,7 +732,7 @@ function endMatch() {
   if (winner && humanIdx >= 0) sfx(G.winner === humanIdx ? "win" : "lose");
   if (winner) log(`<b>${winner.name}</b> wins the match!`);
   else log(`<b>The match ends in a draw.</b>`);
-  render();
+  try { render(); } catch (e) { /* never let a redraw hiccup hide the result */ }
   showGameOver();
   autoSave();
 }
