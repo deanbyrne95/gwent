@@ -48,6 +48,8 @@ document.addEventListener("click", (e) => {
     case "ng-back": ngBack(); break;
     case "ng-deck-inc": ngDeckAdjust(t.dataset.key, +1); break;
     case "ng-deck-dec": ngDeckAdjust(t.dataset.key, -1); break;
+    case "ng-col-filter": ngSetFilter("col", t.dataset.v); break;
+    case "ng-deck-filter": ngSetFilter("deck", t.dataset.v); break;
     case "ng-leader-pick": ngLeaderPick(t.dataset.key); break;
 
     // settings

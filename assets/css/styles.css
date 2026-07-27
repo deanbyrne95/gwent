@@ -286,15 +286,14 @@ body.pre-game .theme-float{display:inline-flex}
 /* Strength coin, top-left — white with a gold rim (Gwent's power token): green
    when boosted, red when weakened, and a black spiked coin for heroes. */
 .card .c-str{position:absolute; top:-3px; left:-3px; z-index:4; width:18px; height:18px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center; font-family:"Cormorant Garamond",serif;
-  font-size:12px; font-weight:700; color:#20180c;
+  display:flex; align-items:center; justify-content:center;
+  font-family:"Jost",system-ui,sans-serif; font-variant-numeric:tabular-nums;
+  font-size:12px; font-weight:700; line-height:1; letter-spacing:-.02em; color:#20180c;
   background:radial-gradient(circle at 38% 30%, #ffffff, #ccd1d7 82%); border:1.5px solid var(--gilt);
   box-shadow:0 1px 2px rgba(0,0,0,.6)}
 .card.v-up .c-str{background:radial-gradient(circle at 38% 30%, #cdeea6, #5c9e3f 82%); border-color:#3d7327; color:#12240a}
 .card.v-down .c-str{background:radial-gradient(circle at 38% 30%, #f2b09c, #b23f2c 82%); border-color:#742619; color:#2a0d07}
-.card.hero .c-str{color:#f4ecd6; background:radial-gradient(circle at 40% 32%, #3b3b42, #09090b 80%); border-color:var(--gilt)}
-.card.hero .c-str::before{content:""; position:absolute; inset:-3.5px; border-radius:50%; z-index:-1;
-  background:repeating-conic-gradient(from 0deg, var(--gilt) 0deg 5deg, transparent 5deg 18deg)}
+.card.hero .c-str{color:#ffffff; background:radial-gradient(circle at 38% 30%, #3b3b42, #09090b 82%); border-color:var(--gilt)}
 /* Face "art" — the faction crest as a watermark straight on the card fill (no
    inset window, so the card reads as filled). */
 .card .c-art{position:absolute; left:3px; right:3px; top:3px; bottom:22px;
@@ -515,69 +514,89 @@ body.pre-game .modal.page .page-body.newgame.ng-narrow{max-width:600px}
 .ng-step.on{opacity:1; color:var(--gilt-soft)}
 .ng-arrow{opacity:.4}
 
-/* Deck-builder: a card-grid collection with copy steppers on the left and a
-   live validity summary on the right. */
-body.pre-game .modal.page .page-body.deckbuild{max-width:1000px}
-.db-layout{display:flex; gap:18px; align-items:flex-start}
-.db-main{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:20px;
-  max-height:min(64vh,560px); overflow:auto; padding:2px 6px 2px 2px}
-.db-h{display:flex; align-items:baseline; gap:8px; font-size:11px; letter-spacing:1.5px; text-transform:uppercase;
-  color:var(--ink-dim); margin:0 0 12px; padding-bottom:6px; border-bottom:1px solid var(--line)}
-.db-note{font-size:11px; letter-spacing:.4px; text-transform:none; color:var(--ink-dim); font-weight:600}
-.db-note.warn{color:#d8894f}
-.db-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(72px,1fr)); gap:14px 8px}
-.db-grid.leaders{grid-template-columns:repeat(auto-fill, minmax(84px,1fr))}
-.db-card{display:flex; flex-direction:column; align-items:center; gap:6px}
-.db-face{position:relative}
-/* Reuse the in-game card face at hand-card scale for legibility in the grid. */
-.db-face .card{width:60px; height:84px; cursor:default}
-.db-face .card .c-name{height:24px; font-size:8.5px}
-.db-face .card .c-art{bottom:26px}
-.db-face .card .c-art.crest .fac-svg{width:36px; height:36px}
-.db-face .card .c-str{width:22px; height:22px; font-size:14px; top:-4px; left:-4px}
-.db-face .card .c-coins{bottom:24px}
-.db-face .card .c-eff,.db-face .card .c-row{width:20px; height:20px; font-size:14px}
-.db-card.in .db-face .card{border-color:var(--gilt-soft); box-shadow:0 0 0 1px var(--gilt-soft), 0 2px 6px rgba(0,0,0,.55)}
-.db-card.maxed .db-face{opacity:.62; filter:grayscale(.35)}
-/* In-deck copy badge (gilt), and the leader's selected check (green). */
-.db-badge{position:absolute; top:-7px; right:-7px; z-index:6; min-width:20px; height:20px; padding:0 5px; border-radius:11px;
-  display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#20180c;
+/* Deck-builder: the Witcher-3 layout — a Card Collection panel on the left, a
+   live Leader + deck-summary column in the centre, and the Cards in Deck panel
+   on the right. Clicking a collection card adds a copy; clicking a deck card
+   removes one. */
+body.pre-game .modal.page .page-body.deckbuild{max-width:1240px; width:min(95vw,1240px)}
+.db2{display:grid; grid-template-columns:1fr 216px 1fr; gap:16px; align-items:start}
+.db2-col{display:flex; flex-direction:column; min-width:0;
+  background:var(--felt-2); border:1px solid var(--line); border-radius:12px; padding:12px}
+.db2-head{display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:8px}
+.db2-title{font-family:"Cormorant Garamond",serif; font-size:18px; color:var(--gilt-soft); letter-spacing:.4px}
+.db2-sub{font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--ink-dim)}
+/* Row/type filter tabs. */
+.db2-tabs{display:flex; gap:4px; padding-bottom:10px; margin-bottom:10px; border-bottom:1px solid var(--line)}
+.db2-tab{flex:1 1 0; display:flex; align-items:center; justify-content:center; height:30px; cursor:pointer;
+  background:transparent; border:1px solid transparent; border-radius:7px; color:var(--ink-dim); transition:color .12s, background .12s, border-color .12s}
+.db2-tab .gic{width:18px; height:18px}
+.db2-tab:hover{color:var(--ink); background:rgba(255,255,255,.05)}
+.db2-tab.on{color:var(--gilt-soft); border-color:var(--line); background:rgba(184,147,63,.13)}
+.db2-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:16px 8px; align-content:start;
+  overflow:auto; max-height:min(60vh,540px); padding:4px 4px 6px 2px}
+.db2-empty{grid-column:1/-1; text-align:center; color:var(--ink-dim); font-size:12px; padding:26px 0}
+/* One clickable tile. The container hugs the card so the copy badge and the
+   focus ring sit on the card itself. */
+.db2-card{position:relative; width:96px; justify-self:center; cursor:pointer; border-radius:8px; transition:transform .1s}
+.db2-card:hover{transform:translateY(-3px)}
+.db2-card:focus-visible{outline:2px solid var(--gilt-soft); outline-offset:3px}
+.db2-card.blocked{cursor:not-allowed; opacity:.5; filter:grayscale(.55)}
+.db2-card.blocked:hover{transform:none}
+/* Reuse the in-game card face, enlarged toward the real game's tile size. */
+.db2-card .card{width:96px; height:134px; cursor:inherit}
+.db2-card .card .c-name{height:30px; font-size:11px; padding:3px 4px 4px}
+.db2-card .card .c-art{left:5px; right:5px; top:5px; bottom:33px}
+.db2-card .card .c-art.crest .fac-svg{width:58px; height:58px}
+.db2-card .card .c-str{width:30px; height:30px; font-size:14px; font-weight:600; top:-6px; left:-6px}
+.db2-card .card .c-coins{bottom:31px; right:3px}
+.db2-card .card .c-eff,.db2-card .card .c-row{width:26px; height:26px; font-size:17px}
+/* Copy badge — gilt "×N" at the card's bottom-left, like the game. */
+.db2-qty{position:absolute; left:5px; bottom:5px; z-index:7; min-width:24px; height:22px; padding:0 6px; border-radius:5px;
+  display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:700; color:#20180c;
   background:radial-gradient(circle at 38% 30%, #f4d572, #b8933f 78%); border:1px solid #6f5320; box-shadow:0 1px 3px rgba(0,0,0,.6)}
-.db-badge.check{color:#12240a; background:radial-gradient(circle at 38% 30%, #bfe6a2, #5c9e3f 82%); border-color:#3d7327}
-.db-ctl{display:flex; align-items:center; gap:5px}
-.db-ctl .stp{width:22px; height:22px; display:flex; align-items:center; justify-content:center; cursor:pointer;
-  background:var(--felt-2); color:var(--ink); border:1px solid var(--line); border-radius:6px; font-size:14px; line-height:1}
-.db-ctl .stp:hover:not(:disabled){border-color:var(--gilt); color:var(--gilt-soft)}
-.db-ctl .stp:disabled{opacity:.3; cursor:not-allowed}
-.db-ct{min-width:30px; text-align:center; font-size:12px; font-variant-numeric:tabular-nums}
-.db-mx{color:var(--ink-dim); font-size:10px}
-.db-card.leader-pick{cursor:pointer}
-.db-card.leader-pick:not(.in) .db-face{opacity:.62; filter:grayscale(.3); transition:opacity .12s, filter .12s}
-.db-card.leader-pick:not(.in):hover .db-face{opacity:.85; filter:none}
-.db-lead-state{font-size:11px; color:var(--ink-dim)}
-.db-card.leader-pick.in .db-lead-state{color:var(--gilt-soft)}
-/* Live summary panel — sticks alongside the scrolling collection. */
-.db-summary{flex:0 0 224px; align-self:flex-start; position:sticky; top:2px;
-  background:var(--felt-2); border:1px solid var(--line); border-radius:12px; padding:14px 16px;
-  display:flex; flex-direction:column; gap:8px}
-.db-summary h3{margin:0; font-family:"Cormorant Garamond",serif; font-size:20px; color:var(--gilt-soft)}
-.db-sum-fac{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-dim);
-  padding-bottom:8px; margin-bottom:2px; border-bottom:1px solid var(--line)}
-.db-sum-row{display:flex; align-items:baseline; justify-content:space-between; gap:8px; font-size:13.5px; color:var(--ink)}
-.db-sum-row > span{color:var(--ink-dim)}
-.db-sum-row b{font-weight:600}
-.db-sum-row em{font-style:normal; color:var(--ink-dim); font-size:11px}
-.db-sum-row.ok b{color:var(--gilt-soft)}
-.db-sum-row.bad b,.db-sum-row b.bad{color:#d8894f}
-.db-verdict{margin-top:4px; text-align:center; padding:7px; border-radius:8px; font-weight:700; font-size:13px; letter-spacing:.5px}
+/* Centre column — Leader picker over the live deck summary. */
+.db2-center{display:flex; flex-direction:column; align-items:center; gap:9px; padding:2px 2px 4px}
+.db2-lead{display:flex; flex-direction:column; align-items:center; gap:8px; width:100%}
+.db2-lead-h{margin:0; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-dim)}
+.db2-req{color:#d8894f; font-weight:600; letter-spacing:.4px}
+.db2-lead-card .card.leader{width:94px; height:130px}
+.db2-lead-card .card.leader .c-name{height:28px; font-size:10px}
+.db2-lead-card .card.leader .c-crown{width:30px; height:30px; top:-6px; left:-6px}
+.db2-lead-card .card.leader .c-art.lead-crest{bottom:50px}
+.db2-lead-card .card.leader .c-art.lead-crest .fac-svg{width:46px; height:46px}
+.db2-lead-card .card.leader .c-lead{bottom:33px; font-size:8px}
+.db2-lead-name{font-family:"Cormorant Garamond",serif; font-size:15px; line-height:1.1; color:var(--ink); text-align:center}
+.db2-lead-empty{width:94px; height:130px; display:flex; align-items:center; justify-content:center; text-align:center;
+  padding:8px; font-size:12px; color:var(--ink-dim); border:1px dashed var(--line); border-radius:8px}
+.db2-lead-vars{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:2px}
+.db2-lead-var{background:none; border:none; padding:0; cursor:pointer; border-radius:7px;
+  opacity:.5; filter:grayscale(.45); transition:opacity .12s, filter .12s}
+.db2-lead-var:hover{opacity:.85; filter:none}
+.db2-lead-var.on{opacity:1; filter:none; box-shadow:0 0 0 2px var(--gilt-soft)}
+.db2-lead-var .card.leader{width:46px; height:64px; cursor:pointer}
+.db2-lead-var .card.leader .c-name{height:14px; font-size:6px; padding:1px}
+.db2-lead-var .card.leader .c-lead{display:none}
+.db2-lead-var .card.leader .c-crown{width:16px; height:16px; top:-4px; left:-4px}
+.db2-lead-var .card.leader .c-art.lead-crest{bottom:16px}
+.db2-lead-var .card.leader .c-art.lead-crest .fac-svg{width:24px; height:24px}
+/* Live stats. */
+.db2-stats{list-style:none; margin:6px 0 0; padding:0; width:100%}
+.db2-stats li{display:flex; align-items:baseline; justify-content:space-between; gap:8px;
+  padding:6px 2px; border-bottom:1px solid var(--line); font-size:12.5px}
+.db2-stats li span{color:var(--ink-dim)}
+.db2-stats li b{font-weight:700; font-variant-numeric:tabular-nums; color:var(--ink)}
+.db2-stats li b em{font-style:normal; color:var(--ink-dim); font-size:11px; margin-left:1px}
+.db2-stats li.ok b{color:var(--gilt-soft)}
+.db2-stats li.bad b{color:#d8894f}
+.db-verdict{margin-top:8px; width:100%; text-align:center; padding:7px; border-radius:8px; font-weight:700; font-size:13px; letter-spacing:.5px}
 .db-verdict.ok{color:#12240a; background:radial-gradient(circle at 50% 0%, #bfe6a2, #7bb35e)}
 .db-verdict.bad{color:#2a0d07; background:radial-gradient(circle at 50% 0%, #f0b79c, #cf6a58)}
-.db-problems{margin:2px 0 0; padding-left:16px; font-size:11.5px; color:#d8894f; line-height:1.5}
-.db-hint{margin:6px 0 0; font-size:11px; color:var(--ink-dim); line-height:1.4}
-@media (max-width:720px){
-  .db-layout{flex-direction:column}
-  .db-main{max-height:none; width:100%}
-  .db-summary{position:static; flex-basis:auto; width:100%}
+.db-problems{margin:6px 0 0; padding-left:16px; font-size:11.5px; color:#d8894f; line-height:1.5; align-self:stretch}
+.db2-hint{margin:6px 0 0; font-size:11px; color:var(--ink-dim); line-height:1.4; text-align:center}
+@media (max-width:900px){
+  .db2{grid-template-columns:1fr}
+  .db2-center{order:-1}
+  .db2-grid{max-height:none}
 }
 .neutral-note{display:flex; align-items:center; gap:10px; margin:0 0 16px; padding:10px 12px;
   background:var(--felt-2); border:1px dashed var(--line); border-radius:10px; font-size:12.5px; color:var(--ink-dim)}
