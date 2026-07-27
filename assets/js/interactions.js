@@ -27,11 +27,12 @@ function onHandCard(cardId) {
   }
 }
 
-// Commit the selected card. Some cards need a target first: Commander's Horn
-// picks a row (pop-up); agile deploys to a row and Decoy recalls a unit, both by
-// tapping the board; Medic picks a fallen unit to raise (pop-up).
+// Commit the selected card. Some cards need a target first: the Commander's Horn
+// SPECIAL picks a row (pop-up) — unit horns (Dandelion, Draig Bon-Dhu) deploy to
+// their own row automatically; agile deploys to a row and Decoy recalls a unit,
+// both by tapping the board; Medic picks a fallen unit to raise (pop-up).
 function commitCard(card) {
-  if (card.ability === "horn") {
+  if (card.ability === "horn" && card.type !== "unit") {
     UI.target = { kind: "horn", cardId: card.id };
     flash("Tap a row to sound the horn (tap the card again to cancel).");
     render();
