@@ -98,6 +98,8 @@ function cardHTML(card, opts) {
     ? ` data-action="pick-target-card" data-id="${card.id}" tabindex="0" role="button" aria-label="Recall ${esc(label)}"`
     : opts.revive
     ? ` data-action="pick-revive" data-id="${card.id}" tabindex="0" role="button" aria-label="Revive ${esc(label)}"`
+    : opts.leaderPick
+    ? ` data-action="pick-leader" data-id="${card.id}" tabindex="0" role="button" aria-label="Choose ${esc(label)}"`
     : "";
   return `<div class="${cls.join(" ")}"${attrs}${tip}>
     ${badge}${kind}<span class="c-name">${esc(card.name)}</span>
@@ -106,7 +108,8 @@ function cardHTML(card, opts) {
 
 function abilityLabel(a) {
   return { spy: "Spy", medic: "Medic", horn: "Horn", weather: "Weather", clear: "Clear",
-           muster: "Muster", scorch: "Scorch", decoy: "Decoy" }[a] || a;
+           muster: "Muster", scorch: "Scorch", decoy: "Decoy", scorchrow: "Scorch",
+           berserker: "Berserker", avenger: "Avenger", mardroeme: "Mardroeme" }[a] || a;
 }
 
 // Short word for the corner tag naming the card's type. Heroes and specials
@@ -140,7 +143,7 @@ function cardKindGlyph(card) {
 // row-less specials (weather → its effect, scorch → skull, horn, decoy).
 function cardEffectKey(card) {
   if (card.type === "weather") return card.ability === "clear" ? "clear" : (card.weather || "frost");
-  if (card.ability === "scorch") return "scorch";
+  if (card.ability === "scorch" || card.ability === "scorchrow") return "scorch";
   if (card.ability === "decoy") return "decoy";
   if (card.ability === "horn") return "horn";
   if (["spy", "medic", "muster"].includes(card.ability)) return card.ability;
@@ -165,10 +168,14 @@ function cardDesc(card) {
     case "medic":   return "Revives your strongest fallen unit.";
     case "horn":    return "Doubles the strength of a chosen row.";
     case "clear":   return "Removes all weather effects.";
-    case "weather": return `Drops every non-hero unit in the ${ROW_NAME[WEATHER[card.weather].row]} row to 1 until Clear Weather.`;
+    case "weather": return `Drops every non-hero unit in the ${WEATHER[card.weather].rows.map(r => ROW_NAME[r]).join(" & ")} row to 1 until Clear Weather.`;
     case "muster":  return "Muster — when played, summons all its copies from your deck and hand.";
     case "scorch":  return "Destroys the highest-strength unit(s) on the board.";
+    case "scorchrow": return `Destroys the enemy's strongest ${ROW_NAME[card.scorchRow] || ""} unit if that row totals 10 or more.`;
     case "decoy":   return "Swap for one of your units, returning it to your hand.";
+    case "berserker": return "Berserker — transforms into a stronger form when a Mardroeme is played.";
+    case "avenger": return "Avenger — when destroyed, a stronger creature rises in its place.";
+    case "mardroeme": return "Mardroeme — transforms your Berserkers into their Vildkaarl forms.";
   }
   if (card.hero) return "A hero — immune to weather and special effects.";
   if (card.bond) return "Tight Bond — copies in the same row multiply each other.";
@@ -358,11 +365,12 @@ function leaderCardHTML(player, isViewer) {
   const L = player.leader;
   if (!L) return "";
   const crest = typeof factionSvg === "function" ? factionSvg(FACTIONS[player.faction].icon) : "";
-  const usable = isViewer && !player.isAI && !player.leaderUsed && humanControls();
+  const usable = isViewer && !player.isAI && !L.passive && !player.leaderUsed && !player.leaderCancelled && humanControls();
   const cls = `card leader fac-${player.faction} ${player.leaderUsed ? "used" : ""} ${usable ? "usable" : ""}`;
   const attrs = usable ? ` data-action="use-leader" tabindex="0" role="button"` : "";
   const meta = `Leader · ${FACTIONS[player.faction].name}`;
-  const desc = L.desc + (player.leaderUsed ? " (spent)" : usable ? " Tap to use." : "");
+  const state = L.passive ? " (passive — always on)" : player.leaderCancelled ? " (cancelled)" : player.leaderUsed ? " (spent)" : usable ? " Tap to use." : "";
+  const desc = L.desc + state;
   const flav = L.flavour ? ` data-tip-flav="${esc(L.flavour)}"` : "";
   const tip = ` data-tip-name="${esc(L.name)}" data-tip-meta="${esc(meta)}" data-tip-desc="${esc(desc)}"${flav}`;
   return `<div class="${cls}"${attrs}${tip}>

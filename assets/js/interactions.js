@@ -91,13 +91,14 @@ function confirmPass() {
     </div>`, true, "page");
 }
 
-// The human activates their leader's once-per-game ability. Horn-type leaders
-// ask which row to buff first.
+// The human activates their leader's once-per-game ability. A horn-type leader
+// with no fixed row asks which row to buff first; every other act resolves in
+// useLeader (which shows a card picker when the ability needs a choice).
 function onUseLeader() {
   if (!humanControls()) return;
   const p = me();
-  if (!p.leader || p.leaderUsed) return;
-  if (p.leader.act === "horn") {
+  if (!p.leader || p.leader.passive || p.leaderUsed || p.leaderCancelled) return;
+  if (p.leader.act === "hornrow" && !p.leader.row) {
     chooseRow(p, row => useLeader({ row }), ROWS, p.leader.name, "Sound the horn on which row?");
   } else {
     useLeader();

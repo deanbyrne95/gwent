@@ -1,641 +1,1727 @@
 {
-  "cards": {
-    "frost": {
-      "name": "Biting Frost",
-      "type": "weather",
-      "ability": "weather",
-      "weather": "frost",
-      "faction": "neutral",
-      "copies": 2,
-      "flavour": "Best part about frost - bodies of the fallen don't rot so quickly."
-    },
-    "fog": {
-      "name": "Impenetrable Fog",
-      "type": "weather",
-      "ability": "weather",
-      "weather": "fog",
-      "faction": "neutral",
-      "copies": 2,
-      "flavour": "A good commander's dream... a bad one's horror."
-    },
-    "rain": {
-      "name": "Torrential Rain",
-      "type": "weather",
-      "ability": "weather",
-      "weather": "rain",
-      "faction": "neutral",
-      "copies": 2,
-      "flavour": "Even the rain in this land smells like piss."
-    },
-    "clear": {
-      "name": "Clear Weather",
-      "type": "weather",
-      "ability": "clear",
-      "faction": "neutral",
-      "copies": 2,
-      "flavour": "The sun's shinin', Dromle! Maybe there's hope left after all..."
-    },
-    "horn": {
-      "name": "Commander's Horn",
-      "type": "horn",
-      "ability": "horn",
-      "faction": "neutral",
-      "copies": 2,
-      "flavour": "Plus one to morale, minus three to hearing."
-    },
-    "scorch": {
-      "name": "Scorch",
-      "type": "special",
-      "ability": "scorch",
-      "faction": "neutral",
-      "copies": 2,
-      "flavour": "Pillars of flame turn the mightiest to ash. All others tremble in shock and awe."
-    },
-    "decoy": {
-      "name": "Decoy",
-      "type": "special",
-      "ability": "decoy",
-      "faction": "neutral",
-      "copies": 2,
-      "flavour": "When you run out of peasants, decoys also make decent arrow fodder."
-    },
-    "geralt": {
-      "name": "Geralt of Rivia",
-      "str": 7,
-      "row": "melee",
-      "type": "hero",
-      "faction": "neutral",
-      "copies": 1,
-      "flavour": "If that's what it takes to save the world, 'twere better that world perished."
-    },
-    "ciri": {
-      "name": "Cirilla Fiona",
-      "str": 6,
-      "row": "melee",
-      "type": "hero",
-      "faction": "neutral",
-      "copies": 1,
-      "flavour": "Know when fairy tales cease to be tales? When people start believing in them."
-    },
-    "vesemir": {
-      "name": "Vesemir",
-      "str": 6,
-      "row": "melee",
-      "type": "hero",
-      "faction": "neutral",
-      "copies": 1,
-      "flavour": "If you're to be hanged, ask for water. Anything can happen before they fetch it."
-    },
-    "zoltan": {
-      "name": "Zoltan Chivay",
-      "str": 5,
-      "row": "melee",
-      "type": "unit",
-      "faction": "neutral",
-      "agile": true,
-      "copies": 1,
-      "flavour": "Life without old mates and booze is like a woman without a rump."
-    },
-    "yennefer": {
-      "name": "Yennefer of Vengerberg",
-      "row": "ranged",
-      "type": "unit",
-      "ability": "medic",
-      "faction": "neutral",
-      "copies": 1,
-      "flavour": "Magic is Chaos, Art and Science. It is a curse, a blessing and a progression."
-    },
-    "avallach": {
-      "name": "Avallac'h",
-      "row": "ranged",
-      "type": "unit",
-      "ability": "spy",
-      "faction": "neutral",
-      "copies": 1,
-      "flavour": "You humans have... unusual tastes."
-    },
-    "blue": {
-      "name": "Blue Stripes Commando",
-      "str": 4,
-      "row": "melee",
-      "type": "unit",
-      "faction": "nr",
-      "bond": "blue",
-      "copies": 3,
-      "flavour": "I'd do anything for Temeria. Mostly, though, I kill for her."
-    },
-    "infantry": {
-      "name": "Poor Infantry",
-      "str": 1,
-      "row": "melee",
-      "type": "unit",
-      "faction": "nr",
-      "copies": 4,
-      "flavour": "I's a war veteran, I is. Spare a crown?"
-    },
-    "reaver": {
-      "name": "Crinfrid Reavers",
-      "str": 5,
-      "row": "ranged",
-      "type": "unit",
-      "faction": "nr",
-      "copies": 3,
-      "flavour": "Haven't had much luck with monsters of late, so we enlisted."
-    },
-    "ballista": {
-      "name": "Ballista",
-      "str": 6,
-      "row": "siege",
-      "type": "unit",
-      "faction": "nr",
-      "copies": 1,
-      "flavour": "'Usually we give 'em female names.' 'Like Jenny?' 'More like Bertha.'"
-    },
-    "trebuchet": {
-      "name": "Trebuchet",
-      "str": 6,
-      "row": "siege",
-      "type": "unit",
-      "faction": "nr",
-      "copies": 1,
-      "flavour": "Castle won't batter itself down, now will it? Get them trebuchets rollin'!"
-    },
-    "catapult": {
-      "name": "Catapult",
-      "str": 8,
-      "row": "siege",
-      "type": "unit",
-      "faction": "nr",
-      "copies": 1,
-      "flavour": "The gods help those who have better catapults."
-    },
-    "siegfried": {
-      "name": "Siegfried of Denesle",
-      "str": 5,
-      "row": "melee",
-      "type": "hero",
-      "faction": "nr",
-      "copies": 1,
-      "flavour": "We're on the same side, witcher. You'll realize this one day."
-    },
-    "medic_nr": {
-      "name": "Field Medic",
-      "row": "ranged",
-      "type": "unit",
-      "ability": "medic",
-      "faction": "nr",
-      "copies": 1,
-      "flavour": "Stitch red to red, white to white, and everything will be all right."
-    },
-    "dijkstra": {
-      "name": "Sigismund Dijkstra",
-      "row": "melee",
-      "type": "unit",
-      "ability": "spy",
-      "faction": "nr",
-      "copies": 1,
-      "flavour": "Gwent's like politics, just more honest."
-    },
-    "stennis": {
-      "name": "Prince Stennis",
-      "str": 5,
-      "row": "melee",
-      "type": "unit",
-      "ability": "spy",
-      "faction": "nr",
-      "copies": 1,
-      "flavour": "He ploughin' wears golden armor. Golden. 'Course he's an arsehole."
-    },
-    "ghoul": {
-      "name": "Ghoul",
-      "str": 1,
-      "row": "melee",
-      "type": "unit",
-      "faction": "monsters",
-      "copies": 3,
-      "flavour": "If ghouls are part of the Circle of Life... then it's a damn vicious circle."
-    },
-    "nekker": {
-      "name": "Nekker",
-      "str": 2,
-      "row": "melee",
-      "type": "unit",
-      "ability": "muster",
-      "faction": "monsters",
-      "muster": "nekker",
-      "copies": 3,
-      "flavour": "Damn things are almost cute, if you ignore the whole vicious killer aspect."
-    },
-    "foglet": {
-      "name": "Foglet",
-      "str": 2,
-      "row": "melee",
-      "type": "unit",
-      "faction": "monsters",
-      "copies": 2,
-      "flavour": "Fog creeps on little cat feet. Foglets creep over the bodies of their victims."
-    },
-    "harpy": {
-      "name": "Harpy",
-      "str": 2,
-      "row": "ranged",
-      "type": "unit",
-      "faction": "monsters",
-      "copies": 2,
-      "flavour": "There are many species of harpy, and all are kleptomaniacs."
-    },
-    "griffin": {
-      "name": "Griffin",
-      "str": 5,
-      "row": "ranged",
-      "type": "unit",
-      "faction": "monsters",
-      "copies": 1,
-      "flavour": "Griffins like to toy with their prey. Eat 'em alive, piece by piece."
-    },
-    "katakan": {
-      "name": "Katakan",
-      "str": 5,
-      "row": "melee",
-      "type": "unit",
-      "faction": "monsters",
-      "copies": 1,
-      "flavour": "Drinking the blood of the Continent since the Conjunction."
-    },
-    "werewolf": {
-      "name": "Werewolf",
-      "str": 5,
-      "row": "melee",
-      "type": "unit",
-      "faction": "monsters",
-      "copies": 1,
-      "flavour": "Wolves aren't as bad as they say. Werewolves, though - they're worse."
-    },
-    "forktail": {
-      "name": "Forktail",
-      "str": 5,
-      "row": "siege",
-      "type": "unit",
-      "faction": "monsters",
-      "copies": 1,
-      "flavour": "Fork tails... Bah! Fuckers' tails're more like cleavers."
-    },
-    "arachas": {
-      "name": "Arachas",
-      "str": 4,
-      "row": "siege",
-      "type": "unit",
-      "ability": "muster",
-      "faction": "monsters",
-      "muster": "arachas",
-      "copies": 2,
-      "flavour": "Ugly - nature's way of saying 'Stay away.'"
-    },
-    "fiend": {
-      "name": "Fiend",
-      "str": 6,
-      "row": "melee",
-      "type": "unit",
-      "faction": "monsters",
-      "copies": 1,
-      "flavour": "A fiend looks a bit like a deer. An enormous, evil deer."
-    },
-    "draug": {
-      "name": "Draug",
-      "str": 7,
-      "row": "siege",
-      "type": "hero",
-      "faction": "monsters",
-      "copies": 1,
-      "flavour": "Some men cannot admit defeat. Some keep fighting from beyond the grave."
-    },
-    "imlerith": {
-      "name": "Nithral",
-      "str": 10,
-      "row": "melee",
-      "type": "hero",
-      "faction": "monsters",
-      "copies": 1,
-      "flavour": "Ladd nahw! Kill them! Litter the earth with their entrails!"
-    },
-    "nauzicaa": {
-      "name": "Nauzicaa Brigade",
-      "str": 4,
-      "row": "melee",
-      "type": "unit",
-      "faction": "nilfgaard",
-      "agile": true,
-      "copies": 3,
-      "flavour": "The Emperor will teach the North discipline."
-    },
-    "impera": {
-      "name": "Impera Brigade Guard",
-      "str": 3,
-      "row": "ranged",
-      "type": "unit",
-      "faction": "nilfgaard",
-      "morale": true,
-      "copies": 3,
-      "flavour": "The Impera Brigade never surrenders. Ever."
-    },
-    "blackarch": {
-      "name": "Black Infantry Archer",
-      "str": 6,
-      "row": "ranged",
-      "type": "unit",
-      "faction": "nilfgaard",
-      "copies": 2,
-      "flavour": "I aim for the knee. Always."
-    },
-    "siegesup": {
-      "name": "Siege Engineer",
-      "str": 6,
-      "row": "siege",
-      "type": "unit",
-      "faction": "nilfgaard",
-      "copies": 2,
-      "flavour": "Wielded correctly, a protractor can be a deadly weapon."
-    },
-    "arbalest": {
-      "name": "Arbalest",
-      "str": 4,
-      "row": "siege",
-      "type": "unit",
-      "faction": "nilfgaard",
-      "copies": 2,
-      "flavour": "A crossbow cares not for courage - only for range."
-    },
-    "menno": {
-      "name": "Menno Coehoorn",
-      "row": "ranged",
-      "type": "unit",
-      "ability": "medic",
-      "faction": "nilfgaard",
-      "copies": 1,
-      "flavour": "I'll take an attentive reconnaissance unit over a fine cavalry brigade any day."
-    },
-    "vattier": {
-      "name": "Vattier de Rideaux",
-      "row": "melee",
-      "type": "unit",
-      "ability": "spy",
-      "faction": "nilfgaard",
-      "copies": 1,
-      "flavour": "There's never been a problem a well-planned assassination couldn't solve."
-    },
-    "stefan": {
-      "name": "Stefan Skellen",
-      "row": "siege",
-      "type": "unit",
-      "ability": "spy",
-      "faction": "nilfgaard",
-      "copies": 1,
-      "flavour": "My mark scars the face of our future empress. That is my proudest achievement."
-    },
-    "cahir": {
-      "name": "Cahir Mawr Dyffryn",
-      "str": 6,
-      "row": "melee",
-      "type": "hero",
-      "faction": "nilfgaard",
-      "copies": 1,
-      "flavour": "His eyes flashed under his winged helmet. Fire gleamed from his sword's blade."
-    },
-    "morvran": {
-      "name": "Morvran Voorhis",
-      "str": 10,
-      "row": "siege",
-      "type": "hero",
-      "faction": "nilfgaard",
-      "copies": 1,
-      "flavour": "Summer sun on the quiet waters of the Alba - that's Nilfgaard to me."
-    },
-    "dwarf": {
-      "name": "Dwarven Skirmisher",
-      "str": 3,
-      "row": "melee",
-      "type": "unit",
-      "ability": "muster",
-      "faction": "scoiatael",
-      "muster": "dwarf",
-      "copies": 3,
-      "flavour": "Worked a pickaxe all me life. Battleaxe won't be any trouble."
-    },
-    "mahakam": {
-      "name": "Mahakam Defender",
-      "str": 5,
-      "row": "melee",
-      "type": "unit",
-      "faction": "scoiatael",
-      "morale": true,
-      "copies": 2,
-      "flavour": "I'm telling ye, we're born fer battle - we slash straight at their knees!"
-    },
-    "dolarcher": {
-      "name": "Dol Blathanna Archer",
-      "str": 4,
-      "row": "ranged",
-      "type": "unit",
-      "faction": "scoiatael",
-      "copies": 3,
-      "flavour": "Take another step, dh'oine. You'd look better with an arrow between your eyes."
-    },
-    "vrihedd": {
-      "name": "Vrihedd Brigade Officer",
-      "str": 6,
-      "row": "ranged",
-      "type": "unit",
-      "faction": "scoiatael",
-      "agile": true,
-      "copies": 2,
-      "flavour": "Hatred burns brighter than any fire, and cuts deeper than any blade."
-    },
-    "havekar": {
-      "name": "Havekar Smuggler",
-      "str": 5,
-      "row": "siege",
-      "type": "unit",
-      "faction": "scoiatael",
-      "copies": 2,
-      "flavour": "I fight for whoever's paying the best. Or whoever's easiest to rob."
-    },
-    "ithlinne": {
-      "name": "Ithlinne",
-      "row": "ranged",
-      "type": "unit",
-      "ability": "medic",
-      "faction": "scoiatael",
-      "copies": 1,
-      "flavour": "Famed for constantly prophesying the world's doom. Not much fun at parties."
-    },
-    "yaevinn": {
-      "name": "Yaevinn",
-      "row": "ranged",
-      "type": "unit",
-      "ability": "spy",
-      "faction": "scoiatael",
-      "copies": 1,
-      "flavour": "We are the drops of rain that together make a ferocious storm."
-    },
-    "ciaran": {
-      "name": "Ciaran aep Easnillen",
-      "str": 4,
-      "row": "melee",
-      "type": "unit",
-      "faction": "scoiatael",
-      "copies": 2,
-      "flavour": "The path to freedom is paved in blood, not ink."
-    },
-    "filavandrel": {
-      "name": "Filavandrel aén Fidháil",
-      "str": 6,
-      "row": "ranged",
-      "type": "hero",
-      "faction": "scoiatael",
-      "copies": 1,
-      "flavour": "Though we are now few and scattered, our hearts burn brighter than ever."
-    },
-    "isengrim": {
-      "name": "Isengrim Faoiltiarna",
-      "str": 10,
-      "row": "melee",
-      "type": "hero",
-      "faction": "scoiatael",
-      "copies": 1,
-      "flavour": "It dawns on them once they notice my scar: a realization of imminent death."
-    },
-    "tordarroch": {
-      "name": "Clan Tordarroch Armorsmith",
-      "str": 3,
-      "row": "melee",
-      "type": "unit",
-      "faction": "skellige",
-      "copies": 2,
-      "flavour": "Steel from Mahakam, temper from Skellige. Nothing bites through it."
-    },
-    "berserker": {
-      "name": "Young Berserker",
-      "str": 4,
-      "row": "melee",
-      "type": "unit",
-      "faction": "skellige",
-      "copies": 3,
-      "flavour": "The bear-shirt takes him, and the man is gone till the killing's done."
-    },
-    "shieldmaid": {
-      "name": "Shieldmaiden",
-      "str": 5,
-      "row": "melee",
-      "type": "unit",
-      "faction": "skellige",
-      "bond": "shieldmaid",
-      "copies": 3,
-      "flavour": "Raise your shields, sisters! We die standing or not at all."
-    },
-    "donar": {
-      "name": "Donar an Hindar",
-      "str": 5,
-      "row": "ranged",
-      "type": "unit",
-      "faction": "skellige",
-      "copies": 2,
-      "flavour": "An Hindar keeps his word - and his axe - well sharpened."
-    },
-    "dimun": {
-      "name": "Clan Dimun Pirate",
-      "str": 4,
-      "row": "siege",
-      "type": "unit",
-      "faction": "skellige",
-      "copies": 2,
-      "flavour": "We came for the plunder. We stayed for the fight."
-    },
-    "longship": {
-      "name": "War Longship",
-      "str": 6,
-      "row": "siege",
-      "type": "unit",
-      "faction": "skellige",
-      "copies": 2,
-      "flavour": "Fifty oars, one drum, and a hold full of hungry madmen."
-    },
-    "birna": {
-      "name": "Birna Bran",
-      "row": "ranged",
-      "type": "unit",
-      "ability": "medic",
-      "faction": "skellige",
-      "copies": 1,
-      "flavour": "A mother's ambition is the sharpest blade in Kaer Trolde."
-    },
-    "holger": {
-      "name": "Holger Blackhand",
-      "row": "melee",
-      "type": "unit",
-      "ability": "spy",
-      "faction": "skellige",
-      "copies": 1,
-      "flavour": "One hand black as pitch, the other red with oath-breakers' blood."
-    },
-    "madman": {
-      "name": "Madman Lugos",
-      "str": 6,
-      "row": "siege",
-      "type": "hero",
-      "faction": "skellige",
-      "copies": 1,
-      "flavour": "They call me mad. I call it not caring who I kill."
-    },
-    "hjalmar": {
-      "name": "Hjalmar an Craite",
-      "str": 10,
-      "row": "melee",
-      "type": "hero",
-      "faction": "skellige",
-      "copies": 1,
-      "flavour": "A true jarl leads from the front - sword first, sense later."
+  "nr": {
+    "leaders": {
+      "foltest_king_of_temeria": {
+        "name": "Foltest: King of Temeria",
+        "title": "King of Temeria",
+        "act": "playweather",
+        "row": null,
+        "weather": "fog",
+        "n": null,
+        "discard": null,
+        "passive": null,
+        "default": true,
+        "desc": "Pick an Impenetrable Fog card from your deck and play it instantly.",
+        "flavour": "It is natural and beautiful that a man should love his sister."
+      },
+      "foltest_lord_commander_of_the_north": {
+        "name": "Foltest: Lord Commander of the North",
+        "title": "Lord Commander of the North",
+        "act": "clearweather",
+        "row": null,
+        "weather": null,
+        "n": null,
+        "discard": null,
+        "passive": null,
+        "default": false,
+        "desc": "Clear any weather effects (resulting from Biting Frost, Torrential Rain or Impenetrable Fog cards) in play.",
+        "flavour": "Sod advisors and their schemes. I place my trust in my solders' blades."
+      },
+      "foltest_son_of_medell": {
+        "name": "Foltest: Son of Medell",
+        "title": "Son of Medell",
+        "act": "ruin",
+        "row": "ranged",
+        "weather": null,
+        "n": null,
+        "discard": null,
+        "passive": null,
+        "default": false,
+        "desc": "Destroy your enemy's strongest Ranged Combat unit(s) if the combined strength of all his or her Ranged Combat units is 10 or more.",
+        "flavour": "Dammit, I rule this land and I refuse to creep around its corners."
+      },
+      "foltest_the_siegemaster": {
+        "name": "Foltest: The Siegemaster",
+        "title": "The Siegemaster",
+        "act": "hornrow",
+        "row": "siege",
+        "weather": null,
+        "n": null,
+        "discard": null,
+        "passive": null,
+        "default": false,
+        "desc": "Doubles the strength of all your Siege units (unless a Commander's Horn is also present on that row).",
+        "flavour": "A well-aimed ballista razes not just the enemy's walls, but his morale as well."
+      },
+      "foltest_the_steel_forged": {
+        "name": "Foltest: The Steel-Forged",
+        "title": "The Steel-Forged",
+        "act": "ruin",
+        "row": "siege",
+        "weather": null,
+        "n": null,
+        "discard": null,
+        "passive": null,
+        "default": false,
+        "desc": "Destroy your enemy's strongest Siege unit(s) if the combined strength of all his or her Siege units is 10 or more.",
+        "flavour": "A beautiful day for battle."
+      }
+    },
+    "cards": {
+      "ballista": {
+        "name": "Ballista",
+        "str": 6,
+        "type": "unit",
+        "row": "siege",
+        "copies": 1,
+        "flavour": "'Usually we give 'em female names.' 'Like Jenny?' 'More like Bertha.'"
+      },
+      "blue_stripes_commando": {
+        "name": "Blue Stripes Commando",
+        "str": 4,
+        "type": "unit",
+        "row": "melee",
+        "bond": "blue_stripes_commando",
+        "copies": 3,
+        "flavour": "I'd do anything for Temeria. Mostly, though, I kill for her."
+      },
+      "catapult": {
+        "name": "Catapult",
+        "str": 8,
+        "type": "unit",
+        "row": "siege",
+        "bond": "catapult",
+        "copies": 3,
+        "flavour": "The gods help those who have better catapults."
+      },
+      "crinfrid_reavers_dragon_hunter": {
+        "name": "Crinfrid Reavers Dragon Hunter",
+        "str": 5,
+        "type": "unit",
+        "row": "ranged",
+        "bond": "crinfrid_reavers_dragon_hunter",
+        "copies": 3,
+        "flavour": "Haven't had much luck with monsters of late, so we enlisted."
+      },
+      "dethmold": {
+        "name": "Dethmold",
+        "str": 6,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "I once made a prisoner vomit his own entrails... Ah, good times..."
+      },
+      "dun_banner_medic": {
+        "name": "Dun Banner Medic",
+        "str": 5,
+        "type": "unit",
+        "row": "siege",
+        "ability": "medic",
+        "copies": 1,
+        "flavour": "Stitch red to red, white to white, and everything will be all right."
+      },
+      "esterad_thyssen": {
+        "name": "Esterad Thyssen",
+        "str": 10,
+        "type": "hero",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "Like all Thyssen men, he was tall, powerfully built and criminally handsome."
+      },
+      "john_natalis": {
+        "name": "John Natalis",
+        "str": 10,
+        "type": "hero",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "That square should bear the names of my soldiers, of the dead. Not mine."
+      },
+      "kaedweni_siege_expert": {
+        "name": "Kaedweni Siege Expert",
+        "str": 1,
+        "type": "unit",
+        "row": "siege",
+        "morale": true,
+        "copies": 1,
+        "flavour": "'You gotta recalibrate the arm by five degrees.' 'Do what by the what now?'"
+      },
+      "keira_metz": {
+        "name": "Keira Metz",
+        "str": 5,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "If I'm to die today, I wish to look smashing for the occasion."
+      },
+      "philippa_eilhart": {
+        "name": "Philippa Eilhart",
+        "str": 10,
+        "type": "hero",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "Soon the power of kings will wither, and the Lodge shall seize its rightful place."
+      },
+      "poor_fucking_infantry": {
+        "name": "Poor Fucking Infantry",
+        "str": 1,
+        "type": "unit",
+        "row": "melee",
+        "bond": "poor_fucking_infantry",
+        "copies": 3,
+        "flavour": "I's a war veteran! ... spare me a crown?"
+      },
+      "prince_stennis": {
+        "name": "Prince Stennis",
+        "str": 5,
+        "type": "unit",
+        "row": "melee",
+        "ability": "spy",
+        "copies": 1,
+        "flavour": "He ploughin' wears golden armor. Golden. 'Course he's an arsehole."
+      },
+      "redanian_foot_soldier": {
+        "name": "Redanian Foot Soldier",
+        "str": 1,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "I've bled for Redania! I've killed for Redania... Dammit, I've even raped for Redania!"
+      },
+      "sabrina_glevissig": {
+        "name": "Sabrina Glevissig",
+        "str": 4,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "The Daughter of the Kaedweni Wilderness."
+      },
+      "sheldon_skaggs": {
+        "name": "Sheldon Skaggs",
+        "str": 4,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "I was there, on the front lines! Right where the fightin' was the thickest!"
+      },
+      "siege_tower": {
+        "name": "Siege Tower",
+        "str": 6,
+        "type": "unit",
+        "row": "siege",
+        "copies": 1,
+        "flavour": "I love the clamor of siege towers in the morning. Sounds like victory."
+      },
+      "siegfried_of_denesle": {
+        "name": "Siegfried of Denesle",
+        "str": 5,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "We're on the same side, witcher. You'll realize this one day."
+      },
+      "sigismund_dijkstra": {
+        "name": "Sigismund Dijkstra",
+        "str": 4,
+        "type": "unit",
+        "row": "melee",
+        "ability": "spy",
+        "copies": 1,
+        "flavour": "Gwent's like politics, just more honest."
+      },
+      "s_le_de_tansarville": {
+        "name": "Síle de Tansarville",
+        "str": 5,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "The Lodge lacks humility. Our lust for power may yet be our undoing."
+      },
+      "thaler": {
+        "name": "Thaler",
+        "str": 1,
+        "type": "unit",
+        "row": "siege",
+        "ability": "spy",
+        "copies": 1,
+        "flavour": "Fuck off! We aren't all ploughin' philanderers. Some of us have depth..."
+      },
+      "trebuchet": {
+        "name": "Trebuchet",
+        "str": 6,
+        "type": "unit",
+        "row": "siege",
+        "copies": 1,
+        "flavour": "Castle won't batter itself down, now will it? Get them trebuchets rollin'!"
+      },
+      "vernon_roche": {
+        "name": "Vernon Roche",
+        "str": 10,
+        "type": "hero",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "A patriot... and a real son of a bitch."
+      },
+      "ves": {
+        "name": "Ves",
+        "str": 5,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "Better to live one day as a king than a whole life as a beggar."
+      },
+      "yarpen_zigrin": {
+        "name": "Yarpen Zigrin",
+        "str": 2,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "The world belongs to whoever's best at crackin' skulls and impregnatin' lasses."
+      }
     }
   },
-  "leaders": {
-    "nr": {
-      "name": "Foltest",
-      "title": "The Steel-Forged",
-      "act": "clearweather",
-      "tag": "Clear weather",
-      "desc": "Once per game: clear all weather effects.",
-      "flavour": "It is natural and beautiful that a man should love his sister."
+  "nilfgaard": {
+    "leaders": {
+      "emhyr_var_emreis_emperor_of_nilfgaard": {
+        "name": "Emhyr var Emreis: Emperor of Nilfgaard",
+        "title": "Emperor of Nilfgaard",
+        "act": "peek",
+        "row": null,
+        "weather": null,
+        "n": 3,
+        "discard": null,
+        "passive": null,
+        "default": false,
+        "desc": "Look at 3 random cards from your opponent's hand.",
+        "flavour": "Your motives do not interest me. Only results."
+      },
+      "emhyr_var_emreis_his_imperial_majesty": {
+        "name": "Emhyr var Emreis: His Imperial Majesty",
+        "title": "His Imperial Majesty",
+        "act": "playweather",
+        "row": null,
+        "weather": "rain",
+        "n": null,
+        "discard": null,
+        "passive": null,
+        "default": true,
+        "desc": "Pick a Torrential Rain card from your deck and play it instantly.",
+        "flavour": "The skies wept when my Pavetta died. They will not weep for me."
+      },
+      "emhyr_var_emreis_invader_of_the_north": {
+        "name": "Emhyr var Emreis: Invader of the North",
+        "title": "Invader of the North",
+        "act": "passive",
+        "row": null,
+        "weather": null,
+        "n": null,
+        "discard": null,
+        "passive": "randomrevive",
+        "default": false,
+        "desc": "Abilities that restore a unit to the battlefield restore a randomly-chosen unit. Affects both players.",
+        "flavour": "Emperors command multitudes, yet cannot control two things: their time and their hearts."
+      },
+      "emhyr_var_emreis_the_relentless": {
+        "name": "Emhyr var Emreis: The Relentless",
+        "title": "The Relentless",
+        "act": "opdiscarddraw",
+        "row": null,
+        "weather": null,
+        "n": null,
+        "discard": null,
+        "passive": null,
+        "default": false,
+        "desc": "Draw a card from your opponent's discard pile.",
+        "flavour": "They do not call me the Patient. Take care they do not call you the Headless."
+      },
+      "emhyr_var_emreis_the_white_flame": {
+        "name": "Emhyr var Emreis: The White Flame",
+        "title": "The White Flame",
+        "act": "cancel",
+        "row": null,
+        "weather": null,
+        "n": null,
+        "discard": null,
+        "passive": null,
+        "default": false,
+        "desc": "Cancel your opponent's Leader Ability.",
+        "flavour": "A sword is but one of many tools at a ruler's disposal."
+      }
     },
-    "nilfgaard": {
-      "name": "Emhyr var Emreis",
-      "title": "The White Flame",
-      "act": "draw",
-      "tag": "Draw a card",
-      "desc": "Once per game: draw a card from your deck.",
-      "flavour": "Your motives do not interest me. Only results."
+    "cards": {
+      "albrich": {
+        "name": "Albrich",
+        "str": 2,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "A fireball? Of course. Whatever Your Imperial Majesty wishes."
+      },
+      "assire_var_anahid": {
+        "name": "Assire var Anahid",
+        "str": 6,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "Nilfgaardian mages do have a choice: servile submission, or the gallows."
+      },
+      "black_infantry_archer": {
+        "name": "Black Infantry Archer",
+        "str": 10,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "I aim for the knee. Always."
+      },
+      "cahir_mawr_dyffryn_aep_ceallach": {
+        "name": "Cahir Mawr Dyffryn aep Ceallach",
+        "str": 6,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "His eyes flashed under his winged helmet. Fire gleamed from his sword's blade."
+      },
+      "cynthia": {
+        "name": "Cynthia",
+        "str": 4,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "Cynthia's talents can be deadly. She needs a tight leash."
+      },
+      "etolian_auxiliary_archers": {
+        "name": "Etolian Auxiliary Archers",
+        "str": 1,
+        "type": "unit",
+        "row": "ranged",
+        "ability": "medic",
+        "copies": 1,
+        "flavour": "Double or nothing, aim for his cock."
+      },
+      "fringilla_vigo": {
+        "name": "Fringilla Vigo",
+        "str": 6,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "Magic is the highest good. It transcends all borders and divisions."
+      },
+      "heavy_zerrikanian_fire_scorpion": {
+        "name": "Heavy Zerrikanian Fire Scorpion",
+        "str": 10,
+        "type": "unit",
+        "row": "siege",
+        "copies": 1,
+        "flavour": "Not the best for taking cities, but great for razing them to the ground."
+      },
+      "impera_brigade_guard": {
+        "name": "Impera Brigade Guard",
+        "str": 3,
+        "type": "unit",
+        "row": "melee",
+        "bond": "impera_brigade_guard",
+        "copies": 3,
+        "flavour": "The Impera Brigade never surrenders. Ever."
+      },
+      "letho_of_gulet": {
+        "name": "Letho of Gulet",
+        "str": 10,
+        "type": "hero",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "Witchers never die in their beds."
+      },
+      "menno_coehoorn": {
+        "name": "Menno Coehoorn",
+        "str": 10,
+        "type": "hero",
+        "row": "melee",
+        "ability": "medic",
+        "copies": 1,
+        "flavour": "I'll take an attentive reconnaissance unit over a fine cavalry brigade any day."
+      },
+      "morteisen": {
+        "name": "Morteisen",
+        "str": 3,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "No Nordling pikemen or dwarven spearbearers can hope to best trained cavalry."
+      },
+      "morvran_voorhis": {
+        "name": "Morvran Voorhis",
+        "str": 10,
+        "type": "hero",
+        "row": "siege",
+        "copies": 1,
+        "flavour": "Summer sun reflecting in the quiet waters of the Alba - that's Nilfgaard to me."
+      },
+      "nausicaa_cavalry_rider": {
+        "name": "Nausicaa Cavalry Rider",
+        "str": 2,
+        "type": "unit",
+        "row": "melee",
+        "bond": "nausicaa_cavalry_rider",
+        "copies": 3,
+        "flavour": "The Emperor will teach the North discipline."
+      },
+      "puttkammer": {
+        "name": "Puttkammer",
+        "str": 3,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "Learned a lot at Braibant Military Academy. How to scrub potatoes, for instance."
+      },
+      "rainfarn": {
+        "name": "Rainfarn",
+        "str": 4,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "You'll die as painfully as that pathetic traitor Windhalm did."
+      },
+      "renuald_aep_matsen": {
+        "name": "Renuald aep Matsen",
+        "str": 5,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "They say the Impera fear nothing. Untrue. Renuald scares them shitless."
+      },
+      "rotten_mangonel": {
+        "name": "Rotten Mangonel",
+        "str": 3,
+        "type": "unit",
+        "row": "siege",
+        "copies": 1,
+        "flavour": "The rotten smell brings back childhood memories"
+      },
+      "shilard_fitz_oesterlen": {
+        "name": "Shilard Fitz-Oesterlen",
+        "str": 7,
+        "type": "unit",
+        "row": "melee",
+        "ability": "spy",
+        "copies": 1,
+        "flavour": "Warfare is mere sound and fury - diplomacy is what truly shapes history."
+      },
+      "siege_engineer": {
+        "name": "Siege Engineer",
+        "str": 6,
+        "type": "unit",
+        "row": "siege",
+        "copies": 1,
+        "flavour": "Wielded correctly, a protractor can be a deadly weapon."
+      },
+      "siege_technician": {
+        "name": "Siege Technician",
+        "str": 0,
+        "type": "unit",
+        "row": "siege",
+        "ability": "medic",
+        "copies": 1,
+        "flavour": "I never miss twice."
+      },
+      "stefan_skellen": {
+        "name": "Stefan Skellen",
+        "str": 9,
+        "type": "unit",
+        "row": "melee",
+        "ability": "spy",
+        "copies": 1,
+        "flavour": "My mark scars the face of our future empress. That is my proudest achievement."
+      },
+      "sweers": {
+        "name": "Sweers",
+        "str": 2,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "And hands off the girl! Whatever we may be, we're not savages."
+      },
+      "tibor_eggebracht": {
+        "name": "Tibor Eggebracht",
+        "str": 10,
+        "type": "hero",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "Albaaaa! Forward!! Alba! Long live the Emperor!"
+      },
+      "vanhemar": {
+        "name": "Vanhemar",
+        "str": 4,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "For a fire mage, he's not very... flamboyant."
+      },
+      "vattier_de_rideaux": {
+        "name": "Vattier de Rideaux",
+        "str": 4,
+        "type": "unit",
+        "row": "melee",
+        "ability": "spy",
+        "copies": 1,
+        "flavour": "There's never been a problem a well-planned assassination couldn't solve."
+      },
+      "vreemde": {
+        "name": "Vreemde",
+        "str": 2,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "Discipline is the Empire's deadliest weapon."
+      },
+      "young_emissary": {
+        "name": "Young Emissary",
+        "str": 5,
+        "type": "unit",
+        "row": "melee",
+        "bond": "young_emissary",
+        "copies": 3,
+        "flavour": "If I acquit myself well, perhaps next they'll post me somewhere civilized."
+      },
+      "zerrikanian_fire_scorpion": {
+        "name": "Zerrikanian Fire Scorpion",
+        "str": 5,
+        "type": "unit",
+        "row": "siege",
+        "copies": 1,
+        "flavour": "The Zerrikania Desert used to be a lush garden. Then these came along."
+      }
+    }
+  },
+  "monsters": {
+    "leaders": {
+      "eredin_br_acc_glas_the_treacherous": {
+        "name": "Eredin Bréacc Glas: The Treacherous",
+        "title": "The Treacherous",
+        "act": "draw",
+        "row": null,
+        "weather": null,
+        "n": null,
+        "discard": null,
+        "passive": null,
+        "default": false,
+        "desc": "Doubles the strength of all spy cards (affects both players).",
+        "flavour": "I'm enjoying this. You are my toy."
+      },
+      "eredin_bringer_of_death": {
+        "name": "Eredin: Bringer of Death",
+        "title": "Bringer of Death",
+        "act": "recall",
+        "row": null,
+        "weather": null,
+        "n": null,
+        "discard": null,
+        "passive": null,
+        "default": false,
+        "desc": "Restore a card from your discard pile to your hand.",
+        "flavour": "Go on. Show me your spins, pirouettes and feints. I want to watch."
+      },
+      "eredin_commander_of_the_red_riders": {
+        "name": "Eredin: Commander of the Red Riders",
+        "title": "Commander of the Red Riders",
+        "act": "hornrow",
+        "row": "melee",
+        "weather": null,
+        "n": null,
+        "discard": null,
+        "passive": null,
+        "default": false,
+        "desc": "Double the strength of all your Close Combat units (unless a Commander's horn is also present on that row).",
+        "flavour": "Have some dignity. You know how this will end."
+      },
+      "eredin_destroyer_of_worlds": {
+        "name": "Eredin: Destroyer of Worlds",
+        "title": "Destroyer of Worlds",
+        "act": "discarddraw",
+        "row": null,
+        "weather": null,
+        "n": null,
+        "discard": 2,
+        "passive": null,
+        "default": false,
+        "desc": "Discard 2 card and draw 1 card of your choice from your deck.",
+        "flavour": "It is unavoidable."
+      },
+      "eredin_king_of_the_wild_hunt": {
+        "name": "Eredin: King of the Wild Hunt",
+        "title": "King of the Wild Hunt",
+        "act": "playweather",
+        "row": null,
+        "weather": "any",
+        "n": null,
+        "discard": null,
+        "passive": null,
+        "default": true,
+        "desc": "Pick any weather card from your deck and play it instantly.",
+        "flavour": "I've long awaited this..."
+      }
     },
-    "monsters": {
-      "name": "Eredin",
-      "title": "Destroyer of Worlds",
-      "act": "recall",
-      "tag": "Recall a unit",
-      "desc": "Once per game: return your strongest fallen unit to your hand.",
-      "flavour": "I've long awaited this..."
+    "cards": {
+      "arachas": {
+        "name": "Arachas",
+        "str": 4,
+        "type": "unit",
+        "row": "melee",
+        "ability": "muster",
+        "muster": "arachas",
+        "copies": 3,
+        "flavour": "Ugly - nature's way of saying 'Stay the fuck away.'"
+      },
+      "arachas_behemoth": {
+        "name": "Arachas Behemoth",
+        "str": 6,
+        "type": "unit",
+        "row": "siege",
+        "ability": "muster",
+        "muster": "arachas_behemoth",
+        "copies": 1,
+        "flavour": "Like a cross between a crab, a spider...and a ploughin' mountain"
+      },
+      "botchling": {
+        "name": "Botchling",
+        "str": 4,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "Admit your mistakes and bury them proper - else they'll come back to haunt you."
+      },
+      "celaeno_harpy": {
+        "name": "Celaeno Harpy",
+        "str": 2,
+        "type": "unit",
+        "row": "melee",
+        "agile": true,
+        "copies": 1,
+        "flavour": "Common harpies feed on carrion. Celaeno harpies... they feed on dreams."
+      },
+      "cockatrice": {
+        "name": "Cockatrice",
+        "str": 2,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "Born of an egg laid by a cockerel... if you believe such peasant drivel."
+      },
+      "crone_brewess": {
+        "name": "Crone: Brewess",
+        "str": 6,
+        "type": "unit",
+        "row": "melee",
+        "ability": "muster",
+        "muster": "crone",
+        "copies": 1,
+        "flavour": "We'll cut you up, boy. A fine broth you will make."
+      },
+      "crone_weavess": {
+        "name": "Crone: Weavess",
+        "str": 6,
+        "type": "unit",
+        "row": "melee",
+        "ability": "muster",
+        "muster": "crone",
+        "copies": 1,
+        "flavour": "I sense your pain. I see your fear..."
+      },
+      "crone_whispess": {
+        "name": "Crone: Whispess",
+        "str": 6,
+        "type": "unit",
+        "row": "melee",
+        "ability": "muster",
+        "muster": "crone",
+        "copies": 1,
+        "flavour": "I'd be your best - and last."
+      },
+      "draug": {
+        "name": "Draug",
+        "str": 10,
+        "type": "hero",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "Some men cannot admit defeat. Some keep fighting from beyond the grave."
+      },
+      "earth_elemental": {
+        "name": "Earth Elemental",
+        "str": 6,
+        "type": "unit",
+        "row": "siege",
+        "copies": 1,
+        "flavour": "How to fight an earth elemental? You don't. You run. Fast as you can."
+      },
+      "endrega": {
+        "name": "Endrega",
+        "str": 2,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "The nest! Take out the nest, or the bastards'll just keep coming!"
+      },
+      "fiend": {
+        "name": "Fiend",
+        "str": 6,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "A fiend looks a bit like a deer. An enormous, evil deer."
+      },
+      "fire_elemental": {
+        "name": "Fire Elemental",
+        "str": 6,
+        "type": "unit",
+        "row": "siege",
+        "copies": 1,
+        "flavour": "Fire is so delightful."
+      },
+      "foglet": {
+        "name": "Foglet",
+        "str": 2,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "Fog creeps on little cat feet. Foglets creep over the bodies of their victims."
+      },
+      "forktail": {
+        "name": "Forktail",
+        "str": 5,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "Fork tails... Bah! Fuckers' tails're more like cleavers."
+      },
+      "frightener": {
+        "name": "Frightener",
+        "str": 5,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "\"What have I done?\" the mage cried out, frightened of his own creation."
+      },
+      "gargoyle": {
+        "name": "Gargoyle",
+        "str": 2,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "Ancient sculptors' nightmarish fantasies, brought to life by bored mages."
+      },
+      "ghoul": {
+        "name": "Ghoul",
+        "str": 1,
+        "type": "unit",
+        "row": "melee",
+        "ability": "muster",
+        "muster": "ghoul",
+        "copies": 3,
+        "flavour": "If ghouls are part of the Circle of Life... then it's a damn vicious circle."
+      },
+      "grave_hag": {
+        "name": "Grave Hag",
+        "str": 5,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "Their long tongues're for slurping marrow - and whipping prep."
+      },
+      "griffin": {
+        "name": "Griffin",
+        "str": 5,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "Griffins like to toy with their prey. Eat 'em alive, piece by piece."
+      },
+      "harpy": {
+        "name": "Harpy",
+        "str": 2,
+        "type": "unit",
+        "row": "melee",
+        "agile": true,
+        "copies": 1,
+        "flavour": "There are many species of harpy, and all are kleptomaniacs."
+      },
+      "ice_giant": {
+        "name": "Ice Giant",
+        "str": 5,
+        "type": "unit",
+        "row": "siege",
+        "copies": 1,
+        "flavour": "Fled one time in my life. From the Ice Giant. And I'm not a bit ashamed."
+      },
+      "imlerith": {
+        "name": "Imlerith",
+        "str": 10,
+        "type": "hero",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "Ladd nahw! Kill them! Litter the earth with their entrails!"
+      },
+      "kayran": {
+        "name": "Kayran",
+        "str": 8,
+        "type": "hero",
+        "row": "melee",
+        "morale": true,
+        "agile": true,
+        "copies": 1,
+        "flavour": "Kill a kayran? Simple. Take your best sword... then sell it and hire a witcher."
+      },
+      "leshen": {
+        "name": "Leshen",
+        "str": 10,
+        "type": "hero",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "We never hunt in these woods. Not even if it means the whole village starves."
+      },
+      "nekker": {
+        "name": "Nekker",
+        "str": 2,
+        "type": "unit",
+        "row": "melee",
+        "ability": "muster",
+        "muster": "nekker",
+        "copies": 3,
+        "flavour": "Damn things are almost cute, if you ignore the whole vicious killer aspect."
+      },
+      "plague_maiden": {
+        "name": "Plague Maiden",
+        "str": 5,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "The sick rave about a boil-pocked woman surrounded by herds of rabid rats..."
+      },
+      "toad": {
+        "name": "Toad",
+        "str": 7,
+        "type": "unit",
+        "row": "ranged",
+        "ability": "scorchrow",
+        "scorchRow": "ranged",
+        "copies": 1,
+        "flavour": "Big. Bad. Ugly. Squats in the sewers."
+      },
+      "vampire_bruxa": {
+        "name": "Vampire: Bruxa",
+        "str": 4,
+        "type": "unit",
+        "row": "melee",
+        "ability": "muster",
+        "muster": "vampire",
+        "copies": 1,
+        "flavour": "A vile, bloodthirsty, man-eating hag. Kind of like my mother-in-law."
+      },
+      "vampire_ekimmara": {
+        "name": "Vampire: Ekimmara",
+        "str": 4,
+        "type": "unit",
+        "row": "melee",
+        "ability": "muster",
+        "muster": "vampire",
+        "copies": 1,
+        "flavour": "Who would think overgrown bats would have a taste for gaudy jewelry?"
+      },
+      "vampire_fleder": {
+        "name": "Vampire: Fleder",
+        "str": 4,
+        "type": "unit",
+        "row": "melee",
+        "ability": "muster",
+        "muster": "vampire",
+        "copies": 1,
+        "flavour": "Higher vampires embrace their victims. Fleders rip them to shreds."
+      },
+      "vampire_garkain": {
+        "name": "Vampire: Garkain",
+        "str": 4,
+        "type": "unit",
+        "row": "melee",
+        "ability": "muster",
+        "muster": "vampire",
+        "copies": 1,
+        "flavour": "Blood-drinkers and corpse-eaters so foul their very ugliness paralyses foes."
+      },
+      "vampire_katakan": {
+        "name": "Vampire: Katakan",
+        "str": 5,
+        "type": "unit",
+        "row": "melee",
+        "ability": "muster",
+        "muster": "vampire",
+        "copies": 1,
+        "flavour": "Drinking the blood of the Continent since the Conjunction."
+      },
+      "werewolf": {
+        "name": "Werewolf",
+        "str": 5,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "Wolves aren't as bad as they say. Werewolves, though - they're worse."
+      },
+      "wyvern": {
+        "name": "Wyvern",
+        "str": 2,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "Imagine a cross between a winged snake and a nightmare. Wyverns are worse."
+      }
+    }
+  },
+  "scoiatael": {
+    "leaders": {
+      "francesca_findabair_daisy_of_the_valley": {
+        "name": "Francesca Findabair: Daisy of the Valley",
+        "title": "Daisy of the Valley",
+        "act": "passive",
+        "row": null,
+        "weather": null,
+        "n": null,
+        "discard": null,
+        "passive": "drawextra",
+        "default": false,
+        "desc": "Draw an extra card at the beginning of the battle.",
+        "flavour": "The Elder Races have forgotten more than humans can ever hope to know."
+      },
+      "francesca_findabair_hope_of_the_aen_seidhe": {
+        "name": "Francesca Findabair: Hope of the Aen Seidhe",
+        "title": "Hope of the Aen Seidhe",
+        "act": "moveagile",
+        "row": null,
+        "weather": null,
+        "n": null,
+        "discard": null,
+        "passive": null,
+        "default": false,
+        "desc": "Move agile units to whichever valid row maximizes their strength (don't move units already in optimal row).",
+        "flavour": "Daede sian caente, Aen Seidhe en'allane ael coeden..."
+      },
+      "francesca_findabair_pureblood_elf": {
+        "name": "Francesca Findabair: Pureblood Elf",
+        "title": "Pureblood Elf",
+        "act": "playweather",
+        "row": null,
+        "weather": "frost",
+        "n": null,
+        "discard": null,
+        "passive": null,
+        "default": true,
+        "desc": "Pick a Biting Frost card from your deck and play it instantly.",
+        "flavour": "Ash shall fertilize the soil. By spring, the valley shall bloom once more."
+      },
+      "francesca_findabair_queen_of_dol_blathanna": {
+        "name": "Francesca Findabair: Queen of Dol Blathanna",
+        "title": "Queen of Dol Blathanna",
+        "act": "ruin",
+        "row": "melee",
+        "weather": null,
+        "n": null,
+        "discard": null,
+        "passive": null,
+        "default": false,
+        "desc": "Destroy your enemy's strongest Close Combat unit(s) if the combined strength of all his or her Close Combat units is 10 or more.",
+        "flavour": "To live in peace, we first must kill. This is human oppression's cruel finale."
+      },
+      "francesca_findabair_the_beautiful": {
+        "name": "Francesca Findabair: The Beautiful",
+        "title": "The Beautiful",
+        "act": "hornrow",
+        "row": "ranged",
+        "weather": null,
+        "n": null,
+        "discard": null,
+        "passive": null,
+        "default": false,
+        "desc": "Doubles the strength of all your Ranged Combat units (unless a Commander's Horn is also present on that row).",
+        "flavour": "Do not let my beauty distract your aim."
+      }
     },
-    "scoiatael": {
-      "name": "Francesca Findabair",
-      "title": "Queen of Dol Blathanna",
-      "act": "horn",
-      "tag": "Horn a row",
-      "desc": "Once per game: sound a Commander's Horn on a row you choose.",
-      "flavour": "To live in peace, we first must kill. This is human oppression's cruel finale."
+    "cards": {
+      "barclay_els": {
+        "name": "Barclay Els",
+        "str": 6,
+        "type": "unit",
+        "row": "melee",
+        "agile": true,
+        "copies": 1,
+        "flavour": "Our mead smells like piss, do it? Easy to fix - I'll break your fuckin' nose!"
+      },
+      "ciaran_aep_easnillien": {
+        "name": "Ciaran aep Easnillien",
+        "str": 3,
+        "type": "unit",
+        "row": "melee",
+        "agile": true,
+        "copies": 1,
+        "flavour": "The path to freedom is paved in blood, not ink."
+      },
+      "dennis_cranmer": {
+        "name": "Dennis Cranmer",
+        "str": 6,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "I know how to carry out orders, so you can shove your advice up your coal chute."
+      },
+      "dol_blathanna_archer": {
+        "name": "Dol Blathanna Archer",
+        "str": 4,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "Take another step, dh'oine. You'd look better with an arrow between your eyes."
+      },
+      "dol_blathanna_scout": {
+        "name": "Dol Blathanna Scout",
+        "str": 6,
+        "type": "unit",
+        "row": "melee",
+        "agile": true,
+        "copies": 1,
+        "flavour": "They track like hounds, run like deer and kill like cold-hearted bastards."
+      },
+      "dwarven_skirmisher": {
+        "name": "Dwarven Skirmisher",
+        "str": 3,
+        "type": "unit",
+        "row": "melee",
+        "ability": "muster",
+        "muster": "dwarven_skirmisher",
+        "copies": 3,
+        "flavour": "Worked a pickaxe all me life. Battleaxe won't be any trouble."
+      },
+      "eithn": {
+        "name": "Eithné",
+        "str": 10,
+        "type": "hero",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "The dryad queen has eyes of molten silver, and a heart of cold-forged steel."
+      },
+      "elven_skirmisher": {
+        "name": "Elven Skirmisher",
+        "str": 2,
+        "type": "unit",
+        "row": "ranged",
+        "ability": "muster",
+        "muster": "elven_skirmisher",
+        "copies": 3,
+        "flavour": "No matter what you may have heard, elves don't take human scalps. Too much lice."
+      },
+      "filavandrel_aen_fidhail": {
+        "name": "Filavandrel aen Fidhail",
+        "str": 6,
+        "type": "unit",
+        "row": "melee",
+        "agile": true,
+        "copies": 1,
+        "flavour": "Though we are now few and scattered, our hearts burn brighter than ever."
+      },
+      "havekar_healer": {
+        "name": "Havekar Healer",
+        "str": 0,
+        "type": "unit",
+        "row": "ranged",
+        "ability": "medic",
+        "copies": 1,
+        "flavour": "Sure, I'll patch you up. Gonna cost you, though."
+      },
+      "havekar_smuggler": {
+        "name": "Havekar Smuggler",
+        "str": 5,
+        "type": "unit",
+        "row": "melee",
+        "ability": "muster",
+        "muster": "havekar_smuggler",
+        "copies": 3,
+        "flavour": "I fight for whoever's paying the best. Or whoever's easiest to rob."
+      },
+      "ida_emean_aep_sivney": {
+        "name": "Ida Emean aep Sivney",
+        "str": 6,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "I am a Sage. My power lies in possessing knowledge. Not sharing it."
+      },
+      "iorveth": {
+        "name": "Iorveth",
+        "str": 10,
+        "type": "hero",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "King or beggar, what's the difference? One dh'oine less."
+      },
+      "isengrim_faoiltiarna": {
+        "name": "Isengrim Faoiltiarna",
+        "str": 10,
+        "type": "hero",
+        "row": "melee",
+        "morale": true,
+        "copies": 1,
+        "flavour": "It dawns on them once they notice my scar: a realization of imminent death."
+      },
+      "mahakaman_defender": {
+        "name": "Mahakaman Defender",
+        "str": 5,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "I'm telling ye, we're born fer battle - we slash straight at their knees!"
+      },
+      "milva": {
+        "name": "Milva",
+        "str": 10,
+        "type": "unit",
+        "row": "ranged",
+        "morale": true,
+        "copies": 1,
+        "flavour": "With each arrow I loose, I think of my da. He'd be proud. I think."
+      },
+      "riordain": {
+        "name": "Riordain",
+        "str": 1,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "Stare into their eyes, feast on their terror. Then go in for the kill."
+      },
+      "saesenthessis": {
+        "name": "Saesenthessis",
+        "str": 10,
+        "type": "hero",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "Beautiful, pure, fierce - the prefect icon for a rebellion."
+      },
+      "schirr": {
+        "name": "Schirrú",
+        "str": 8,
+        "type": "unit",
+        "row": "siege",
+        "ability": "scorchrow",
+        "scorchRow": "siege",
+        "copies": 1,
+        "flavour": "Time to look death in the face."
+      },
+      "toruviel": {
+        "name": "Toruviel",
+        "str": 2,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "I'd gladly kill you from up close, stare in your eyes... But you reek, human."
+      },
+      "vrihedd_brigade_recruit": {
+        "name": "Vrihedd Brigade Recruit",
+        "str": 4,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "Hatred burns brighter than any fire, and cuts deeper than any blade."
+      },
+      "vrihedd_brigade_veteran": {
+        "name": "Vrihedd Brigade Veteran",
+        "str": 5,
+        "type": "unit",
+        "row": "melee",
+        "agile": true,
+        "copies": 1,
+        "flavour": "'Vrihedd? What's that mean?' 'Trouble.'"
+      },
+      "yaevinn": {
+        "name": "Yaevinn",
+        "str": 6,
+        "type": "unit",
+        "row": "melee",
+        "agile": true,
+        "copies": 1,
+        "flavour": "We are the drops of rain that together make a ferocious storm."
+      }
+    }
+  },
+  "skellige": {
+    "leaders": {
+      "crach_an_craite": {
+        "name": "Crach an Craite",
+        "title": "Crach an Craite",
+        "act": "reshuffle",
+        "row": null,
+        "weather": null,
+        "n": null,
+        "discard": null,
+        "passive": null,
+        "default": true,
+        "desc": "Shuffle all cards from each player's graveyard back into their decks.",
+        "flavour": "A king's gotta be wise. A king's gotta command respect. A king's gotta have stones."
+      },
+      "king_bran": {
+        "name": "King Bran",
+        "title": "King Bran",
+        "act": "passive",
+        "row": null,
+        "weather": null,
+        "n": null,
+        "discard": null,
+        "passive": "halfweather",
+        "default": false,
+        "desc": "Units only lose half their Strength in bad weather conditions.",
+        "flavour": "No one can replace Bran. Though they're sure to try."
+      }
     },
-    "skellige": {
-      "name": "Crach an Craite",
-      "title": "An Craite Jarl",
-      "act": "summon",
-      "tag": "Summon a unit",
-      "desc": "Once per game: summon your strongest fallen unit to the battlefield.",
-      "flavour": "A king's gotta be wise. A king's gotta command respect. A king's gotta have stones."
+    "cards": {
+      "berserker": {
+        "name": "Berserker",
+        "str": 4,
+        "type": "unit",
+        "row": "melee",
+        "ability": "berserker",
+        "transformInto": "transformed_vildkaarl",
+        "copies": 1,
+        "flavour": "Kill, crush, cleave!"
+      },
+      "birna_bran": {
+        "name": "Birna Bran",
+        "str": 2,
+        "type": "unit",
+        "row": "melee",
+        "ability": "medic",
+        "copies": 1,
+        "flavour": "Skellige must have a strong king. No matter what it takes."
+      },
+      "blueboy_lugos": {
+        "name": "Blueboy Lugos",
+        "str": 6,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "I'm damn near ready to puke from boredom."
+      },
+      "cerys": {
+        "name": "Cerys",
+        "str": 10,
+        "type": "hero",
+        "row": "melee",
+        "ability": "muster",
+        "musterTarget": "shield_maiden",
+        "copies": 1,
+        "flavour": "They call me Sparrowhawk, know why? Because I eat rats like you for breakfast."
+      },
+      "clan_an_craite_warrior": {
+        "name": "Clan an Craite Warrior",
+        "str": 6,
+        "type": "unit",
+        "row": "melee",
+        "bond": "clan_an_craite_warrior",
+        "copies": 3,
+        "flavour": "I'll bring the an Craites such glory, bards'll go hoarse singin' me praises!"
+      },
+      "clan_brokvar_archer": {
+        "name": "Clan Brokvar Archer",
+        "str": 6,
+        "type": "unit",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "So ye can hit a movin' target at two hundred paces. Me, too. In a storm."
+      },
+      "clan_dimun_pirate": {
+        "name": "Clan Dimun Pirate",
+        "str": 6,
+        "type": "unit",
+        "row": "ranged",
+        "ability": "scorch",
+        "copies": 1,
+        "flavour": "Can see the fear in their eyes. Fear o' me... fear o' Clan Dimun!"
+      },
+      "clan_drummond_shield_maiden": {
+        "name": "Clan Drummond Shield Maiden",
+        "str": 4,
+        "type": "unit",
+        "row": "melee",
+        "bond": "clan_drummond_shield_maiden",
+        "copies": 3,
+        "flavour": "They'll shatter on our shields like waves on a rocky shore.",
+        "muster": "shield_maiden"
+      },
+      "clan_heymaey_skald": {
+        "name": "Clan Heymaey Skald",
+        "str": 4,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "The deeds of Clan Heymaey will go down in history."
+      },
+      "clan_tordarroch_armorsmith": {
+        "name": "Clan Tordarroch Armorsmith",
+        "str": 4,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "Ye're in for a poundin'."
+      },
+      "donar_an_hindar": {
+        "name": "Donar an Hindar",
+        "str": 4,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "I've gathered all the jarls together. Now make your case."
+      },
+      "draig_bon_dhu": {
+        "name": "Draig Bon-Dhu",
+        "str": 2,
+        "type": "unit",
+        "row": "siege",
+        "ability": "horn",
+        "copies": 1,
+        "flavour": "Hear ye now the tale of the heroic deeds of Clan an Craite."
+      },
+      "ermion": {
+        "name": "Ermion",
+        "str": 8,
+        "type": "hero",
+        "row": "ranged",
+        "ability": "mardroeme",
+        "copies": 1,
+        "flavour": "Only the ignorant dismiss the importance of myths."
+      },
+      "hemdall": {
+        "name": "Hemdall",
+        "str": 11,
+        "row": "melee",
+        "type": "hero",
+        "copies": 0,
+        "flavour": "When Hemdall arrives, so too does Ragh nar Roog — the end of days."
+      },
+      "hjalmar": {
+        "name": "Hjalmar",
+        "str": 10,
+        "type": "hero",
+        "row": "ranged",
+        "copies": 1,
+        "flavour": "Instead of mournin' the fallen, let's drink to their memory!"
+      },
+      "holger_blackhand": {
+        "name": "Holger Blackhand",
+        "str": 4,
+        "type": "unit",
+        "row": "siege",
+        "copies": 1,
+        "flavour": "Now let's drink to Emperor of Nilfgaard - may his prick forever stay limp!"
+      },
+      "kambi": {
+        "name": "Kambi",
+        "str": 0,
+        "type": "unit",
+        "row": "melee",
+        "ability": "avenger",
+        "summon": "hemdall",
+        "copies": 1,
+        "flavour": "When the time comes, the cockerel Kambi shall crow and awaken Hemdall."
+      },
+      "light_longship": {
+        "name": "Light Longship",
+        "str": 4,
+        "type": "unit",
+        "row": "ranged",
+        "ability": "muster",
+        "muster": "light_longship",
+        "copies": 3,
+        "flavour": "Escape them? In the waters of Skellige? Good luck."
+      },
+      "madman_lugos": {
+        "name": "Madman Lugos",
+        "str": 6,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "WAAAAAAAAAAGH!!!!"
+      },
+      "mardroeme": {
+        "name": "Mardroeme",
+        "type": "special",
+        "ability": "mardroeme",
+        "copies": 3,
+        "flavour": "Eat enough of them, and the world will never be the same..."
+      },
+      "olaf": {
+        "name": "Olaf",
+        "str": 12,
+        "type": "unit",
+        "row": "melee",
+        "morale": true,
+        "agile": true,
+        "copies": 1,
+        "flavour": "Many've tried to defeat Olaf. But won't hear about it from them - they're dead."
+      },
+      "svanrige": {
+        "name": "Svanrige",
+        "str": 4,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "The emperor also thought him an accidental king. At first."
+      },
+      "transformed_vildkaarl": {
+        "name": "Transformed Vildkaarl",
+        "str": 14,
+        "type": "unit",
+        "row": "melee",
+        "morale": true,
+        "copies": 0,
+        "flavour": "Saw them fight once in my life... and once was enough."
+      },
+      "transformed_young_vildkaarl": {
+        "name": "Transformed Young Vildkaarl",
+        "str": 8,
+        "type": "unit",
+        "row": "ranged",
+        "bond": "transformed_young_vildkaarl",
+        "copies": 0,
+        "flavour": "Rooaaaar!"
+      },
+      "udalryk": {
+        "name": "Udalryk",
+        "str": 4,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "Haaaargh! After me, if ye've the bollocks!"
+      },
+      "war_longship": {
+        "name": "War Longship",
+        "str": 6,
+        "type": "unit",
+        "row": "siege",
+        "bond": "war_longship",
+        "copies": 3,
+        "flavour": "They say Hemdall's heart swells whenever the longships sail out on a raid."
+      },
+      "young_berserker": {
+        "name": "Young Berserker",
+        "str": 2,
+        "type": "unit",
+        "row": "ranged",
+        "ability": "berserker",
+        "transformInto": "transformed_young_vildkaarl",
+        "copies": 1,
+        "flavour": "Want some?"
+      }
+    }
+  },
+  "neutral": {
+    "leaders": {},
+    "cards": {
+      "frost": {
+        "name": "Biting Frost",
+        "type": "weather",
+        "ability": "weather",
+        "weather": "frost",
+        "copies": 3,
+        "flavour": "Best part about frost - bodies of the fallen don't rot so quickly."
+      },
+      "bovine_defense_force": {
+        "name": "Bovine Defense Force",
+        "str": 8,
+        "type": "unit",
+        "row": "melee",
+        "copies": 0,
+        "flavour": "Grrrrr!"
+      },
+      "cirilla_fiona_elen_riannon": {
+        "name": "Cirilla Fiona Elen Riannon",
+        "str": 15,
+        "type": "hero",
+        "row": "melee",
+        "ability": "muster",
+        "musterTarget": "roach",
+        "copies": 1,
+        "flavour": "Know when fairy tales cease to be tales? When people start believing in them."
+      },
+      "clear": {
+        "name": "Clear Weather",
+        "type": "weather",
+        "ability": "clear",
+        "copies": 3,
+        "flavour": "The sun's shinin', Dromle! The sun's shinin'! Maybe there's hope left after all..."
+      },
+      "horn": {
+        "name": "Commander's Horn",
+        "type": "special",
+        "ability": "horn",
+        "copies": 3,
+        "flavour": "Plus one to morale, minus three to hearing."
+      },
+      "cow": {
+        "name": "Cow",
+        "str": 0,
+        "type": "unit",
+        "row": "ranged",
+        "ability": "avenger",
+        "summon": "bovine_defense_force",
+        "copies": 1,
+        "flavour": "Mooo!"
+      },
+      "dandelion": {
+        "name": "Dandelion",
+        "str": 2,
+        "type": "unit",
+        "row": "melee",
+        "ability": "horn",
+        "copies": 1,
+        "flavour": "Dandelion, you're a cynic, a lecher, a whoremonger, a liar - and my best friend."
+      },
+      "decoy": {
+        "name": "Decoy",
+        "type": "special",
+        "ability": "decoy",
+        "copies": 3,
+        "flavour": "When you run out of peasants, decoys also make decent arrow fodder."
+      },
+      "emiel_regis_rohellec_terzieff": {
+        "name": "Emiel Regis Rohellec Terzieff",
+        "str": 5,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "Men, the polite ones, at least, would call me a monster. A blood-drinking freak."
+      },
+      "gaunter_odimm": {
+        "name": "Gaunter O'Dimm",
+        "str": 2,
+        "type": "unit",
+        "row": "siege",
+        "ability": "muster",
+        "muster": "gaunter",
+        "copies": 1,
+        "flavour": "He always grants exactly what you wish for. That's the problem."
+      },
+      "gaunter_odimm_darkness": {
+        "name": "Gaunter O'Dimm: Darkness",
+        "str": 4,
+        "type": "unit",
+        "row": "ranged",
+        "ability": "muster",
+        "muster": "gaunter",
+        "copies": 1,
+        "flavour": "Fear not the shadows, but the light."
+      },
+      "geralt_of_rivia": {
+        "name": "Geralt of Rivia",
+        "str": 15,
+        "type": "hero",
+        "row": "melee",
+        "ability": "muster",
+        "musterTarget": "roach",
+        "copies": 1,
+        "flavour": "If that's what it takes to save the world, it'd better to let that world die."
+      },
+      "fog": {
+        "name": "Impenetrable Fog",
+        "type": "weather",
+        "ability": "weather",
+        "weather": "fog",
+        "copies": 3,
+        "flavour": "A good commander's dream... a bad one's horror."
+      },
+      "mysterious_elf": {
+        "name": "Mysterious Elf",
+        "str": 0,
+        "type": "hero",
+        "row": "melee",
+        "ability": "spy",
+        "copies": 1,
+        "flavour": "You humans have... unusual tastes."
+      },
+      "olgierd_von_everec": {
+        "name": "Olgierd von Everec",
+        "str": 6,
+        "type": "unit",
+        "row": "melee",
+        "morale": true,
+        "agile": true,
+        "copies": 1,
+        "flavour": "At least you now know I don't easily lose my head"
+      },
+      "roach": {
+        "name": "Roach",
+        "str": 3,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "\"Come on, Roach! Faster!\"",
+        "muster": "roach"
+      },
+      "scorch": {
+        "name": "Scorch",
+        "type": "special",
+        "ability": "scorch",
+        "copies": 3,
+        "flavour": "Pillars of flame turn the mightiest to ash. All others tremble in shock and awe."
+      },
+      "storm": {
+        "name": "Skellige Storm",
+        "type": "weather",
+        "ability": "weather",
+        "weather": "storm",
+        "copies": 3,
+        "flavour": "This ain't no normal storm. This here's the wrath of the gods."
+      },
+      "rain": {
+        "name": "Torrential Rain",
+        "type": "weather",
+        "ability": "weather",
+        "weather": "rain",
+        "copies": 3,
+        "flavour": "Even the rain in this land smells like piss."
+      },
+      "triss_merigold": {
+        "name": "Triss Merigold",
+        "str": 7,
+        "type": "hero",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "I can take care of myself. Trust me."
+      },
+      "vesemir": {
+        "name": "Vesemir",
+        "str": 6,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "If you're to be hanged, ask for water. Anything can happen before they fetch it."
+      },
+      "villentretenmerth": {
+        "name": "Villentretenmerth",
+        "str": 7,
+        "type": "unit",
+        "row": "melee",
+        "ability": "scorchrow",
+        "scorchRow": "melee",
+        "copies": 1,
+        "flavour": "Also calls himself Borkh Three Jackdaws... he's not the best at names."
+      },
+      "yennefer_of_vengerberg": {
+        "name": "Yennefer of Vengerberg",
+        "str": 7,
+        "type": "hero",
+        "row": "ranged",
+        "ability": "medic",
+        "copies": 1,
+        "flavour": "Magic is Chaos, Art and Science. It is a curse, a blessing and a progression."
+      },
+      "zoltan_chivay": {
+        "name": "Zoltan Chivay",
+        "str": 5,
+        "type": "unit",
+        "row": "melee",
+        "copies": 1,
+        "flavour": "Life without old mates and booze is like a woman without a rump."
+      }
     }
   }
 }
