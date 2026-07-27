@@ -37,6 +37,31 @@
   const gw = {
     _seat: 0,   // which seat the commands target (0 = You, 1 = opponent)
 
+    // Force the end-of-match screen with a chosen outcome ("win" | "lose" |
+    // "draw"), seeding crowns, rounds won and a sample per-round scoreboard so
+    // it renders exactly as real play would. Example:  gw.end("lose")
+    end(outcome) {
+      if (!G || !G.players) { console.warn("No game in progress — start a match first."); return; }
+      const o = (outcome === "win" || outcome === "lose" || outcome === "draw") ? outcome : "win";
+      const a = G.players[0], b = G.players[1];
+      const you = G.players.findIndex(p => !p.isAI);
+      const meIdx = you < 0 ? 0 : you, foeIdx = meIdx === 0 ? 1 : 0;
+      // A three-round history whose final round matches the outcome (a draw
+      // ends on a tie, so the scoreboard never contradicts the verdict).
+      const hist = [{ a: 33, b: 21 }, { a: 19, b: 27 },
+        o === "draw" ? { a: 24, b: 24 } : (o === "win" ? { a: 41, b: 30 } : { a: 22, b: 35 })];
+      G.roundHistory = hist;
+      if (o === "draw") { a.crowns = b.crowns = 0; a.roundsWon = b.roundsWon = 1; }
+      else {
+        const winIdx = o === "win" ? meIdx : foeIdx;
+        G.players[winIdx].crowns = 1; G.players[winIdx === 0 ? 1 : 0].crowns = 0;
+        G.players[winIdx].roundsWon = 2; G.players[winIdx === 0 ? 1 : 0].roundsWon = 1;
+      }
+      endMatch();
+      console.log(`Triggered "${o}" end screen.`);
+      return o;
+    },
+
     // Point the commands at a seat (0 = You, 1 = the other side).
     seat(i) { gw._seat = (i === 1 ? 1 : 0); console.log("Targeting seat", gw._seat, "—", (player() || {}).name); return gw._seat; },
 
@@ -130,6 +155,7 @@
   gw.find("scorch")                search the catalogue by key/name
   gw.list("nr")                    list all cards (optionally one faction)
   gw.seat(0|1)                     choose which seat commands target (0 = You)
+  gw.end("win"|"lose"|"draw")      show the end-of-match screen for an outcome
   gw.state() / gw.you(seat?)       raw match state / a player object
 
 Factions: nr · nilfgaard · monsters · scoiatael · skellige
