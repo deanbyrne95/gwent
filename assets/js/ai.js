@@ -93,13 +93,16 @@ function evalCard(p, o, card) {
       return weatherDelta(p, o, { melee: false, ranged: false, siege: false });
     }
     case "weather": {
-      const w = Object.assign({}, G.weather, { [WEATHER[card.weather].row]: true });
+      const w = Object.assign({}, G.weather);
+      WEATHER[card.weather].rows.forEach(r => { w[r] = true; });
       return weatherDelta(p, o, w);
     }
     case "muster": {
       // Playing it rallies every copy from hand and deck onto the board at once.
-      const kin = p.hand.concat(p.deck).filter(c => c.muster === card.muster);
-      let add = 0;
+      const group = card.musterTarget || card.muster;
+      const kin = p.hand.concat(p.deck).filter(c => c.muster === group);
+      let add = card.hero ? card.str : (G.weather[card.row] ? 1 : card.str);
+      if (p.horns[card.row]) add *= 2;
       kin.forEach(c => { const r = c.row; const b = c.hero ? c.str : (G.weather[r] ? 1 : c.str); add += p.horns[r] ? b * 2 : b; });
       return add;
     }
@@ -125,30 +128,47 @@ function evalCard(p, o, card) {
 // Decide whether the rival should spend its leader ability this turn. Returns
 // true (and uses it) when the moment is clearly worthwhile.
 function aiMaybeLeader(p, o) {
-  if (!p.leader || p.leaderUsed) return false;
-  switch (p.leader.act) {
-    case "clearweather": {
-      const anyWeather = G.weather.melee || G.weather.ranged || G.weather.siege;
+  if (!p.leader || p.leader.passive || p.leaderUsed || p.leaderCancelled) return false;
+  const L = p.leader;
+  const anyWeather = G.weather.melee || G.weather.ranged || G.weather.siege;
+  const oppTopRow = ROWS.slice().sort((a, b) => rowStrength(o, b) - rowStrength(o, a))[0];
+  switch (L.act) {
+    case "clearweather":
       if (anyWeather && weatherDelta(p, o, { melee: false, ranged: false, siege: false }) > 2) { useLeader(); return true; }
       return false;
-    }
-    case "horn": {
-      const row = strongestRow(p);
+    case "hornrow": {
+      const row = L.row || strongestRow(p);
       if (!p.horns[row] && rowStrengthNoHorn(p, row) >= 8) { useLeader({ row }); return true; }
       return false;
     }
-    case "summon": {
-      const c = strongestRevivable(p);
-      if (c && c.str >= 5) { useLeader(); return true; }
+    case "playweather": {
+      if (rowStrength(o, oppTopRow) >= 10) { useLeader(); return true; }
       return false;
     }
-    case "recall": {
-      const c = strongestRevivable(p);
+    case "ruin": {
+      const row = L.row || oppTopRow;
+      if (rowStrength(o, row) >= 10) { useLeader({ row }); return true; }
+      return false;
+    }
+    case "recall":
+    case "opdiscarddraw": {
+      const src = L.act === "recall" ? p : o;
+      const c = strongestRevivable(src);
       if (c && c.str >= 6) { useLeader(); return true; }
       return false;
     }
     case "draw":
       if (p.hand.length <= 6) { useLeader(); return true; }
+      return false;
+    case "discarddraw":
+      if (p.hand.length >= 6 && p.deck.length) { useLeader(); return true; }
+      return false;
+    case "peek":
+    case "cancel":
+    case "moveagile":
+    case "reshuffle":
+      // Situational utility — spend it late so the turn isn't wasted early.
+      if (p.hand.length <= 4) { useLeader(); return true; }
       return false;
   }
   return false;

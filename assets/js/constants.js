@@ -19,12 +19,14 @@ const ROWS = ["melee", "ranged", "siege"];
 const ROW_NAME = { melee: "Close Combat", ranged: "Ranged", siege: "Siege" };
 const ROW_GLYPH = { melee: "\u2694", ranged: "\u27B3", siege: "\u2620" };
 
-// Weather effects keyed by the row they smother. A weather card sets every
-// non-hero unit in its row to strength 1 until Clear Weather is played.
+// Weather effects keyed by the card's weather type. Each smothers one or more
+// rows, setting every non-hero unit there to strength 1 until Clear Weather is
+// played. Skellige Storm hits two rows at once.
 const WEATHER = {
-  frost: { row: "melee",  name: "Biting Frost" },
-  fog:   { row: "ranged", name: "Impenetrable Fog" },
-  rain:  { row: "siege",  name: "Torrential Rain" },
+  frost: { rows: ["melee"],           name: "Biting Frost" },
+  fog:   { rows: ["ranged"],          name: "Impenetrable Fog" },
+  rain:  { rows: ["siege"],           name: "Torrential Rain" },
+  storm: { rows: ["ranged", "siege"], name: "Skellige Storm" },
 };
 
 // Faction display metadata. `icon` keys into UI.factionIcon() for the menu art.
@@ -81,8 +83,10 @@ function buildDefaultDecks() {
     Object.keys(CARDS).forEach(key => {
       const c = CARDS[key];
       if (c.faction !== f && c.faction !== "neutral") return;
-      const n = isSpecialCard(c) ? 1 : (c.copies || 1);
-      if (n > 0) recipe.push([key, n]);
+      const owned = (c.copies == null ? 1 : c.copies);
+      if (owned <= 0) return;                    // summon-only tokens never seed a deck
+      const n = isSpecialCard(c) ? 1 : owned;
+      recipe.push([key, n]);
     });
     DECKS[f] = recipe;
   });
@@ -96,28 +100,59 @@ function loadCardData() {
   return fetch("assets/data/cards.json")
     .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
     .then(data => {
-      Object.keys(data.cards || {}).forEach(key => {
-        const c = data.cards[key];
-        CARDS[key] = {
-          name: c.name,
-          str: c.str || 0,
-          row: c.row || null,
-          type: c.type || "unit",
-          ability: c.ability || null,
-          weather: c.weather || null,
-          faction: c.faction || "neutral",
-          bond: c.bond || null,
-          muster: c.muster || null,
-          morale: !!c.morale,
-          agile: !!c.agile,
-          copies: c.copies || 1,
-          flavour: c.flavour || "",
-        };
+      // cards.json is grouped per faction: { <faction>: { leaders:{}, cards:{} } }.
+      Object.keys(data).forEach(faction => {
+        const group = data[faction] || {};
+        Object.keys(group.cards || {}).forEach(key => {
+          const c = group.cards[key];
+          CARDS[key] = {
+            name: c.name,
+            str: c.str || 0,
+            row: c.row || null,
+            type: c.type || "unit",
+            ability: c.ability || null,
+            weather: c.weather || null,
+            faction: faction,
+            bond: c.bond || null,
+            muster: c.muster || null,
+            musterTarget: c.musterTarget || null,
+            morale: !!c.morale,
+            agile: !!c.agile,
+            scorchRow: c.scorchRow || null,
+            transformInto: c.transformInto || null,
+            summon: c.summon || null,
+            copies: (c.copies == null ? 1 : c.copies),
+            flavour: c.flavour || "",
+          };
+        });
+        // Each faction offers several Leader variants; store them as an ordered
+        // array (with the source key attached) so the deck-builder can present
+        // the choice and startGame can resolve a pick to a single leader.
+        LEADERS[faction] = Object.keys(group.leaders || {}).map(key => {
+          const L = group.leaders[key];
+          return {
+            key, faction,
+            name: L.name, title: L.title || "",
+            act: L.act || "draw", row: L.row || null, weather: L.weather || null,
+            n: L.n || null, discard: L.discard || null, passive: L.passive || null,
+            default: !!L.default, desc: L.desc || "", flavour: L.flavour || "",
+          };
+        });
       });
-      Object.keys(data.leaders || {}).forEach(f => { LEADERS[f] = data.leaders[f]; });
       buildDefaultDecks();
       return data;
     });
+}
+
+// Resolve a leader variant by key within a faction (null if not found).
+function leaderByKey(faction, key) {
+  return (LEADERS[faction] || []).find(l => l.key === key) || null;
+}
+
+// The faction's canonical default leader (flagged in the data, else the first).
+function defaultLeader(faction) {
+  const list = LEADERS[faction] || [];
+  return list.find(l => l.default) || list[0] || null;
 }
 
 // Number of cards drawn into the opening hand.
@@ -142,7 +177,9 @@ function makeCard(key) {
     name: t.name, str: t.str, row: t.row, type: t.type,
     ability: t.ability || null, weather: t.weather || null, faction: t.faction,
     hero: t.type === "hero",
-    bond: t.bond || null, morale: !!t.morale, muster: t.muster || null, agile: !!t.agile,
+    bond: t.bond || null, morale: !!t.morale, muster: t.muster || null,
+    musterTarget: t.musterTarget || null, agile: !!t.agile,
+    scorchRow: t.scorchRow || null, transformInto: t.transformInto || null, summon: t.summon || null,
     flavour: t.flavour || null,
   };
 }
@@ -183,8 +220,10 @@ const FACTION_COLOR = {
   nr: "#4f7fb5", nilfgaard: "#d0a03a", monsters: "#b5432f", scoiatael: "#5c9e4f", skellige: "#8a5bb0", neutral: "#b8933f",
 };
 
-// Create a blank player with an empty board, deck, hand, and graveyard.
-function newPlayer(name, isAI, faction) {
+// Create a blank player with an empty board, deck, hand, and graveyard. The
+// leader is resolved from the chosen variant key (falling back to the faction
+// default) so both the deck-builder pick and AI seats get a valid leader.
+function newPlayer(name, isAI, faction, leaderKey) {
   return {
     name, isAI, faction,
     deck: [], hand: [], graveyard: [],
@@ -193,8 +232,9 @@ function newPlayer(name, isAI, faction) {
     crowns: START_CROWNS,
     roundsWon: 0,
     passed: false,
-    leader: LEADERS[faction] || null,
+    leader: leaderByKey(faction, leaderKey) || defaultLeader(faction),
     leaderUsed: false,
+    leaderCancelled: false,
   };
 }
 
@@ -220,24 +260,30 @@ function startGame(opts, silent) {
   //   ai      — a human "You" against the computer.
   //   hotseat — two humans sharing the screen (pass-and-play).
   //   watch   — two AIs the human spectates.
+  // opts.leaders[seat] names the chosen Leader variant (deck-builder); absent
+  // seats fall back to the faction's default leader.
+  const lead = opts.leaders || {};
   let you, foe;
   if (mode === "hotseat") {
-    you = newPlayer("Player 1", false, youFaction);
-    foe = newPlayer("Player 2", false, foeFaction);
+    you = newPlayer("Player 1", false, youFaction, lead[0]);
+    foe = newPlayer("Player 2", false, foeFaction, lead[1]);
   } else if (mode === "watch") {
-    you = newPlayer(AI_NAMES[0], true, youFaction); you.level = level;
-    foe = newPlayer(AI_NAMES[1], true, foeFaction); foe.level = level;
+    you = newPlayer(AI_NAMES[0], true, youFaction, lead[0]); you.level = level;
+    foe = newPlayer(AI_NAMES[1], true, foeFaction, lead[1]); foe.level = level;
   } else {
-    you = newPlayer("You", false, youFaction);
-    foe = newPlayer(AI_NAMES[0], true, foeFaction); foe.level = level;
+    you = newPlayer("You", false, youFaction, lead[0]);
+    foe = newPlayer(AI_NAMES[0], true, foeFaction, lead[1]); foe.level = level;
   }
 
   // Per-seat custom recipes from the deck-builder (opts.decks[0] = you,
-  // opts.decks[1] = foe); absent seats fall back to the faction default.
+  // opts.decks[1] = foe); absent seats fall back to the faction default. A
+  // leader with the drawextra passive (Francesca: Daisy of the Valley) opens
+  // with one additional card.
   const decks = opts.decks || {};
   [you, foe].forEach((p, i) => {
     p.deck = buildDeck(p.faction, decks[i]);
-    p.hand = p.deck.splice(0, HAND_SIZE);
+    const openN = HAND_SIZE + ((p.leader && p.leader.passive === "drawextra") ? 1 : 0);
+    p.hand = p.deck.splice(0, openN);
   });
 
   // Scoia'tael's passive lets them decide who goes first; here they take the
@@ -257,6 +303,10 @@ function startGame(opts, silent) {
     winner: null,
     turn: 0,
     lastRound: null,
+    // Global leader passives (either seat): spy cards count double; ability
+    // revives pull a random unit instead of the chosen one.
+    spyDouble: [you, foe].some(p => p.leader && p.leader.passive === "spydouble"),
+    randomRevive: [you, foe].some(p => p.leader && p.leader.passive === "randomrevive"),
   };
   UI = { selectedCard: null, phase: "play", hornPick: null };
   currentSessionId = null;

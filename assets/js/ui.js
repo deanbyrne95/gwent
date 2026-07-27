@@ -231,7 +231,9 @@ function ngCollection(faction) {
   Object.keys(CARDS).forEach(key => {
     const c = CARDS[key];
     if (c.faction !== faction && c.faction !== "neutral") return;
-    owned[key] = c.copies || 1;
+    const n = (c.copies == null ? 1 : c.copies);
+    if (n <= 0) return;                 // summon-only tokens aren't collectible
+    owned[key] = n;
   });
   return owned;
 }
@@ -265,7 +267,7 @@ function ngDeckStatus(seat) {
     if (n > (owned[key] || 0)) overOwned = true;
     if (ngIsSpecial(CARDS[key])) specials += n; else units += n;
   });
-  const leaderSel = NG.leaders[seat] !== false;
+  const leaderSel = !!NG.leaders[seat];
   const unitsOk = units >= MIN_UNITS;
   const specialsOk = specials <= MAX_SPECIALS;
   const ownedOk = !overOwned;
@@ -404,21 +406,26 @@ function ngDeckStep() {
     </div>`;
   };
 
-  // The Leader is chosen separately and never counts toward the deck size; each
-  // faction fields a single Leader, shown as a selectable card.
-  const L = LEADERS[faction];
-  const fakeP = { leader: L, faction, leaderUsed: false, isAI: true };
-  const leaderTile = `<div class="db-card leader-pick ${st.leaderSel ? "in" : ""}" data-action="ng-leader-toggle" role="button" tabindex="0" aria-pressed="${st.leaderSel}">
-      <div class="db-face">${leaderCardHTML(fakeP, false)}${st.leaderSel ? '<span class="db-badge check">\u2713</span>' : ""}</div>
-      <div class="db-ctl"><span class="db-lead-state">${st.leaderSel ? "Selected" : "Tap to select"}</span></div>
+  // The Leader is chosen separately and never counts toward the deck size. Each
+  // faction fields several Leader variants (Witcher-3 base game); the player
+  // picks exactly one, shown as selectable cards.
+  const variants = LEADERS[faction] || [];
+  const chosenKey = NG.leaders[seat] || null;
+  const chosenLeader = variants.find(v => v.key === chosenKey) || null;
+  const leaderTile = variants.map(v => {
+    const on = v.key === chosenKey;
+    const fakeP = { leader: v, faction, leaderUsed: false, isAI: true };
+    return `<div class="db-card leader-pick ${on ? "in" : ""}" data-action="ng-leader-pick" data-key="${v.key}" role="button" tabindex="0" aria-pressed="${on}">
+      <div class="db-face">${leaderCardHTML(fakeP, false)}${on ? '<span class="db-badge check">\u2713</span>' : ""}</div>
     </div>`;
+  }).join("");
 
   const capNote = st.specials >= MAX_SPECIALS ? " \u00b7 limit reached" : "";
   const summary = `
       <aside class="db-summary">
         <h3>Deck summary</h3>
         <div class="db-sum-fac"><span class="fac-ic sm">${factionSvg(FACTIONS[faction].icon)}</span> ${esc(FACTIONS[faction].name)}</div>
-        <div class="db-sum-row"><span>Leader</span><b class="${st.leaderSel ? "" : "bad"}">${st.leaderSel ? esc(L.name) : "None"}</b></div>
+        <div class="db-sum-row"><span>Leader</span><b class="${st.leaderSel ? "" : "bad"}">${st.leaderSel && chosenLeader ? esc(chosenLeader.name) : "None"}</b></div>
         <div class="db-sum-row ${st.unitsOk ? "ok" : "bad"}"><span>Units</span><b>${st.units} <em>/ min ${MIN_UNITS}</em></b></div>
         <div class="db-sum-row ${st.specialsOk ? "ok" : "bad"}"><span>Specials</span><b>${st.specials} <em>/ max ${MAX_SPECIALS}</em></b></div>
         <div class="db-sum-row"><span>Total</span><b>${st.total} cards</b></div>
@@ -469,7 +476,7 @@ function ngNext() {
     NG.buildPos = 0;
     NG.buildList.forEach(i => {
       NG.decks[i] = NG.decks[i] || ngDefaultCounts(ngSeatFaction(i));
-      if (NG.leaders[i] === undefined) NG.leaders[i] = true;
+      if (NG.leaders[i] === undefined) NG.leaders[i] = (defaultLeader(ngSeatFaction(i)) || {}).key || null;
     });
     if (!NG.buildList.length) return ngStart();       // Watch → straight to play
     NG.step = "deck"; return ngRender();
@@ -512,12 +519,12 @@ function ngDeckAdjust(key, delta) {
   ngRender();
 }
 
-// Toggle the seat's Leader selection. Exactly one Leader must stay selected for
-// the deck to be valid; deselecting flags the deck as not ready.
-function ngLeaderToggle() {
-  if (!NG || NG.step !== "deck") return;
+// Choose one of the seat's Leader variants (exactly one must stay selected for
+// the deck to be valid). Re-picking the same leader keeps it selected.
+function ngLeaderPick(key) {
+  if (!NG || NG.step !== "deck" || !key) return;
   const seat = NG.buildList[NG.buildPos];
-  NG.leaders[seat] = NG.leaders[seat] === false;
+  NG.leaders[seat] = key;
   ngRender();
 }
 
@@ -527,11 +534,14 @@ function ngStart() {
   saveSettings();
   const decks = {};
   NG.buildList.forEach(i => { decks[i] = ngCountsToRecipe(NG.decks[i]); });
+  // Chosen Leader variant per seat (falls back to the faction default).
+  const leaders = {};
+  [0, 1].forEach(i => { leaders[i] = NG.leaders[i] || (defaultLeader(ngSeatFaction(i)) || {}).key || null; });
   document.body.classList.remove("pre-game");
   if (typeof Music !== "undefined") Music.setMode("game");
   closeModal();
   clearLog();
-  startGame({ mode: NG.mode, faction: NG.you, foeFaction: NG.foe, level: NG.level, decks });
+  startGame({ mode: NG.mode, faction: NG.you, foeFaction: NG.foe, level: NG.level, decks, leaders });
   NG = null;
 }
 
@@ -766,6 +776,28 @@ function pickRevive(id) {
   const cb = UI._reviveCb; UI._reviveCb = null;
   closeModal();
   if (id && cb) cb(+id);
+}
+
+// Generic leader "choose a card" picker. Shows the given cards and invokes
+// cb(id) with the chosen card's id; an empty/cancel selection keeps the leader
+// unused. Cards without a face-down owner are shown fully; when `hidden` is set
+// (e.g. the enemy's discard) they still read normally since a discard is public.
+function leaderPick(cards, cb, title, desc, owner) {
+  UI._leaderCb = cb;
+  const list = cards.slice().sort((a, b) => (b.str || 0) - (a.str || 0));
+  openModal(`
+    <div class="page-body">
+      <h2>${esc(title || "Leader")}</h2>
+      <p>${esc(desc || "Choose a card.")}</p>
+      <div class="mull-hand">${list.map(c => cardHTML(c, { leaderPick: true })).join("")}</div>
+      <div class="row-actions"><button class="btn" data-action="pick-leader" data-id="">Cancel</button></div>
+    </div>`, false, "page");
+  return true;
+}
+function pickLeaderCard(id) {
+  const cb = UI._leaderCb; UI._leaderCb = null;
+  closeModal();
+  if (id && cb) cb(+id); else render();   // cancel — leave the leader available
 }
 
 /* ---------- round / game-over banners ---------- */

@@ -48,7 +48,7 @@ document.addEventListener("click", (e) => {
     case "ng-back": ngBack(); break;
     case "ng-deck-inc": ngDeckAdjust(t.dataset.key, +1); break;
     case "ng-deck-dec": ngDeckAdjust(t.dataset.key, -1); break;
-    case "ng-leader-toggle": ngLeaderToggle(); break;
+    case "ng-leader-pick": ngLeaderPick(t.dataset.key); break;
 
     // settings
     case "toggle-theme": toggleTheme(); break;
@@ -73,6 +73,7 @@ document.addEventListener("click", (e) => {
     case "pick-row": pickRow(t.dataset.row); break;
     case "pick-decoy": pickDecoy(t.dataset.id); break;
     case "pick-revive": pickRevive(t.dataset.id); break;
+    case "pick-leader": pickLeaderCard(t.dataset.id); break;
     case "pick-target-row": onPickTargetRow(t.dataset.row); break;
     case "pick-target-card": onPickTargetCard(t.dataset.id); break;
     case "mull-card": onMulliganCard(t.dataset.id); break;
