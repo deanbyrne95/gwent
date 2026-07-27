@@ -79,13 +79,14 @@ function draw(player, n) {
 
 // Opening redraw (mulligan): swap one hand card for a fresh draw, then shuffle
 // the discarded card back into the deck — so the replacement is a new card, per
-// the rulebook. Returns the drawn replacement (or null if the deck was empty).
+// the rulebook. The drawn card takes the discarded card's slot (rather than
+// landing at the end). Returns the replacement (or null if the deck was empty).
 function mulliganCard(player, cardId) {
   const i = player.hand.findIndex(c => c.id === cardId);
   if (i < 0) return null;
   const discarded = player.hand.splice(i, 1)[0];
   const drew = player.deck.length ? player.deck.pop() : null;
-  if (drew) player.hand.push(drew);
+  if (drew) player.hand.splice(i, 0, drew);
   player.deck.push(discarded);
   player.deck = shuffle(player.deck);
   return drew;
@@ -649,6 +650,7 @@ function resolveRound() {
   }
 
   G.lastRound = { round: G.round, a: sa, b: sb };
+  (G.roundHistory || (G.roundHistory = [])).push({ a: sa, b: sb });
 
   // Monsters keep one random non-hero unit on the field through the sweep.
   const kept = [null, null];
@@ -730,7 +732,7 @@ function endMatch() {
   if (winner && humanIdx >= 0) sfx(G.winner === humanIdx ? "win" : "lose");
   if (winner) log(`<b>${winner.name}</b> wins the match!`);
   else log(`<b>The match ends in a draw.</b>`);
-  render();
+  try { render(); } catch (e) { /* never let a redraw hiccup hide the result */ }
   showGameOver();
   autoSave();
 }

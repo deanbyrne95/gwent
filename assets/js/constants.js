@@ -303,6 +303,7 @@ function startGame(opts, silent) {
     winner: null,
     turn: 0,
     lastRound: null,
+    roundHistory: [],   // per-round finals: [{ a, b }] for the score screen
     // Global leader passives (either seat): spy cards count double; ability
     // revives pull a random unit instead of the chosen one.
     spyDouble: [you, foe].some(p => p.leader && p.leader.passive === "spydouble"),

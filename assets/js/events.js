@@ -64,7 +64,7 @@ document.addEventListener("click", (e) => {
     case "save-game": saveGame(); break;
     case "load-game": openSessions(); break;
     case "load-session": loadSession(t.dataset.id); break;
-    case "del-session": deleteSession(t.dataset.id); break;
+    case "del-session": deleteSession(t.dataset.id); openSessions(); break;
 
     // gameplay
     case "hand-card": onHandCard(+t.dataset.id); break;

@@ -105,11 +105,11 @@ body.pre-game .theme-float{display:inline-flex}
 .wx-cards{position:relative; z-index:1; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:5px; overflow:hidden}
 /* Custom line-art icons size to their container's font-size and inherit its colour. */
 .gic{width:1em; height:1em; display:inline-block; vertical-align:middle}
-.wx-card{width:40px; height:54px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; border-radius:5px;
+.wx-card{font-size:10px; width:4em; height:5.4em; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.3em; border-radius:.5em;
   background:linear-gradient(180deg, var(--panel-2), #1c130a); border:1px solid var(--gilt-deep); box-shadow:0 1px 3px rgba(0,0,0,.5)}
-.wx-card .wx-ic{font-size:19px}
+.wx-card .wx-ic{font-size:1.9em}
 .wx-card.frost .wx-ic{color:var(--weather)} .wx-card.fog .wx-ic{color:#c9d6dd} .wx-card.rain .wx-ic{color:#8fb2c8}
-.wx-card .wx-n{font-size:8px; letter-spacing:.3px; text-transform:uppercase; color:var(--ink)}
+.wx-card .wx-n{font-size:.8em; letter-spacing:.3px; text-transform:uppercase; color:var(--ink)}
 
 /* The banner: a round faction medallion beside a two-row body — a cards + life
    gems row and a name / faction row. It's mirrored like Gwent: the opponent
@@ -170,20 +170,20 @@ body.pre-game .theme-float{display:inline-flex}
 .leader-slot .pass-btn{flex:0 0 auto; padding:8px 14px; font-size:13px; border-radius:9px;
   background:linear-gradient(180deg, var(--wood-2), var(--wood)); border-color:var(--gilt-deep)}
 .leader-slot .pass-btn:not(:disabled):hover{border-color:var(--gilt); color:var(--gilt-soft)}
-.card.leader{width:56px; height:78px; flex:0 0 auto}
-.card.leader .c-crown{position:absolute; top:-4px; left:-4px; z-index:4; width:20px; height:20px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center; font-size:12px; color:#221808;
+.card.leader{width:5.6em; height:7.8em; flex:0 0 auto}
+.card.leader .c-crown{position:absolute; top:-.4em; left:-.4em; z-index:4; width:2em; height:2em; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; font-size:1.2em; color:#221808;
   background:radial-gradient(circle at 38% 30%, #f4d572, #b8933f 78%); border:1px solid #6f5320; box-shadow:0 1px 2px rgba(0,0,0,.65)}
-.card.leader .c-art.lead-crest{bottom:30px}
-.card.leader .c-art.lead-crest .fac-svg{width:28px; height:28px; opacity:.9}
+.card.leader .c-art.lead-crest{bottom:3em}
+.card.leader .c-art.lead-crest .fac-svg{width:2.8em; height:2.8em; opacity:.9}
 .card.leader.fac-nr .lead-crest{color:#6ea0d8}
 .card.leader.fac-nilfgaard .lead-crest{color:#e0b552}
 .card.leader.fac-monsters .lead-crest{color:#cf6a58}
 .card.leader.fac-scoiatael .lead-crest{color:#79c06a}
 .card.leader.fac-skellige .lead-crest{color:#a97fcf}
 /* Small "Leader" caption between the crest and the name. */
-.card.leader .c-lead{position:absolute; left:0; right:0; bottom:21px; z-index:3; text-align:center;
-  font-size:6.5px; letter-spacing:1.2px; text-transform:uppercase; color:var(--gilt-soft); text-shadow:0 1px 2px #000}
+.card.leader .c-lead{position:absolute; left:0; right:0; bottom:2.1em; z-index:3; text-align:center;
+  font-size:.65em; letter-spacing:1.2px; text-transform:uppercase; color:var(--gilt-soft); text-shadow:0 1px 2px #000}
 .card.leader.usable{cursor:pointer; border-color:var(--gilt); box-shadow:0 0 0 1px var(--gilt) inset, 0 0 12px rgba(184,147,63,.35)}
 .card.leader.used{opacity:.55}
 .card.leader.used .c-name{text-decoration:line-through}
@@ -216,7 +216,7 @@ body.pre-game .theme-float{display:inline-flex}
 .deck-card .stack-n{position:relative; z-index:1; font-family:"Cormorant Garamond",serif; font-size:20px; font-weight:700; color:var(--gilt-soft); line-height:1;
   text-shadow:0 1px 3px rgba(0,0,0,.7)}
 .grave-card{background:none; border:none; box-shadow:none; padding:0}
-.grave-card .card{width:52px; height:72px}
+.grave-card .card{font-size:10.4px}
 .grave-card.empty{background:linear-gradient(180deg,var(--felt-2),var(--leather)); border:1px dashed var(--gilt-deep)}
 .grave-card.empty .stack-lb{font-size:8px; letter-spacing:.6px; text-transform:uppercase; color:var(--ink-dim)}
 .stack-badge{position:absolute; bottom:-4px; right:-4px; z-index:4; min-width:17px; height:17px; padding:0 3px; border-radius:9px;
@@ -258,10 +258,10 @@ body.pre-game .theme-float{display:inline-flex}
 .horn-slot .hs-empty{color:var(--gilt-deep); opacity:.4}
 .horn-slot.on{color:var(--horn); text-shadow:0 0 6px rgba(221,143,69,.7)}
 /* The Commander's Horn card, sized like a regular card. */
-.horn-card{width:46px; height:62px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; border-radius:5px;
+.horn-card{font-size:10px; width:4.6em; height:6.2em; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.3em; border-radius:.5em;
   background:linear-gradient(160deg, #3d2d18, #2b2011 70%, #241a0e); border:1px solid var(--horn); color:var(--horn);
   box-shadow:0 0 9px rgba(221,143,69,.35), 0 2px 5px rgba(0,0,0,.5)}
-.horn-card .hc-ic{font-size:20px} .horn-card .hc-lb{font-size:7px; letter-spacing:.5px; text-transform:uppercase; color:var(--ink-dim)}
+.horn-card .hc-ic{font-size:2em} .horn-card .hc-lb{font-size:.7em; letter-spacing:.5px; text-transform:uppercase; color:var(--ink-dim)}
 /* Units never wrap onto a second line — a full row scrolls sideways instead, so
    every row keeps one fixed height and can't shove the rows below it off-screen. */
 .row-field{display:flex; align-items:center; gap:6px; padding:6px 8px; flex-wrap:nowrap;
@@ -278,40 +278,40 @@ body.pre-game .theme-float{display:inline-flex}
 
 /* Cards — a gilt-framed tile with a solid warm fill (the faction crest sits on
    it as a watermark), a strength coin, effect + row coins, and a name banner. */
-.card{position:relative; width:50px; height:68px; border-radius:5px; flex:0 0 auto;
+.card{position:relative; font-size:10px; width:5em; height:6.8em; border-radius:.5em; flex:0 0 auto;
   background:linear-gradient(160deg, #3d2d18, #2b2011 70%, #241a0e);
   border:1px solid var(--gilt-deep);
   box-shadow:0 2px 6px rgba(0,0,0,.55), inset 0 0 0 1px rgba(0,0,0,.35);
   transition:transform .12s ease, border-color .12s ease, box-shadow .12s ease}
 /* Strength coin, top-left — white with a gold rim (Gwent's power token): green
    when boosted, red when weakened, and a black spiked coin for heroes. */
-.card .c-str{position:absolute; top:-3px; left:-3px; z-index:4; width:18px; height:18px; border-radius:50%;
+.card .c-str{position:absolute; top:-.3em; left:-.3em; z-index:4; width:1.8em; height:1.8em; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
   font-family:"Jost",system-ui,sans-serif; font-variant-numeric:tabular-nums;
-  font-size:12px; font-weight:700; line-height:1; letter-spacing:-.02em; color:#20180c;
-  background:radial-gradient(circle at 38% 30%, #ffffff, #ccd1d7 82%); border:1.5px solid var(--gilt);
+  font-size:1.2em; font-weight:700; line-height:1; letter-spacing:-.02em; color:#20180c;
+  background:radial-gradient(circle at 38% 30%, #ffffff, #ccd1d7 82%); border:.15em solid var(--gilt);
   box-shadow:0 1px 2px rgba(0,0,0,.6)}
 .card.v-up .c-str{background:radial-gradient(circle at 38% 30%, #cdeea6, #5c9e3f 82%); border-color:#3d7327; color:#12240a}
 .card.v-down .c-str{background:radial-gradient(circle at 38% 30%, #f2b09c, #b23f2c 82%); border-color:#742619; color:#2a0d07}
 .card.hero .c-str{color:#ffffff; background:radial-gradient(circle at 38% 30%, #3b3b42, #09090b 82%); border-color:var(--gilt)}
 /* Face "art" — the faction crest as a watermark straight on the card fill (no
    inset window, so the card reads as filled). */
-.card .c-art{position:absolute; left:3px; right:3px; top:3px; bottom:22px;
+.card .c-art{position:absolute; left:.3em; right:.3em; top:.3em; bottom:2.2em;
   display:flex; align-items:center; justify-content:center; pointer-events:none; color:var(--gilt-soft)}
-.card .c-art.crest .fac-svg{width:30px; height:30px; opacity:.5}
+.card .c-art.crest .fac-svg{width:3em; height:3em; opacity:.5}
 /* Effect + combat-row coins together at the bottom-right (effect on the left). */
-.card .c-coins{position:absolute; right:1px; bottom:19px; z-index:3; display:flex; align-items:center; gap:2px}
-.card .c-eff,.card .c-row{width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-  font-size:11px; box-shadow:0 1px 2px rgba(0,0,0,.6)}
+.card .c-coins{position:absolute; right:.1em; bottom:1.9em; z-index:3; display:flex; align-items:center; gap:.2em}
+.card .c-eff,.card .c-row{width:1.6em; height:1.6em; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:1.1em; box-shadow:0 1px 2px rgba(0,0,0,.6)}
 .card .c-eff{color:#251c10; background:radial-gradient(circle at 38% 30%, #f3ecd9, #b7a983 82%); border:1px solid #6f5320}
 .card .c-row{color:#221808; background:radial-gradient(circle at 38% 30%, #f4d572, #b8933f 78%); border:1px solid #6f5320}
 /* Name banner along the foot — fully opaque so overlapping cards never show
    through. */
-.card .c-name{position:absolute; left:0; right:0; bottom:0; z-index:2; height:20px; padding:2px 2px 3px;
+.card .c-name{position:absolute; left:0; right:0; bottom:0; z-index:2; height:2em; padding:.2em .2em .3em;
   display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; overflow:hidden;
   background:linear-gradient(180deg, #241a0e, #130c05);
   border-top:1px solid rgba(184,147,63,.4);
-  font-size:7.5px; line-height:1.04; text-align:center; color:var(--ink); overflow-wrap:break-word}
+  font-size:.75em; line-height:1.04; text-align:center; color:var(--ink); overflow-wrap:break-word}
 
 /* Card tooltip — floating detail panel shown on hover/focus, carrying the full
    name and rules text the truncated card face can't. Parented to <body>. */
@@ -325,14 +325,8 @@ body.pre-game .theme-float{display:inline-flex}
 .card-tip .ct-flav{font-size:11px; line-height:1.35; color:var(--ink-dim); font-style:italic;
   margin-top:1px; padding-top:5px; border-top:1px solid var(--line)}
 
-/* Hand cards — larger, lift on hover/select. */
-.hand .card{width:62px; height:86px; cursor:pointer}
-.hand .card .c-name{height:24px; font-size:8.5px}
-.hand .card .c-art{bottom:26px}
-.hand .card .c-art.crest .fac-svg{width:38px; height:38px}
-.hand .card .c-str{width:22px; height:22px; font-size:14px; top:-4px; left:-4px}
-.hand .card .c-coins{bottom:24px}
-.hand .card .c-eff,.hand .card .c-row{width:20px; height:20px; font-size:14px}
+/* Hand cards — larger, lift on hover/select (scale from a single font-size). */
+.hand .card{font-size:12.4px; cursor:pointer}
 .hand .card:hover{transform:translateY(-8px); border-color:var(--gilt); box-shadow:0 8px 16px rgba(0,0,0,.55)}
 .hand .card.sel{transform:translateY(-10px); border-color:var(--gilt-soft);
   box-shadow:0 0 0 2px var(--gilt), 0 8px 18px rgba(0,0,0,.55)}
@@ -621,6 +615,30 @@ body.pre-game .modal.page .page-body.deckbuild{max-width:1240px; width:min(95vw,
 .over-score{font-size:18px; color:var(--ink); margin:8px 0 4px}
 .over .foot{justify-content:center}
 
+/* Victory / defeat over-screen: full-bleed crest + per-round scoreboard */
+.modal.over-modal{position:fixed; inset:0; width:auto; height:auto; max-height:none;
+  border:none; border-radius:0; box-shadow:none; padding:24px; overflow:auto;
+  display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(120% 90% at 50% 42%, rgba(6,8,6,.5), rgba(6,8,6,.86))}
+.modal.over-modal.vic-win{background:radial-gradient(120% 90% at 50% 42%, rgba(122,96,24,.4), rgba(6,8,6,.85))}
+.modal.over-modal.vic-lose{background:radial-gradient(120% 90% at 50% 42%, rgba(122,18,18,.46), rgba(8,4,4,.9))}
+.vic{display:flex; flex-direction:column; align-items:center; gap:22px; width:94vw; max-width:720px}
+.vic-win{color:var(--gilt-soft)} .vic-lose{color:#e0554b} .vic-draw{color:var(--ink)}
+.vic-emblem{position:relative; width:min(430px,82vw)}
+.vic-crest{display:block; width:100%; height:auto; color:inherit;
+  filter:drop-shadow(0 4px 18px rgba(0,0,0,.5))}
+.vic-title{position:absolute; left:0; right:0; top:59%; transform:translateY(-50%);
+  text-align:center; font-family:"Cormorant Garamond",serif; font-weight:600;
+  font-size:clamp(30px,4.4vw,46px); letter-spacing:1px; color:inherit}
+.vic-grid{display:grid; align-items:center; gap:12px 26px;
+  font-family:"Cormorant Garamond",serif}
+.vic-round{color:var(--ink-dim); font-size:15px; text-align:center; letter-spacing:.5px}
+.vic-name{color:var(--ink-dim); font-size:16px; text-align:right; padding-right:4px}
+.vic-score{text-align:center; font-size:26px; color:var(--ink)}
+.vic-score.won{color:var(--gilt-soft)}
+.vic-score.lost{color:var(--ink)}
+.vic-actions{display:flex; gap:12px; margin-top:4px}
+
 @media (max-width:760px){
   /* Slim the rails and stacks so the battlefield keeps room on a phone. */
   .board{padding:8px}
@@ -631,8 +649,7 @@ body.pre-game .modal.page .page-body.deckbuild{max-width:1240px; width:min(95vw,
   .rail-info{gap:8px}
   .rail-medallion{width:44px; height:44px}
   .rail-medallion .fac-svg{width:28px; height:28px}
-  .card.leader{width:48px; height:66px}
-  .card.leader .c-art.lead-crest .fac-svg{width:24px; height:24px}
+  .card.leader{font-size:8.57px}
   .rail-name{font-size:14.5px}
   .rail-fac{font-size:9.5px}
   .rail-hand{font-size:12.5px}
@@ -643,28 +660,17 @@ body.pre-game .modal.page .page-body.deckbuild{max-width:1240px; width:min(95vw,
   .rail-gem .laurel{width:62px; height:62px}
   .rail-total{font-size:19px}
   .weather-inner{height:56px; padding:2px}
-  .wx-card{width:32px; height:44px}
-  .wx-card .wx-ic{font-size:15px}
+  .wx-card{font-size:8px}
   .stack-card{width:44px; height:60px}
-  .stack-card .card{width:44px; height:60px}
+  .stack-card .card{font-size:8.8px}
   .deck-card .stack-n{font-size:16px}
   .row{grid-template-columns:46px minmax(0,1fr); min-height:64px}
   .row-coin{width:24px; height:24px; font-size:12px; left:-22px}
   .row-field{padding:5px 6px; gap:5px}
   .row-emblem{font-size:28px}
-  .horn-card{width:34px; height:48px}
-  .horn-card .hc-ic{font-size:16px}
-  .card{width:44px; height:60px}
-  .card .c-art{bottom:19px}
-  .card .c-art.crest .fac-svg{width:24px; height:24px}
-  .card .c-coins{bottom:17px}
-  .card .c-eff,.card .c-row{width:14px; height:14px; font-size:9.5px}
-  .card .c-name{height:18px; font-size:7px}
-  .hand .card{width:54px; height:76px}
-  .hand .card .c-art{bottom:23px}
-  .hand .card .c-art.crest .fac-svg{width:34px; height:34px}
-  .hand .card .c-coins{bottom:21px}
-  .hand .card .c-eff,.hand .card .c-row{width:18px; height:18px; font-size:12.5px}
+  .horn-card{font-size:7.4px}
+  .card{font-size:8.8px}
+  .hand .card{font-size:10.8px}
 }
 
 @media (prefers-reduced-motion: reduce){
@@ -717,3 +723,60 @@ body:not(.pre-game) .modal.settings{align-self:flex-start; margin-top:8vh}
    to Okabe–Ito colourblind-safe hues so they stay distinguishable. */
 body.cvd-prot, body.cvd-deut{ --hero:#F0E442; --spy:#0072B2; --weather:#56B4E9; --horn:#E69F00; }
 body.cvd-trit{ --hero:#D55E00; --spy:#0072B2; --weather:#009E73; --horn:#CC79A7; }
+
+/* ---------- large-screen board scaling ----------
+   The battlefield is cramped and text is tiny on wide monitors, with lots of
+   wasted horizontal space. On bigger viewports we widen the play area and scale
+   the whole board up (cards scale from a single font-size; rails, coins, stacks
+   and the hand bar scale in step). Scoped to .board/.hand/.wrap so the New Game
+   deck-builder cards (rendered in a modal) are untouched. */
+@media (min-width:1180px){
+  .wrap{max-width:1300px; padding-bottom:195px}
+  .board .card{font-size:11.5px}
+  .hand .card{font-size:14px}
+  .board .horn-card{font-size:11.5px}
+  .board .wx-card{font-size:11.5px}
+  .board .row{min-height:86px; grid-template-columns:66px minmax(0,1fr)}
+  .board .row-coin{width:34px; height:34px; font-size:17px; left:-34px}
+  .board .row-emblem{font-size:40px}
+  .board-left{flex-basis:238px; margin-right:52px}
+  .board-stacks{flex-basis:72px}
+  .board .rail-medallion{width:62px; height:62px}
+  .board .rail-medallion .fac-svg{width:40px; height:40px}
+  .board .rail-name{font-size:19px}
+  .board .rail-fac{font-size:12px}
+  .board .rail-gem{width:60px; height:60px; right:-20px}
+  .board .rail-total{font-size:28px}
+  .board .rail-gem .laurel{width:84px; height:84px}
+  .board .life-gem{width:19px; height:19px}
+  .board .weather-inner{height:80px}
+  .board .stack-card{width:60px; height:82px}
+  .board .deck-card .stack-n{font-size:23px}
+  .board .deck-card .deck-crest .fac-svg{width:52px; height:52px}
+  .hand{min-height:120px}
+}
+@media (min-width:1560px){
+  .wrap{max-width:1560px; padding-bottom:210px}
+  .board .card{font-size:13px}
+  .hand .card{font-size:16px}
+  .board .horn-card{font-size:13px}
+  .board .wx-card{font-size:13px}
+  .board .row{min-height:98px; grid-template-columns:74px minmax(0,1fr)}
+  .board .row-coin{width:38px; height:38px; font-size:19px; left:-38px}
+  .board .row-emblem{font-size:46px}
+  .board-left{flex-basis:270px; margin-right:58px}
+  .board-stacks{flex-basis:82px}
+  .board .rail-medallion{width:70px; height:70px}
+  .board .rail-medallion .fac-svg{width:46px; height:46px}
+  .board .rail-name{font-size:21px}
+  .board .rail-fac{font-size:13px}
+  .board .rail-gem{width:68px; height:68px; right:-22px}
+  .board .rail-total{font-size:32px}
+  .board .rail-gem .laurel{width:96px; height:96px}
+  .board .life-gem{width:21px; height:21px}
+  .board .weather-inner{height:92px}
+  .board .stack-card{width:68px; height:94px}
+  .board .deck-card .stack-n{font-size:26px}
+  .board .deck-card .deck-crest .fac-svg{width:58px; height:58px}
+  .hand{min-height:136px}
+}
