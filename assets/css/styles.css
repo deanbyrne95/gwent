@@ -286,15 +286,14 @@ body.pre-game .theme-float{display:inline-flex}
 /* Strength coin, top-left — white with a gold rim (Gwent's power token): green
    when boosted, red when weakened, and a black spiked coin for heroes. */
 .card .c-str{position:absolute; top:-3px; left:-3px; z-index:4; width:18px; height:18px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center; font-family:"Cormorant Garamond",serif;
-  font-size:12px; font-weight:700; color:#20180c;
+  display:flex; align-items:center; justify-content:center;
+  font-family:"Jost",system-ui,sans-serif; font-variant-numeric:tabular-nums;
+  font-size:12px; font-weight:700; line-height:1; letter-spacing:-.02em; color:#20180c;
   background:radial-gradient(circle at 38% 30%, #ffffff, #ccd1d7 82%); border:1.5px solid var(--gilt);
   box-shadow:0 1px 2px rgba(0,0,0,.6)}
 .card.v-up .c-str{background:radial-gradient(circle at 38% 30%, #cdeea6, #5c9e3f 82%); border-color:#3d7327; color:#12240a}
 .card.v-down .c-str{background:radial-gradient(circle at 38% 30%, #f2b09c, #b23f2c 82%); border-color:#742619; color:#2a0d07}
-.card.hero .c-str{color:#f4ecd6; background:radial-gradient(circle at 40% 32%, #3b3b42, #09090b 80%); border-color:var(--gilt)}
-.card.hero .c-str::before{content:""; position:absolute; inset:-3.5px; border-radius:50%; z-index:-1;
-  background:repeating-conic-gradient(from 0deg, var(--gilt) 0deg 5deg, transparent 5deg 18deg)}
+.card.hero .c-str{color:#ffffff; background:radial-gradient(circle at 38% 30%, #3b3b42, #09090b 82%); border-color:var(--gilt)}
 /* Face "art" — the faction crest as a watermark straight on the card fill (no
    inset window, so the card reads as filled). */
 .card .c-art{position:absolute; left:3px; right:3px; top:3px; bottom:22px;
@@ -548,7 +547,7 @@ body.pre-game .modal.page .page-body.deckbuild{max-width:1240px; width:min(95vw,
 .db2-card .card .c-name{height:30px; font-size:11px; padding:3px 4px 4px}
 .db2-card .card .c-art{left:5px; right:5px; top:5px; bottom:33px}
 .db2-card .card .c-art.crest .fac-svg{width:58px; height:58px}
-.db2-card .card .c-str{width:30px; height:30px; font-size:19px; top:-6px; left:-6px}
+.db2-card .card .c-str{width:30px; height:30px; font-size:14px; font-weight:600; top:-6px; left:-6px}
 .db2-card .card .c-coins{bottom:31px; right:3px}
 .db2-card .card .c-eff,.db2-card .card .c-row{width:26px; height:26px; font-size:17px}
 /* Copy badge — gilt "×N" at the card's bottom-left, like the game. */
